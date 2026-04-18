@@ -1,19 +1,29 @@
 import pandas as pd
 import os
 
-NAV_FILE = "data/nav_all_latest.csv"
 MF_FOLDER = "mutualfund"
 
-def load_nav():
-    df = pd.read_csv(NAV_FILE)
-    df["Date"] = pd.to_datetime(df["Date"], dayfirst=True)
-    return df
+def load_fund(folder_name):
+    path = os.path.join(MF_FOLDER, folder_name, "fund.csv")
 
-def load_fund(fund_name):
-    path = os.path.join(MF_FOLDER, fund_name, "fund.csv")
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"❌ File not found: {path}")
+
     df = pd.read_csv(path)
-    df["Date"] = pd.to_datetime(df["Date"], dayfirst=True)
+
+    # safe date parsing
+    df["Date"] = pd.to_datetime(df["Date"], dayfirst=True, errors="coerce")
+
     return df
 
-def get_all_funds():
-    return os.listdir(MF_FOLDER)
+
+def load_nav():
+    path = "data/nav_all_latest.csv"
+
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"❌ NAV file missing: {path}")
+
+    df = pd.read_csv(path)
+    df["Date"] = pd.to_datetime(df["Date"], dayfirst=True, errors="coerce")
+
+    return df
