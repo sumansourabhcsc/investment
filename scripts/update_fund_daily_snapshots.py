@@ -19,6 +19,8 @@ def update_fund_snapshots():
     nav_df = load_nav()
     funds_df = load_all_funds()
 
+    funds_df.columns = funds_df.columns.str.strip()
+
     nav_df.columns = nav_df.columns.str.strip()
     funds_df.columns = funds_df.columns.str.strip()
 
