@@ -254,13 +254,9 @@ indicator = "🟢 ↑" if row_today["nav"] > row_prev["nav"] else "🔴 ↓"
 
 import os
 
-# Load NAV data
-nav_df = load_nav()
-
-# Latest NAV date
+# Use already-loaded nav_df from top of file
 latest_nav_date = nav_df["Date"].max().date()
 
-# Date selector
 selected_date = st.date_input("Select Date", value=latest_nav_date)
 selected_date_str = selected_date.strftime("%d-%m-%Y")
 
@@ -276,30 +272,40 @@ for fund_name, meta in mutual_funds.items():
         continue
 
     df_daily = pd.read_csv(file_path)
+
+    # Normalize columns
+    df_daily.columns = df_daily.columns.str.strip()
     df_daily["date"] = pd.to_datetime(df_daily["date"], format="%d-%m-%Y")
 
-    # Filter for selected date
+    # Sort by date
     df_daily = df_daily.sort_values("date")
 
-    row_today = df_daily[df_daily["date"] == pd.to_datetime(selected_date_str)]
-
-    if row_today.empty:
+    # Today's row for selected date
+    mask_today = df_daily["date"] == pd.to_datetime(selected_date_str)
+    if not mask_today.any():
         continue
 
-    row_today = row_today.iloc[-1]
+    row_today = df_daily[mask_today].iloc[-1]
 
-    # Get previous day row
+    # Previous available row
     prev_rows = df_daily[df_daily["date"] < pd.to_datetime(selected_date_str)]
-
     if prev_rows.empty:
         continue
 
     row_prev = prev_rows.iloc[-1]
 
-    # Compute metrics
-    change_in_value = row_today["current_value"] - row_prev["current_value"]
-    pct_change_nav = ((row_today["nav"] - row_prev["nav"]) / row_prev["nav"]) * 100
-    indicator = "🟢 ↑" if row_today["nav"] > row_prev["nav"] else "🔴 ↓"
+    # Use absolute_gain_loss difference as "change in value"
+    change_in_value = float(row_today["absolute_gain_loss"]) - float(row_prev["absolute_gain_loss"])
+
+    # % change in NAV
+    nav_today = float(row_today["nav"])
+    nav_prev = float(row_prev["nav"])
+    if nav_prev != 0:
+        pct_change_nav = ((nav_today - nav_prev) / nav_prev) * 100
+    else:
+        pct_change_nav = 0.0
+
+    indicator = "🟢 ↑" if nav_today > nav_prev else "🔴 ↓"
 
     daily_rows.append([
         row_today["date"].strftime("%d-%m-%Y"),
@@ -325,4 +331,3 @@ st.dataframe(df_daily, use_container_width=True)
 st.markdown(
     f"### 💹 Total Change Across All Funds: **₹{df_daily['Change in Value'].sum():,.2f}**"
 )
-
