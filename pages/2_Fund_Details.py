@@ -42,8 +42,30 @@ latest_date = fund_df["LatestNAVDate"].iloc[-1]
 
 # Show details on top
 # Calculate invested + current value
+#invested_amount = fund_df["Amount"].sum()
+#current_value = (fund_df["Units"] * latest_nav).sum()
+
+# Calculate invested + current value
 invested_amount = fund_df["Amount"].sum()
 current_value = (fund_df["Units"] * latest_nav).sum()
+profit = current_value - invested_amount
+return_pct = (profit / invested_amount) * 100
+
+# XIRR calculation
+cashflows = list(-fund_df["Amount"])
+dates = list(fund_df["Date_Purchase"])
+
+cashflows.append(current_value)
+dates.append(latest_date)
+
+try:
+    fund_xirr = xirr(cashflows, dates) * 100
+except:
+    fund_xirr = None
+
+
+
+
 
 # Show details on top
 st.subheader(f"📌 {fund_name}")
@@ -53,9 +75,15 @@ col1.metric("Scheme Code", scheme_code)
 col2.metric("Latest NAV", f"{latest_nav:.4f}")
 col3.metric("NAV Date", latest_date.strftime("%d-%b-%Y"))
 
-col4, col5 = st.columns(2)
+col4, col5, col6 = st.columns(3)
 col4.metric("Total Invested", f"₹{invested_amount:,.2f}")
 col5.metric("Current Value", f"₹{current_value:,.2f}")
+col6.metric("Return %", f"{return_pct:.2f}%")
+
+col7, col8 = st.columns(2)
+col7.metric("Profit / Loss", f"₹{profit:,.2f}")
+col8.metric("XIRR", f"{fund_xirr:.2f}%" if fund_xirr else "N/A")
+
 
 
 # Remove columns from table
