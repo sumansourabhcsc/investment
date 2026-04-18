@@ -254,11 +254,13 @@ indicator = "🟢 ↑" if row_today["nav"] > row_prev["nav"] else "🔴 ↓"
 
 import os
 
-# Use already-loaded nav_df from top of file
+# Latest NAV date
 latest_nav_date = nav_df["Date"].max().date()
 
+# Date selector
 selected_date = st.date_input("Select Date", value=latest_nav_date)
-selected_date_str = selected_date.strftime("%d-%m-%Y")
+selected_date_dt = pd.to_datetime(selected_date)
+selected_date_str = selected_date_dt.strftime("%d-%m-%Y")
 
 daily_rows = []
 
@@ -275,38 +277,42 @@ for fund_name, meta in mutual_funds.items():
 
     # Normalize columns
     df_daily.columns = df_daily.columns.str.strip()
-    df_daily["date"] = pd.to_datetime(df_daily["date"], format="%d-%m-%Y")
+
+    # Ensure date is parsed
+    df_daily["date"] = pd.to_datetime(df_daily["date"], format="%d-%m-%Y", errors="coerce")
+    df_daily = df_daily.dropna(subset=["date"])
 
     # Sort by date
     df_daily = df_daily.sort_values("date")
 
-    # Today's row for selected date
-    mask_today = df_daily["date"] == pd.to_datetime(selected_date_str)
-    if not mask_today.any():
+    # Today's row
+    today_rows = df_daily[df_daily["date"] == selected_date_dt]
+
+    if today_rows.empty:
+        # No data for selected date → skip fund
         continue
 
-    row_today = df_daily[mask_today].iloc[-1]
+    row_today = today_rows.iloc[-1]
 
-    # Previous available row
-    prev_rows = df_daily[df_daily["date"] < pd.to_datetime(selected_date_str)]
+    # Previous row
+    prev_rows = df_daily[df_daily["date"] < selected_date_dt]
+
     if prev_rows.empty:
+        # No previous day → skip fund
         continue
 
     row_prev = prev_rows.iloc[-1]
 
-    # Use absolute_gain_loss difference as "change in value"
+    # Use absolute_gain_loss difference (always exists)
     change_in_value = float(row_today["absolute_gain_loss"]) - float(row_prev["absolute_gain_loss"])
-
-
 
     # % change in NAV
     nav_today = float(row_today["nav"])
     nav_prev = float(row_prev["nav"])
-    if nav_prev != 0:
-        pct_change_nav = ((nav_today - nav_prev) / nav_prev) * 100
-    else:
-        pct_change_nav = 0.0
 
+    pct_change_nav = ((nav_today - nav_prev) / nav_prev * 100) if nav_prev != 0 else 0
+
+    # Indicator
     indicator = "🟢 ↑" if nav_today > nav_prev else "🔴 ↓"
 
     daily_rows.append([
@@ -318,6 +324,7 @@ for fund_name, meta in mutual_funds.items():
         indicator
     ])
 
+# Build final table
 df_daily = pd.DataFrame(daily_rows, columns=[
     "Date",
     "Fund Name",
@@ -328,7 +335,7 @@ df_daily = pd.DataFrame(daily_rows, columns=[
 ])
 
 st.subheader(f"📅 Daily Change for {selected_date_str}")
-st.dataframe(df_daily, use_container_width=True)
+st.dataframe(df_daily, width="stretch")
 
 st.markdown(
     f"### 💹 Total Change Across All Funds: **₹{df_daily['Change in Value'].sum():,.2f}**"
