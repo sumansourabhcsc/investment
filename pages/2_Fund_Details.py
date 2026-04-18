@@ -103,6 +103,7 @@ st.plotly_chart(fig2, use_container_width=True)
 # =========================
 # FUND GROWTH VALUE (OPTIONAL VIEW)
 # =========================
+'''
 st.subheader("💹 Fund Value Growth")
 
 fund_df_sorted = fund_df.sort_values("Date").copy()
@@ -116,3 +117,4 @@ fig3 = px.line(
 )
 
 st.plotly_chart(fig3, use_container_width=True)
+'''
