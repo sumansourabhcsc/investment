@@ -1,13 +1,13 @@
 import streamlit as st
 import pandas as pd
 
-from utils.data_loader import load_fund, load_nav
-from utils.calculations import calculate_current_value, calculate_invested_amount
 from config import mutual_funds
+from utils.data_loader import load_fund, load_nav, get_latest_nav_by_code
+from utils.calculations import calculate_invested_amount, calculate_current_value
 
-st.set_page_config(page_title="Portfolio Overview", layout="wide")
+st.set_page_config(page_title="Portfolio", layout="wide")
 
-st.title("🏠 Mutual Fund Portfolio Overview")
+st.title("🏠 Mutual Fund Portfolio (Code-Based System)")
 
 nav_df = load_nav()
 
@@ -16,27 +16,28 @@ summary = []
 total_invested = 0
 total_current = 0
 
-for fund_name, folder in mutual_funds.items():
+for fund_name, scheme_code in mutual_funds.items():
 
     try:
-        fund_df = load_fund(folder)
+        # 📁 Load investment data
+        fund_df = load_fund(fund_name.lower().replace(" ", "_"))
 
-        match = nav_df[nav_df["SchemeName"].str.contains(fund_name, case=False, na=False)]
+        # 📈 Get NAV by SchemeCode
+        nav, scheme_name = get_latest_nav_by_code(nav_df, scheme_code)
 
-        if match.empty:
-            st.warning(f"No NAV found for {fund_name}")
+        if nav is None:
+            st.warning(f"No NAV found for {fund_name} ({scheme_code})")
             continue
 
-        latest_nav = match["NAV"].values[0]
-
         invested = calculate_invested_amount(fund_df)
-        current = calculate_current_value(fund_df, latest_nav)
+        current = calculate_current_value(fund_df, nav)
 
         total_invested += invested
         total_current += current
 
         summary.append([
             fund_name,
+            scheme_code,
             invested,
             current,
             current - invested
@@ -45,7 +46,9 @@ for fund_name, folder in mutual_funds.items():
     except Exception as e:
         st.error(f"{fund_name} error: {e}")
 
-df = pd.DataFrame(summary, columns=["Fund", "Invested", "Current", "P&L"])
+df = pd.DataFrame(summary, columns=[
+    "Fund", "SchemeCode", "Invested", "Current", "P&L"
+])
 
 st.dataframe(df, use_container_width=True)
 
