@@ -1,24 +1,27 @@
 import sys
 import os
+import pandas as pd
 
 # Add project root to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import pandas as pd
-from datetime import datetime
 from utils.data_loader import load_nav
 from utils.load_funds import load_all_funds
 
-
 OUTPUT_FILE = "data/daily_summary.csv"
+
 
 def generate_daily_summary():
 
     nav_df = load_nav()
-    all_funds = load_all_funds()
+    funds_df = load_all_funds()
 
-    all_funds["Date"] = pd.to_datetime(all_funds["Date"])
+    # Clean column names (important for CI)
+    nav_df.columns = nav_df.columns.str.strip()
+    funds_df.columns = funds_df.columns.str.strip()
+
     nav_df["Date"] = pd.to_datetime(nav_df["Date"])
+    funds_df["Date"] = pd.to_datetime(funds_df["Date"])
 
     dates = sorted(nav_df["Date"].unique())
 
@@ -27,11 +30,14 @@ def generate_daily_summary():
     for d in dates:
         day_nav = nav_df[nav_df["Date"] == d]
 
-        total_value = 0
-        total_invested = 0
+        total_invested = 0.0
+        total_current = 0.0
 
-        for _, fund in all_funds.iterrows():
-            scheme_code = str(fund["SchemeCode"])
+        for _, fund in funds_df.iterrows():
+
+            scheme_code = str(fund.get("SchemeCode", "")).strip()
+            if not scheme_code:
+                continue
 
             nav_row = day_nav[day_nav["SchemeCode"] == scheme_code]
 
@@ -39,31 +45,31 @@ def generate_daily_summary():
                 continue
 
             nav = float(nav_row.iloc[0]["NAV"])
+            units = float(fund.get("Units", 0))
+            amount = float(fund.get("Amount", 0))
 
-            units = fund["Units"]
-            amount = fund["Amount"]
-
-            total_value += units * nav
             total_invested += amount
+            total_current += units * nav
 
-        summary.append([d, total_invested, total_value])
+        total_gain = total_current - total_invested
 
-    df = pd.DataFrame(summary, columns=[
-        "Date", "Invested", "Total Value"
-    ])
+        # ✅ FORMAT DATE AS dd-mm-yyyy
+        formatted_date = d.strftime("%d-%m-%Y")
 
-    # =========================
-    # CALCULATIONS
-    # =========================
-    df["Current Return"] = df["Total Value"] - df["Invested"]
-    df["one_day_change"] = df["Total Value"].diff()
-    df["one_day_change_pct"] = df["Total Value"].pct_change() * 100
+        summary.append([
+            formatted_date,
+            round(total_invested, 2),
+            round(total_current, 2),
+            round(total_gain, 2)
+        ])
 
-    df["indicator"] = df["one_day_change"].apply(
-        lambda x: "🟢" if x > 0 else ("🔴" if x < 0 else "⚪")
+    df = pd.DataFrame(
+        summary,
+        columns=["date", "total_invested", "total_current", "total_gain"]
     )
 
     df.to_csv(OUTPUT_FILE, index=False)
+    print(f"Daily summary written to {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":
