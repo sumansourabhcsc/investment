@@ -62,6 +62,7 @@ profit = current_value - invested
 avg_buy_nav = invested / total_units if total_units > 0 else 0
 absolute_return = ((current_value - invested) / invested) * 100 if invested > 0 else 0
 
+
 st.caption(f"Last NAV Date: {latest_date}")
 col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
 
@@ -77,12 +78,16 @@ def metric_normal(col, label, value):
     )
 
 metric_normal(col1, "💰 Invested", f"₹{invested:,.2f}")
-metric_normal(col2, "📦 Total Units", f"{total_units:,.2f}")
-metric_normal(col3, "🧮 Avg Buy NAV", f"₹{avg_buy_nav:,.2f}")
-metric_normal(col4, "📈 Current Value", f"₹{current_value:,.2f}")
-metric_normal(col5, "📊 P&L", f"₹{profit:,.2f}")
-metric_normal(col6, "📉 Absolute Return", f"{absolute_return:.2f}%")
+metric_normal(col2, "📈 Current Value", f"₹{current_value:,.2f}")
+metric_normal(col3, "📊 P&L", f"₹{profit:,.2f}")
+metric_normal(col4, "📉 Absolute Return", f"{absolute_return:.2f}%")
+metric_normal(col5, "🧮 Avg Buy NAV", f"₹{avg_buy_nav:,.2f}")
+metric_normal(col6, "📦 Total Units", f"{total_units:,.2f}")
 metric_normal(col7, "📅 Latest NAV", f"₹{latest_nav:.2f}")
+
+
+
+
 
 
 
