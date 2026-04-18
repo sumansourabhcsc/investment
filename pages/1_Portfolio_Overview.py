@@ -71,14 +71,27 @@ overall_xirr = compute_overall_xirr(all_funds_df)
 # =========================
 # 📊 METRICS (NOW ON TOP)
 # =========================
+def metric_normal(col, label, value):
+    col.markdown(
+        f"""
+        <div style='padding:8px 0;'>
+            <span style='font-weight:600;'>{label}</span><br>
+            <span style='font-size:1.1rem;'>{value}</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
-col1.metric("💰 Total Invested", f"₹{total_invested:,.2f}")
-col2.metric("📈 Current Value", f"₹{total_current:,.2f}")
-col3.metric("📊 Total P&L", f"₹{total_current - total_invested:,.2f}")
-col4.metric("📉 Absolute Return", f"{absolute_return_overall:.2f}%")
-col5.metric("📌 XIRR (Overall)", f"{overall_xirr*100:.2f}%")
+metric_normal(col1, "💰 **Total Invested**", f"₹{total_invested:,.2f}")
+metric_normal(col2, "📈 **Current Value**", f"₹{total_current:,.2f}")
+metric_normal(col3, "📊 **Total P&L**", f"₹{total_current - total_invested:,.2f}")
+metric_normal(col4, "📉 **Absolute Return**", f"{absolute_return_overall:.2f}%")
+metric_normal(col5, "📌 **XIRR (Overall)**", f"{overall_xirr*100:.2f}%")
+
 
 
 st.divider()
