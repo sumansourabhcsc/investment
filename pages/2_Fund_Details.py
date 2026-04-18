@@ -32,11 +32,25 @@ merged = merge_nav_with_portfolio(portfolio_df, nav_df, mutual_funds)
 fund_list = merged["FundName"].unique()
 selected_fund = st.selectbox("Select a Fund", fund_list)
 
-fund_df = merged[merged["FundName"] == selected_fund]
+fund_df = merged[merged["FundName"] == selected_fund].copy()
 
+# Extract values for display
+fund_name = selected_fund
+scheme_code = fund_df["SchemeCode"].iloc[0]
 latest_nav = fund_df["LatestNAV"].iloc[-1]
 latest_date = fund_df["LatestNAVDate"].iloc[-1]
 
-st.metric("Latest NAV", f"{latest_nav}", latest_date.strftime("%d-%b-%Y"))
+# Show details on top
+st.subheader(f"📌 {fund_name}")
+col1, col2, col3 = st.columns(3)
+col1.metric("Scheme Code", scheme_code)
+col2.metric("Latest NAV", f"{latest_nav:.4f}")
+col3.metric("NAV Date", latest_date.strftime("%d-%b-%Y"))
 
+# Remove columns from table
+fund_df = fund_df.drop(columns=["FundName", "SchemeCode", "LatestNAV", "LatestNAVDate"])
+
+# Show cleaned table
+st.write("### Transaction History")
 st.dataframe(fund_df)
+
