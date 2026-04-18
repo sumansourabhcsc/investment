@@ -28,6 +28,10 @@ nav_df = load_nav_file()
 portfolio_df = load_all_funds()
 
 merged = merge_nav_with_portfolio(portfolio_df, nav_df, mutual_funds)
+
+st.write("Merged columns:", merged.columns.tolist())
+st.write(merged.head(20))
+
 summary = calculate_summary(merged)
 
 st.dataframe(summary)
