@@ -244,3 +244,68 @@ if monthly_data:
 
 ############################################################
 
+# ---------------------------------------------------------
+# DAILY CHANGE TABLE
+# ---------------------------------------------------------
+st.divider()
+st.subheader("📅 Daily Change Across Funds")
+
+latest_nav_date = nav_df["Date"].max().date()
+selected_date = st.date_input("Select Date", value=latest_nav_date)
+selected_date_dt = pd.to_datetime(selected_date)
+
+daily_rows = []
+
+for fund_name, meta in mutual_funds.items():
+    folder = meta["folder"]
+    code = meta["code"]
+
+    file_path = f"mutualfund/{folder}/daily_{code}.csv"
+    if not os.path.exists(file_path):
+        continue
+
+    df_daily = pd.read_csv(file_path)
+    df_daily.columns = df_daily.columns.str.strip()
+    df_daily["date"] = pd.to_datetime(df_daily["date"], format="%d-%m-%Y", errors="coerce")
+    df_daily = df_daily.dropna(subset=["date"]).sort_values("date")
+
+    today_rows = df_daily[df_daily["date"] == selected_date_dt]
+    if today_rows.empty:
+        continue
+
+    row_today = today_rows.iloc[-1]
+    prev_rows = df_daily[df_daily["date"] < selected_date_dt]
+    if prev_rows.empty:
+        continue
+
+    row_prev = prev_rows.iloc[-1]
+
+    change_in_value = float(row_today["absolute_gain_loss"]) - float(row_prev["absolute_gain_loss"])
+    nav_today = float(row_today["nav"])
+    nav_prev = float(row_prev["nav"])
+    pct_change_nav = ((nav_today - nav_prev) / nav_prev * 100) if nav_prev != 0 else 0
+    indicator = "🟢 ↑" if nav_today > nav_prev else "🔴 ↓"
+
+    daily_rows.append([
+        row_today["date"].strftime("%d-%m-%Y"),
+        fund_name,
+        code,
+        round(change_in_value, 2),
+        f"{pct_change_nav:.2f}%",
+        indicator
+    ])
+
+df_daily = pd.DataFrame(daily_rows, columns=[
+    "Date",
+    "Fund Name",
+    "Fund Code",
+    "Change in Value",
+    "% Change in NAV",
+    "Indicator"
+])
+
+st.dataframe(df_daily, width="stretch")
+
+st.markdown(
+    f"### 💹 Total Change Across All Funds: **₹{df_daily['Change in Value'].sum():,.2f}**"
+)
