@@ -129,34 +129,42 @@ fund_df_clean["Date"] = pd.to_datetime(fund_df_clean["Date"], errors="coerce")
 fund_df_clean = fund_df_clean.dropna(subset=["Date", "Amount"])
 fund_df_clean = fund_df_clean.sort_values("Date")
 
+# =========================
+# DATA QUALITY CHECK
+# =========================
+sip_count = len(fund_df_clean)
+total_invested = fund_df_clean["Amount"].sum()
+
+if sip_count < 3:
+    st.warning("⚠ Not enough SIP data for XIRR (minimum 3 required)")
+    st.stop()
+
 cashflows = []
 
 # SIP outflows
 for _, row in fund_df_clean.iterrows():
     cashflows.append((row["Date"], -float(row["Amount"])))
 
-# IMPORTANT: final valuation using REAL units × NAV
+# FINAL VALUE (IMPORTANT FIX)
 total_units = fund_df_clean["Units"].sum()
 
-if total_units <= 0 or latest_nav <= 0:
-    st.warning("Invalid units/NAV for XIRR")
-    st.stop()
+final_value = total_units * latest_nav
 
-final_value = float(total_units * latest_nav)
+# use last SIP date (more stable than NAV date)
+final_date = fund_df_clean["Date"].iloc[-1]
 
-# IMPORTANT: use latest SIP date OR NAV date (stable)
-final_date = fund_df_clean["Date"].max()
+cashflows.append((final_date, float(final_value)))
 
-cashflows.append((final_date, final_value))
-
-# DEBUG (VERY IMPORTANT ONCE)
-st.caption(f"Cashflows count: {len(cashflows)}")
-st.caption(f"Total invested: {sum(-c[1] for c in cashflows[:-1]):.2f}")
-st.caption(f"Final value: {final_value:.2f}")
 
 irr = xirr(cashflows)
 
-if irr is None or abs(irr) > 10:
-    st.warning("XIRR unstable — check SIP history length or data quality")
+if irr is None:
+    st.warning("XIRR could not converge — data pattern unstable")
 else:
-    st.metric("📈 XIRR", f"{irr * 100:.2f}%")
+    # sanity filter (very important)
+    if irr < -0.5 or irr > 2:
+        st.warning("XIRR result not realistic — data likely unstable")
+    else:
+        st.metric("📈 XIRR", f"{irr * 100:.2f}%")
+
+
