@@ -37,6 +37,7 @@ def merge_nav_with_portfolio(portfolio_df, nav_df, mutual_funds):
 
 
 #utils/calculations.py — SUMMARY CALCULATIONS
+###############################
 def calculate_summary(df):
     df["CurrentValue"] = df["Units"] * df["LatestNAV"]
     df["Invested"] = df["Amount"]
@@ -51,7 +52,32 @@ def calculate_summary(df):
     summary["ProfitLoss"] = summary["CurrentValue"] - summary["Invested"]
     summary["ReturnPct"] = (summary["ProfitLoss"] / summary["Invested"]) * 100
 
+    # XIRR calculation per fund
+    xirr_values = []
+    for fund in summary["FundName"]:
+        fdf = df[df["FundName"] == fund]
+
+        cashflows = list(-fdf["Amount"])  # investments are negative
+        dates = list(fdf["Date_Purchase"])
+
+        # Add final redemption value (current value)
+        cashflows.append(fdf["Units"].sum() * fdf["LatestNAV"].iloc[-1])
+        dates.append(fdf["LatestNAVDate"].iloc[-1])
+
+        try:
+            rate = xirr(cashflows, dates)
+            xirr_values.append(rate * 100)
+        except:
+            xirr_values.append(None)
+
+    summary["XIRR"] = xirr_values
+
     return summary
+
+
+
+###############
+
 
 
 import numpy as np
