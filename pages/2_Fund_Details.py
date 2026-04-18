@@ -71,7 +71,7 @@ fund_xirr = compute_fund_xirr(fund_df, latest_nav)
 st.caption(f"📅 **Latest NAV:** ₹{latest_nav:.2f}  (as of {latest_date})")
 
 #st.caption(f"📅 Latest NAV", ₹{latest_nav:.2f})
-col1, col2, col3, col4, col5, col6 = st.columns(6)
+col1, col2, col3, col4, col5, col6,col7 = st.columns(7)
 
 def metric_normal(col, label, value):
     col.markdown(
@@ -92,7 +92,8 @@ metric_normal(col5, "🧮 Avg Buy NAV", f"₹{avg_buy_nav:,.2f}")
 metric_normal(col6, "📦 Total Units", f"{total_units:,.2f}")
 #metric_normal(col7, "📅 Latest NAV", f"₹{latest_nav:.2f}")
 
-st.markdown(f"### 📌 XIRR (as of today): **{fund_xirr*100:.2f}%**")
+
+metric_normal(col7,"📌 XIRR (as of today)", f"{fund_xirr*100:.2f}%**")
 
 
 
