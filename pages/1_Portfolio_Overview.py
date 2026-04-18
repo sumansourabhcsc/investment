@@ -220,13 +220,21 @@ if monthly_data:
             return ["background-color: #5c1a33; color: white; font-weight: bold"] * len(row)
         return [""] * len(row)
 
+    def highlight_total_column(col):
+        if col.name == "Total":
+            return ["background-color: #5c1a33; color: white; font-weight: bold"] * len(col)
+        return [""] * len(col)
+
+    
+
     st.markdown(f"### Year {selected_year}")
 
     numeric_cols = final_df.select_dtypes(include="number").columns
 
     st.dataframe(
     final_df.style
-        .apply(highlight_total, axis=1)
+        .apply(highlight_total_row, axis=1)
+        .apply(highlight_total_column, axis=0)
         .format({col: "{:,.2f}" for col in numeric_cols}),
     use_container_width=True
 )
