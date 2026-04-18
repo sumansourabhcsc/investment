@@ -7,6 +7,11 @@ def load_all_funds():
     dfs = []
     for f in files:
         df = pd.read_csv(f)
-        df["FundName"] = f.split("/")[-2]  # folder name as fund name
+
+        # Parse dates (your format is dd-mm-yyyy)
+        df["Date"] = pd.to_datetime(df["Date"], format="%d-%m-%Y")
+
+        df["FundName"] = f.split("/")[-2]
         dfs.append(df)
+
     return pd.concat(dfs, ignore_index=True)
