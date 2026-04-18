@@ -222,9 +222,11 @@ if monthly_data:
 
     st.markdown(f"### Year {selected_year}")
 
+    numeric_cols = final_df.select_dtypes(include="number").columns
+
     st.dataframe(
     final_df.style
         .apply(highlight_total, axis=1)
-        .format("{:,.2f}"),
+        .format({col: "{:,.2f}" for col in numeric_cols}),
     use_container_width=True
-    )
+)
