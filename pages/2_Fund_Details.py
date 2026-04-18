@@ -4,6 +4,8 @@ import pandas as pd
 
 from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
+from utils.xirr_helper import compute_fund_xirr
+
 
 
 # =========================
@@ -61,6 +63,8 @@ current_value = total_units * latest_nav
 profit = current_value - invested
 avg_buy_nav = invested / total_units if total_units > 0 else 0
 absolute_return = ((current_value - invested) / invested) * 100 if invested > 0 else 0
+fund_xirr = compute_fund_xirr(fund_df, latest_nav)
+
 
 
 #st.caption(f"Last NAV Date: {latest_date}")
@@ -88,7 +92,7 @@ metric_normal(col5, "🧮 Avg Buy NAV", f"₹{avg_buy_nav:,.2f}")
 metric_normal(col6, "📦 Total Units", f"{total_units:,.2f}")
 #metric_normal(col7, "📅 Latest NAV", f"₹{latest_nav:.2f}")
 
-
+st.markdown(f"### 📌 XIRR (as of today): **{fund_xirr*100:.2f}%**")
 
 
 
