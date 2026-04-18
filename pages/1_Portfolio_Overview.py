@@ -45,7 +45,9 @@ for fund_name, meta in mutual_funds.items():
         current = calculate_current_value(fund_df, latest_nav)
 
         fund_xirr = compute_fund_xirr(fund_df, latest_nav)
-        fund_xirr = fund_xirr*100:.2f
+        fund_xirr_percent = fund_xirr * 100
+        fund_xirr_display = f"{fund_xirr_percent:.2f}%"
+
 
         total_invested += invested
         total_current += current
@@ -58,7 +60,7 @@ for fund_name, meta in mutual_funds.items():
             current - invested,
             latest_nav,
             latest_date,
-            fund_xirr
+            fund_xirr_display
         ])
 
     except Exception as e:
