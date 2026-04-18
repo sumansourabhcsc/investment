@@ -1,3 +1,11 @@
+import streamlit as st
+import pandas as pd
+
+from config import mutual_funds
+from utils.data_loader import load_fund, load_nav
+from utils.calculations import calculate_invested_amount, calculate_current_value
+
+# ✅ MUST BE FIRST Streamlit command
 st.set_page_config(page_title="Portfolio", layout="wide")
 
 st.title("🏠 Mutual Fund Portfolio Overview")
