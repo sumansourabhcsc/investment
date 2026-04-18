@@ -1,0 +1,57 @@
+name: Update Mutual Fund Daily Snapshots
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    - cron: "45 4 * * *"
+    - cron: "45 12 * * *"
+    - cron: "45 18 * * *"
+  workflow_dispatch:
+
+# ✅ Prevent overlapping runs
+concurrency:
+  group: fund-snapshots
+  cancel-in-progress: false
+
+jobs:
+  update-snapshots:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Setup Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Run snapshot script
+      - name: Run fund snapshot updater
+        run: |
+          python scripts/update_fund_daily_snapshots.py
+
+      # Commit & push changes
+      - name: Commit and push updates
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git add mutualfund/
+
+          git commit -m "Updated fund daily snapshots" || echo "No changes to commit"
+
+          # Sync with remote before push (safe)
+          git pull --rebase origin main || echo "No remote changes"
+
+          git push origin main
