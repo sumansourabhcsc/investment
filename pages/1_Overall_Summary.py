@@ -34,6 +34,16 @@ merged = merge_nav_with_portfolio(portfolio_df, nav_df, mutual_funds)
 
 summary = calculate_summary(merged)
 
+# Show latest NAV and date for each fund
+latest_nav_info = merged.groupby("FundName").agg({
+    "LatestNAV": "last",
+    "LatestNAVDate": "last"
+}).reset_index()
+
+st.subheader("Latest NAV (All Funds)")
+st.dataframe(latest_nav_info)
+
+
 st.dataframe(summary)
 
 total_invested = summary["Invested"].sum()
