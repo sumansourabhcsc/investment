@@ -34,11 +34,6 @@ merged = merge_nav_with_portfolio(portfolio_df, nav_df, mutual_funds)
 
 summary = calculate_summary(merged)
 
-
-
-
-st.dataframe(summary)
-
 total_invested = summary["Invested"].sum()
 total_value = summary["CurrentValue"].sum()
 total_profit = total_value - total_invested
@@ -46,3 +41,8 @@ total_profit = total_value - total_invested
 st.metric("Total Invested", f"₹{total_invested:,.2f}")
 st.metric("Current Value", f"₹{total_value:,.2f}")
 st.metric("Total Profit/Loss", f"₹{total_profit:,.2f}")
+
+
+
+st.dataframe(summary)
+
