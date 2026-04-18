@@ -84,3 +84,27 @@ df = pd.DataFrame(summary, columns=[
 ])
 
 st.dataframe(df, use_container_width=True)
+
+
+
+# pages/1_Overall_Summary.py
+import streamlit as st
+from utils.load_funds import load_all_funds
+from utils.portfolio_math import compute_xirr_for_df
+
+st.title("📊 Overall Portfolio Summary")
+
+df = load_all_funds()
+
+# You can later fetch NAV dynamically per fund
+current_nav = 37.27  
+
+xirr_value = compute_xirr_for_df(df, current_nav)
+
+st.metric("Portfolio XIRR (as of today)", f"{xirr_value*100:.2f}%")
+st.metric("Total Invested", f"₹{df['Amount'].sum():,.0f}")
+st.metric("Total Units", f"{df['Units'].sum():,.2f}")
+st.metric("Current Value", f"₹{df['Units'].sum()*current_nav:,.2f}")
+
+st.write("### All Transactions")
+st.dataframe(df)
