@@ -12,7 +12,6 @@ from utils.xirr_overall import compute_overall_xirr
 st.set_page_config(page_title="Portfolio", layout="wide")
 
 st.title("🏠 Mutual Fund Portfolio Overview")
-st.markdown(f"### 📌 Overall Portfolio XIRR (as of today): **{overall_xirr*100:.2f}%**")
 
 nav_df = load_nav()
 
@@ -59,16 +58,23 @@ for fund_name, meta in mutual_funds.items():
     except Exception as e:
         st.error(f"{fund_name} error: {e}")
 
+# Load all SIP transactions for XIRR
+all_funds_df = load_all_funds()
+
+# Compute overall XIRR
+overall_xirr = compute_overall_xirr(all_funds_df)
+
 
 # =========================
 # 📊 METRICS (NOW ON TOP)
 # =========================
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 
 col1.metric("💰 Total Invested", f"₹{total_invested:,.2f}")
 col2.metric("📈 Current Value", f"₹{total_current:,.2f}")
 col3.metric("📊 Total P&L", f"₹{total_current - total_invested:,.2f}")
+col4.metric("📌 XIRR (Overall)", f"{overall_xirr*100:.2f}%")
 
 
 st.divider()
