@@ -1,44 +1,56 @@
 import streamlit as st
 import pandas as pd
-from utils.data_loader import load_nav, get_all_funds, load_fund
-from utils.calculations import calculate_current_value, calculate_invested_amount, calculate_profit
 
-st.title("🏠 Portfolio Overview")
+from utils.data_loader import load_fund, load_nav
+from utils.calculations import calculate_current_value, calculate_invested_amount
+from config import mutual_funds
+
+st.set_page_config(page_title="Portfolio Overview", layout="wide")
+
+st.title("🏠 Mutual Fund Portfolio Overview")
 
 nav_df = load_nav()
 
-funds = get_all_funds()
+summary = []
 
 total_invested = 0
 total_current = 0
 
-summary = []
+for fund_name, folder in mutual_funds.items():
 
-for fund in funds:
-    fund_df = load_fund(fund)
+    try:
+        fund_df = load_fund(folder)
 
-    scheme_name = fund
-    scheme_code = None
+        match = nav_df[nav_df["SchemeName"].str.contains(fund_name, case=False, na=False)]
 
-    # get latest NAV
-    latest_nav = nav_df[nav_df["SchemeName"].str.contains(fund, case=False)]["NAV"]
-    if len(latest_nav) > 0:
-        nav = latest_nav.values[0]
-    else:
-        continue
+        if match.empty:
+            st.warning(f"No NAV found for {fund_name}")
+            continue
 
-    invested = calculate_invested_amount(fund_df)
-    current = calculate_current_value(fund_df, nav)
+        latest_nav = match["NAV"].values[0]
 
-    total_invested += invested
-    total_current += current
+        invested = calculate_invested_amount(fund_df)
+        current = calculate_current_value(fund_df, latest_nav)
 
-    summary.append([fund, invested, current, current - invested])
+        total_invested += invested
+        total_current += current
+
+        summary.append([
+            fund_name,
+            invested,
+            current,
+            current - invested
+        ])
+
+    except Exception as e:
+        st.error(f"{fund_name} error: {e}")
 
 df = pd.DataFrame(summary, columns=["Fund", "Invested", "Current", "P&L"])
 
-st.dataframe(df)
+st.dataframe(df, use_container_width=True)
 
-st.metric("Total Invested", f"₹{total_invested:,.2f}")
-st.metric("Current Value", f"₹{total_current:,.2f}")
-st.metric("Total P&L", f"₹{total_current-total_invested:,.2f}")
+st.divider()
+
+st.metric("💰 Total Invested", f"₹{total_invested:,.2f}")
+st.metric("📈 Current Value", f"₹{total_current:,.2f}")
+st.metric("📊 Total P&L", f"₹{total_current - total_invested:,.2f}")
