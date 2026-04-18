@@ -52,12 +52,26 @@ invested = fund_df["Amount"].sum()
 current_value = total_units * latest_nav
 profit = current_value - invested
 
-col1, col2, col3, col4 = st.columns(4)
+# =========================
+# SUMMARY METRICS
+# =========================
+total_units = fund_df["Units"].sum()
+invested = fund_df["Amount"].sum()
+current_value = total_units * latest_nav
+profit = current_value - invested
+avg_buy_nav = invested / total_units if total_units > 0 else 0
+
+col1, col2, col3, col4, col5, col6 = st.columns(6)
 
 col1.metric("💰 Invested", f"₹{invested:,.2f}")
-col2.metric("📈 Current Value", f"₹{current_value:,.2f}")
-col3.metric("📊 P&L", f"₹{profit:,.2f}")
-col4.metric("📅 Latest NAV", f"₹{latest_nav:.2f}")
+col2.metric("📦 Total Units", f"{total_units:,.2f}")
+col3.metric("🧮 Avg Buy NAV", f"₹{avg_buy_nav:,.2f}")
+col4.metric("📈 Current Value", f"₹{current_value:,.2f}")
+col5.metric("📊 P&L", f"₹{profit:,.2f}")
+col6.metric("📅 Latest NAV", f"₹{latest_nav:.2f}")
+
+st.caption(f"Last NAV Date: {latest_date}")
+
 
 st.caption(f"Last NAV Date: {latest_date}")
 
