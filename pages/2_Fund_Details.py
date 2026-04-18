@@ -93,7 +93,7 @@ metric_normal(col6, "📦 Total Units", f"{total_units:,.2f}")
 #metric_normal(col7, "📅 Latest NAV", f"₹{latest_nav:.2f}")
 
 
-metric_normal(col7,"📌 XIRR (as of today)", f"{fund_xirr*100:.2f}%**")
+metric_normal(col7,"📌 XIRR (as of today)", f"{fund_xirr*100:.2f}%")
 
 
 
