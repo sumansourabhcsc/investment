@@ -61,6 +61,8 @@ current_value = total_units * latest_nav
 profit = current_value - invested
 avg_buy_nav = invested / total_units if total_units > 0 else 0
 
+
+st.caption(f"Last NAV Date: {latest_date}")
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 
 def metric_normal(col, label, value):
@@ -75,14 +77,14 @@ def metric_normal(col, label, value):
     )
 
 metric_normal(col1, "💰 Invested", f"₹{invested:,.2f}")
-metric_normal(col2, "📦 **Total Units**", f"{total_units:,.2f}")
-metric_normal(col3, "🧮 **Avg Buy NAV**", f"₹{avg_buy_nav:,.2f}")
-metric_normal(col4, "📈 **Current Value**", f"₹{current_value:,.2f}")
-metric_normal(col5, "📊 **P&L**", f"₹{profit:,.2f}")
-metric_normal(col6, "📅 **Latest NAV**", f"₹{latest_nav:.2f}")
+metric_normal(col2, "📦 Total Units", f"{total_units:,.2f}")
+metric_normal(col3, "🧮 Avg Buy NAV", f"₹{avg_buy_nav:,.2f}")
+metric_normal(col4, "📈 Current Value", f"₹{current_value:,.2f}")
+metric_normal(col5, "📊 P&L", f"₹{profit:,.2f}")
+metric_normal(col6, "📅 Latest NAV", f"₹{latest_nav:.2f}")
 
 
-st.caption(f"Last NAV Date: {latest_date}")
+
 
 
 #st.caption(f"Last NAV Date: {latest_date}")
