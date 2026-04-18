@@ -12,11 +12,29 @@ def load_all_funds(base_path="mutualfund"):
             df = pd.read_csv(fund_file)
 
             df["FundName"] = fund_name
+            df.columns = df.columns.str.strip()
 
-            # FIX: ensure correct types
+            # FIX: detect correct date column
+            date_col = None
+
+            for col in df.columns:
+                if col.lower() in ["date", "purchase_date", "purchasedate", "date_purchase"]:
+                    date_col = col
+                    break
+
+            if date_col:
+                df["Date_Purchase"] = pd.to_datetime(df[date_col], errors="coerce")
+            else:
+                df["Date_Purchase"] = pd.NaT
+
+            # numeric safety
             df["Amount"] = pd.to_numeric(df["Amount"], errors="coerce")
             df["Units"] = pd.to_numeric(df["Units"], errors="coerce")
-            df["Date_Purchase"] = pd.to_datetime(df["Date_Purchase"], errors="coerce")
+
+            # FIX: ensure correct types
+            #df["Amount"] = pd.to_numeric(df["Amount"], errors="coerce")
+            #df["Units"] = pd.to_numeric(df["Units"], errors="coerce")
+            #df["Date_Purchase"] = pd.to_datetime(df["Date_Purchase"], errors="coerce")
 
             all_data.append(df)
 
