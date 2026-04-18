@@ -1,8 +1,6 @@
 #utils/calculations.py — MERGE NAV + PORTFOLIO
 def merge_nav_with_portfolio(portfolio_df, nav_df, mutual_funds):
-    # -------------------------------
-    # 1. Normalize fund names
-    # -------------------------------
+    # Normalize fund names
     portfolio_df["FundName"] = (
         portfolio_df["FundName"]
         .astype(str)
@@ -10,17 +8,13 @@ def merge_nav_with_portfolio(portfolio_df, nav_df, mutual_funds):
         .str.lower()
     )
 
-    # Normalize mutual_funds dict keys
+    # Normalize mutual fund dict
     mf_map = {k.lower().strip(): v for k, v in mutual_funds.items()}
 
-    # -------------------------------
-    # 2. Map SchemeCode
-    # -------------------------------
+    # Map SchemeCode
     portfolio_df["SchemeCode"] = portfolio_df["FundName"].map(mf_map)
 
-    # -------------------------------
-    # 3. Merge with NAV data
-    # -------------------------------
+    # Merge
     merged = portfolio_df.merge(
         nav_df[["SchemeCode", "NAV", "Date"]],
         on="SchemeCode",
@@ -28,19 +22,17 @@ def merge_nav_with_portfolio(portfolio_df, nav_df, mutual_funds):
         suffixes=("_Purchase", "_Latest")
     )
 
-    # -------------------------------
-    # 4. Rename columns
-    # -------------------------------
+    # Rename
     merged.rename(
-    columns={
-        "NAV_Latest": "LatestNAV",
-        "Date_Latest": "LatestNAVDate"
-    },
-    inplace=True
+        columns={
+            "NAV_Latest": "LatestNAV",
+            "Date_Latest": "LatestNAVDate"
+        },
+        inplace=True
     )
 
-
     return merged
+
 
 
 
