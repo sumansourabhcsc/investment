@@ -1,13 +1,6 @@
-import streamlit as st
-import pandas as pd
-
-from config import mutual_funds
-from utils.data_loader import load_fund, load_nav, get_latest_nav
-from utils.calculations import calculate_invested_amount, calculate_current_value
-
 st.set_page_config(page_title="Portfolio", layout="wide")
 
-st.title("🏠 Mutual Fund Portfolio (SchemeCode Driven)")
+st.title("🏠 Mutual Fund Portfolio Overview")
 
 nav_df = load_nav()
 
@@ -22,18 +15,21 @@ for fund_name, meta in mutual_funds.items():
         code = meta["code"]
         folder = meta["folder"]
 
-        # 📁 Load investment data
         fund_df = load_fund(folder)
 
-        # 📈 Get NAV by SchemeCode
-        nav = get_latest_nav(nav_df, code)
+        match = nav_df[nav_df["SchemeCode"] == str(code)]
 
-        if nav is None:
+        if match.empty:
             st.warning(f"No NAV found for {fund_name} ({code})")
             continue
 
+        latest_row = match.sort_values("Date", ascending=False).iloc[0]
+
+        latest_nav = float(latest_row["NAV"])
+        latest_date = latest_row["Date"].date()
+
         invested = calculate_invested_amount(fund_df)
-        current = calculate_current_value(fund_df, nav)
+        current = calculate_current_value(fund_df, latest_nav)
 
         total_invested += invested
         total_current += current
@@ -43,20 +39,40 @@ for fund_name, meta in mutual_funds.items():
             code,
             invested,
             current,
-            current - invested
+            current - invested,
+            latest_nav,
+            latest_date
         ])
 
     except Exception as e:
         st.error(f"{fund_name} error: {e}")
 
-df = pd.DataFrame(summary, columns=[
-    "Fund", "SchemeCode", "Invested", "Current", "P&L"
-])
 
-st.dataframe(df, use_container_width=True)
+# =========================
+# 📊 METRICS (NOW ON TOP)
+# =========================
+
+col1, col2, col3 = st.columns(3)
+
+col1.metric("💰 Total Invested", f"₹{total_invested:,.2f}")
+col2.metric("📈 Current Value", f"₹{total_current:,.2f}")
+col3.metric("📊 Total P&L", f"₹{total_current - total_invested:,.2f}")
+
 
 st.divider()
 
-st.metric("💰 Total Invested", f"₹{total_invested:,.2f}")
-st.metric("📈 Current Value", f"₹{total_current:,.2f}")
-st.metric("📊 Total P&L", f"₹{total_current - total_invested:,.2f}")
+# =========================
+# 📋 TABLE BELOW
+# =========================
+
+df = pd.DataFrame(summary, columns=[
+    "Fund",
+    "SchemeCode",
+    "Invested",
+    "Current",
+    "P&L",
+    "Latest NAV",
+    "NAV Date"
+])
+
+st.dataframe(df, use_container_width=True)
