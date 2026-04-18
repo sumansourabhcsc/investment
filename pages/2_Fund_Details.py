@@ -67,7 +67,7 @@ st.divider()
 # =========================
 st.subheader("📋 SIP History (Latest → Oldest)")
 
-fund_df_sorted = fund_df.sort_values(by="Date", ascending=False)
+fund_df_sorted = fund_df.sort_values(by="Date", ascending=False).reset_index(drop=True)
 
 st.dataframe(fund_df_sorted, use_container_width=True)
 
