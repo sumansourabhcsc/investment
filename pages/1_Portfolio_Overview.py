@@ -240,3 +240,74 @@ if monthly_data:
         .format({col: "{:,.0f}" for col in numeric_cols}),
     use_container_width=True
 )
+
+
+
+latest_nav_date = nav_df["Date"].max().date()
+selected_date = st.date_input("Select Date", value=latest_nav_date)
+selected_date_str = selected_date.strftime("%d-%m-%Y")
+
+# Load NAV data
+nav_df = load_nav()
+
+# Get latest NAV date
+latest_nav_date = nav_df["Date"].max().date()
+
+# Date selector defaults to latest NAV date
+selected_date = st.date_input("Select Date", value=latest_nav_date)
+selected_date_str = selected_date.strftime("%d-%m-%Y")
+
+
+daily_rows = []
+
+for fund_name, meta in mutual_funds.items():
+    folder = meta["folder"]
+    code = meta["code"]
+
+    file_path = f"mutualfund/{folder}/daily_{code}.csv"
+
+    if not os.path.exists(file_path):
+        continue
+
+    df_daily = pd.read_csv(file_path)
+
+    # Ensure date is parsed
+    df_daily["date"] = pd.to_datetime(df_daily["date"], format="%d-%m-%Y")
+
+    # Filter for selected date
+    row = df_daily[df_daily["date"] == pd.to_datetime(selected_date_str)]
+
+    if row.empty:
+        continue
+
+    row = row.iloc[0]
+
+    daily_rows.append([
+        fund_name,
+        row["absolute_gain_loss"],
+        row["total_return_pct"],
+        row["xirr_annual"],
+        row["nav"]
+    ])
+
+df_daily = pd.DataFrame(daily_rows, columns=[
+    "Fund",
+    "Change in Value",
+    "% Change (NAV)",
+    "XIRR (Annual)",
+    "NAV"
+])
+
+
+df_daily["Indicator"] = df_daily["Change in Value"].apply(
+    lambda x: "🟢 ↑" if x > 0 else "🔴 ↓"
+)
+
+
+st.subheader(f"📅 Daily Change for {selected_date_str}")
+
+st.dataframe(df_daily, use_container_width=True)
+
+st.markdown(
+    f"### 💹 Total Change Across All Funds: **₹{df_daily['Change in Value'].sum():,.2f}**"
+)
