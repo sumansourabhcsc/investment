@@ -8,35 +8,44 @@ def xnpv(rate, cashflows):
     )
 
 
-def xirr(cashflows, guess=0.1):
-    """
-    Stable XIRR using numpy + iteration (no scipy required)
-    """
-
-    # sort by date
+def xirr(cashflows):
     cashflows = sorted(cashflows, key=lambda x: x[0])
 
-    # remove invalid entries
-    cashflows = [
-        (t, cf) for t, cf in cashflows
-        if t is not None and cf is not None
-    ]
+    def f(rate):
+        return xnpv(rate, cashflows)
 
-    if len(cashflows) < 2:
-        return None
+    # wide search space (IMPORTANT for SIPs)
+    low, high = -0.999, 5.0
 
-    rate = guess
+    f_low = f(low)
+    f_high = f(high)
 
-    for _ in range(100):
-        # derivative approximation
-        npv = xnpv(rate, cashflows)
+    # if no sign change → fallback CAGR (IMPORTANT FIX)
+    if f_low * f_high > 0:
+        start = cashflows[0][0]
+        end = cashflows[-1][0]
 
-        if abs(npv) < 1e-6:
-            return rate
+        total_invested = -sum(cf for _, cf in cashflows if cf < 0)
+        final_value = sum(cf for _, cf in cashflows if cf > 0)
 
-        rate += -npv * 0.001  # damping for stability
+        years = (end - start).days / 365
 
-        if rate <= -0.9999:
+        if years <= 0:
             return None
 
-    return None
+        return (final_value / total_invested) ** (1 / years) - 1
+
+    # stable bisection solver
+    for _ in range(200):
+        mid = (low + high) / 2
+        f_mid = f(mid)
+
+        if abs(f_mid) < 1e-7:
+            return mid
+
+        if f_low * f_mid < 0:
+            high = mid
+        else:
+            low = mid
+
+    return mid
