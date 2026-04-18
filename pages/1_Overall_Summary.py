@@ -42,7 +42,7 @@ st.metric("Total Invested", f"₹{total_invested:,.2f}")
 st.metric("Current Value", f"₹{total_value:,.2f}")
 st.metric("Total Profit/Loss", f"₹{total_profit:,.2f}")
 
-
+st.write(merged[merged["LatestNAV"].isna()][["FundName", "SchemeCode"]])
 
 st.dataframe(summary)
 
