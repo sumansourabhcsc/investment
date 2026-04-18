@@ -65,8 +65,11 @@ st.divider()
 # =========================
 # SIP HISTORY TABLE
 # =========================
-st.subheader("📋 SIP History")
-st.dataframe(fund_df, use_container_width=True)
+st.subheader("📋 SIP History (Latest → Oldest)")
+
+fund_df_sorted = fund_df.sort_values(by="Date", ascending=False)
+
+st.dataframe(fund_df_sorted, use_container_width=True)
 
 # =========================
 # INVESTMENT TREND
