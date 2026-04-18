@@ -4,6 +4,7 @@ import pandas as pd
 
 from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
+from utils.xirr import xirr
 
 # =========================
 # PAGE CONFIG
@@ -117,3 +118,22 @@ st.plotly_chart(fig2, use_container_width=True)
 #)
 
 #st.plotly_chart(fig3, use_container_width=True)
+
+
+st.subheader("📊 XIRR (Fund Return)")
+
+# Build cashflows
+cashflows = []
+
+for _, row in fund_df.iterrows():
+    cashflows.append((row["Date"], -row["Amount"]))
+
+# current value as last inflow
+cashflows.append((latest_date, current_value))
+
+# calculate XIRR
+try:
+    irr = xirr(cashflows)
+    st.metric("📈 XIRR", f"{irr*100:.2f}%")
+except:
+    st.warning("XIRR calculation failed")
