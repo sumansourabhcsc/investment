@@ -125,38 +125,38 @@ from utils.xirr import xirr
 st.subheader("📊 XIRR (Fund Return)")
 
 fund_df_clean = fund_df.copy()
-
-# ensure proper date
 fund_df_clean["Date"] = pd.to_datetime(fund_df_clean["Date"], errors="coerce")
 fund_df_clean = fund_df_clean.dropna(subset=["Date", "Amount"])
 fund_df_clean = fund_df_clean.sort_values("Date")
 
 cashflows = []
 
-# SIPs = negative cashflows
+# SIP outflows
 for _, row in fund_df_clean.iterrows():
     cashflows.append((row["Date"], -float(row["Amount"])))
 
-# IMPORTANT: build realistic final value using units * NAV
+# IMPORTANT: final valuation using REAL units × NAV
 total_units = fund_df_clean["Units"].sum()
 
 if total_units <= 0 or latest_nav <= 0:
-    st.warning("Invalid units or NAV for XIRR")
+    st.warning("Invalid units/NAV for XIRR")
     st.stop()
 
-final_value = total_units * latest_nav
+final_value = float(total_units * latest_nav)
 
-# anchor date = latest SIP date or NAV date
-final_date = pd.to_datetime(latest_date)
+# IMPORTANT: use latest SIP date OR NAV date (stable)
+final_date = fund_df_clean["Date"].max()
 
-cashflows.append((final_date, float(final_value)))
+cashflows.append((final_date, final_value))
 
-# debug (optional but useful)
-st.caption(f"Cashflows used: {len(cashflows)}")
+# DEBUG (VERY IMPORTANT ONCE)
+st.caption(f"Cashflows count: {len(cashflows)}")
+st.caption(f"Total invested: {sum(-c[1] for c in cashflows[:-1]):.2f}")
+st.caption(f"Final value: {final_value:.2f}")
 
 irr = xirr(cashflows)
 
-if irr is None:
-    st.warning("XIRR could not be calculated (data still insufficient)")
+if irr is None or abs(irr) > 10:
+    st.warning("XIRR unstable — check SIP history length or data quality")
 else:
     st.metric("📈 XIRR", f"{irr * 100:.2f}%")
