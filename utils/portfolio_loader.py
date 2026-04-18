@@ -2,7 +2,7 @@
 import os
 import pandas as pd
 # utils/portfolio_loader.py — LOAD ALL FUNDS FROM GITHUB FOLDERS
-def load_all_funds(base_path="mutualfunds"):
+def load_all_funds(base_path="mutualfund"):
     all_data = []
 
     for fund_name in os.listdir(base_path):
