@@ -119,29 +119,3 @@ st.plotly_chart(fig2, use_container_width=True)
 
 #st.plotly_chart(fig3, use_container_width=True)
 
-
-from utils.xirr import xirr
-
-st.subheader("📊 XIRR")
-
-fund_df["Date"] = pd.to_datetime(fund_df["Date"])
-
-cashflows = []
-
-# SIPs (outflows)
-for _, row in fund_df.iterrows():
-    cashflows.append((row["Date"], -float(row["Amount"])))
-
-# FINAL VALUE (IMPORTANT — DO NOT USE SUM OF UNITS)
-total_units = fund_df["Units"].iloc[-1]
-
-final_value = total_units * latest_nav
-
-cashflows.append((fund_df["Date"].iloc[-1], final_value))
-
-irr = xirr(cashflows)
-
-if irr is None:
-    st.warning("XIRR could not be calculated")
-else:
-    st.metric("📈 XIRR", f"{irr * 100:.2f}%")
