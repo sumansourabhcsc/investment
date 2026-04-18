@@ -3,13 +3,7 @@ import pandas as pd
 from datetime import datetime
 from utils.xirr import xirr
 
-def compute_portfolio_xirr(df, current_nav, valuation_date=None):
-    """
-    df must contain: Date, Units, Amount
-    current_nav = today's NAV
-    valuation_date = today's date (default = now)
-    """
-
+def compute_xirr_for_df(df, current_nav, valuation_date=None):
     if valuation_date is None:
         valuation_date = datetime.now().date()
 
@@ -25,5 +19,4 @@ def compute_portfolio_xirr(df, current_nav, valuation_date=None):
     cashflows.append(final_value)
     dates.append(valuation_date)
 
-    # Compute XIRR
     return xirr(cashflows, dates)
