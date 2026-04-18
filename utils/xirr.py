@@ -1,50 +1,22 @@
+# utils/xirr.py
 import numpy as np
+from datetime import datetime
 
-def xnpv(rate, cashflows):
-    t0 = cashflows[0][0]
-    return sum(
-        cf / (1 + rate) ** ((t - t0).days / 365)
-        for t, cf in cashflows
-    )
-
-
-def xirr(cashflows):
-    cashflows = sorted(cashflows, key=lambda x: x[0])
-
+def xirr(cashflows, dates):
+    """Compute XIRR using Newton's method."""
     def f(rate):
-        return xnpv(rate, cashflows)
+        return sum(cf / ((1 + rate) ** ((d - dates[0]).days / 365)) for cf, d in zip(cashflows, dates))
 
-    # safe range for SIPs
-    low, high = -0.999, 2.0
+    rate = 0.1  # initial guess
+    for _ in range(100):
+        f_val = f(rate)
+        f_der = sum(
+            -cf * ((d - dates[0]).days / 365) / ((1 + rate) ** (((d - dates[0]).days / 365) + 1))
+            for cf, d in zip(cashflows, dates)
+        )
+        new_rate = rate - f_val / f_der
+        if abs(new_rate - rate) < 1e-7:
+            return new_rate
+        rate = new_rate
 
-    f_low = f(low)
-    f_high = f(high)
-
-    # fallback → CAGR (THIS IS IMPORTANT FOR ACCURACY)
-    if f_low * f_high > 0:
-        start = cashflows[0][0]
-        end = cashflows[-1][0]
-
-        total_invested = -sum(cf for _, cf in cashflows if cf < 0)
-        final_value = sum(cf for _, cf in cashflows if cf > 0)
-
-        years = (end - start).days / 365
-
-        if years <= 0:
-            return None
-
-        return (final_value / total_invested) ** (1 / years) - 1
-
-    for _ in range(200):
-        mid = (low + high) / 2
-        f_mid = f(mid)
-
-        if abs(f_mid) < 1e-8:
-            return mid
-
-        if f_low * f_mid < 0:
-            high = mid
-        else:
-            low = mid
-
-    return mid
+    return rate
