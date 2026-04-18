@@ -14,13 +14,13 @@ def xirr(cashflows):
     def f(rate):
         return xnpv(rate, cashflows)
 
-    # wide search space (IMPORTANT for SIPs)
-    low, high = -0.999, 5.0
+    # safe range for SIPs
+    low, high = -0.999, 2.0
 
     f_low = f(low)
     f_high = f(high)
 
-    # if no sign change → fallback CAGR (IMPORTANT FIX)
+    # fallback → CAGR (THIS IS IMPORTANT FOR ACCURACY)
     if f_low * f_high > 0:
         start = cashflows[0][0]
         end = cashflows[-1][0]
@@ -35,12 +35,11 @@ def xirr(cashflows):
 
         return (final_value / total_invested) ** (1 / years) - 1
 
-    # stable bisection solver
     for _ in range(200):
         mid = (low + high) / 2
         f_mid = f(mid)
 
-        if abs(f_mid) < 1e-7:
+        if abs(f_mid) < 1e-8:
             return mid
 
         if f_low * f_mid < 0:
