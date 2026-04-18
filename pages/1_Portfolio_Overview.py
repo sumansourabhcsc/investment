@@ -223,6 +223,8 @@ if monthly_data:
     st.markdown(f"### Year {selected_year}")
 
     st.dataframe(
-        final_df.style.apply(highlight_total, axis=1),
-        use_container_width=True
+    final_df.style
+        .apply(highlight_total, axis=1)
+        .format("{:,.2f}"),
+    use_container_width=True
     )
