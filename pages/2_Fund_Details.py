@@ -122,48 +122,26 @@ st.plotly_chart(fig2, use_container_width=True)
 
 from utils.xirr import xirr
 
-st.subheader("📊 XIRR (Fund Return)")
-
-fund_df_clean = fund_df.copy()
-fund_df_clean["Date"] = pd.to_datetime(fund_df_clean["Date"], errors="coerce")
-fund_df_clean = fund_df_clean.dropna(subset=["Date", "Amount"])
-fund_df_clean = fund_df_clean.sort_values("Date")
-
-# =========================
-# DATA QUALITY CHECK
-# =========================
-sip_count = len(fund_df_clean)
-total_invested = fund_df_clean["Amount"].sum()
-
-if sip_count < 3:
-    st.warning("⚠ Not enough SIP data for XIRR (minimum 3 required)")
-    st.stop()
-
-cashflows = []
+st.subheader("📊 XIRR")
 
 fund_df["Date"] = pd.to_datetime(fund_df["Date"])
 
-# SIP outflows
+cashflows = []
+
+# SIPs (outflows)
 for _, row in fund_df.iterrows():
     cashflows.append((row["Date"], -float(row["Amount"])))
 
-# FINAL VALUE (IMPORTANT FIX)
-total_units = fund_df["Units"].iloc[-1]   # 👈 use last known units ONLY
+# FINAL VALUE (IMPORTANT — DO NOT USE SUM OF UNITS)
+total_units = fund_df["Units"].iloc[-1]
 
 final_value = total_units * latest_nav
 
 cashflows.append((fund_df["Date"].iloc[-1], final_value))
 
-
 irr = xirr(cashflows)
 
 if irr is None:
-    st.warning("XIRR could not converge — data pattern unstable")
+    st.warning("XIRR could not be calculated")
 else:
-    # sanity filter (very important)
-    if irr < -0.5 or irr > 2:
-        st.warning("XIRR result not realistic — data likely unstable")
-    else:
-        st.metric("📈 XIRR", f"{irr * 100:.2f}%")
-
-
+    st.metric("📈 XIRR", f"{irr * 100:.2f}%")
