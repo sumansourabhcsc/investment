@@ -74,7 +74,7 @@ def metric_normal(col, label, value):
         unsafe_allow_html=True
     )
 
-metric_normal(col1, "💰 **Invested**", f"₹{invested:,.2f}")
+metric_normal(col1, "💰 Invested", f"₹{invested:,.2f}")
 metric_normal(col2, "📦 **Total Units**", f"{total_units:,.2f}")
 metric_normal(col3, "🧮 **Avg Buy NAV**", f"₹{avg_buy_nav:,.2f}")
 metric_normal(col4, "📈 **Current Value**", f"₹{current_value:,.2f}")
