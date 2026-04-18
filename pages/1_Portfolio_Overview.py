@@ -340,3 +340,9 @@ st.dataframe(df_daily, width="stretch")
 st.markdown(
     f"### 💹 Total Change Across All Funds: **₹{df_daily['Change in Value'].sum():,.2f}**"
 )
+
+st.dataframe(df_daily, width="stretch")
+
+st.markdown(
+    f"### 💹 Total Change Across All Funds: **₹{df_daily['Change in Value'].sum():,.2f}**"
+)
