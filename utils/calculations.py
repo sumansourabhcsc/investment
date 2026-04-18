@@ -46,15 +46,26 @@ def merge_nav_with_portfolio(portfolio_df, nav_df, mutual_funds):
 
 #utils/calculations.py — SUMMARY CALCULATIONS
 def calculate_summary(df):
-    df["CurrentValue"] = df["Units"] * df["LatestNAV"]
+    # Calculate values
+    df["CurrentValue"] = df["Units"] * df["NAV_Latest"]
     df["Invested"] = df["Amount"]
 
+    # Build summary table with latest NAV + date included
     summary = df.groupby("FundName").agg({
         "Invested": "sum",
-        "CurrentValue": "sum"
+        "CurrentValue": "sum",
+        "NAV_Latest": "last",
+        "Date_Latest": "last"
     }).reset_index()
 
     summary["ProfitLoss"] = summary["CurrentValue"] - summary["Invested"]
     summary["ReturnPct"] = (summary["ProfitLoss"] / summary["Invested"]) * 100
 
+    # Rename columns to clean names
+    summary.rename(columns={
+        "NAV_Latest": "LatestNAV",
+        "Date_Latest": "LatestNAVDate"
+    }, inplace=True)
+
     return summary
+
