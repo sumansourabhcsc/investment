@@ -4,7 +4,7 @@ import pandas as pd
 
 from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
-from utils.xirr import xirr
+
 
 # =========================
 # PAGE CONFIG
