@@ -1,12 +1,14 @@
-import pandas as pd
-from datetime import datetime
-from utils.data_loader import load_nav
-from utils.load_funds import load_all_funds
 import sys
 import os
 
 # Add project root to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import pandas as pd
+from datetime import datetime
+from utils.data_loader import load_nav
+from utils.load_funds import load_all_funds
+
 
 OUTPUT_FILE = "data/daily_summary.csv"
 
