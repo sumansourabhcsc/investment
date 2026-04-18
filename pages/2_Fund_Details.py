@@ -41,11 +41,22 @@ latest_nav = fund_df["LatestNAV"].iloc[-1]
 latest_date = fund_df["LatestNAVDate"].iloc[-1]
 
 # Show details on top
+# Calculate invested + current value
+invested_amount = fund_df["Amount"].sum()
+current_value = (fund_df["Units"] * latest_nav).sum()
+
+# Show details on top
 st.subheader(f"📌 {fund_name}")
+
 col1, col2, col3 = st.columns(3)
 col1.metric("Scheme Code", scheme_code)
 col2.metric("Latest NAV", f"{latest_nav:.4f}")
 col3.metric("NAV Date", latest_date.strftime("%d-%b-%Y"))
+
+col4, col5 = st.columns(2)
+col4.metric("Total Invested", f"₹{invested_amount:,.2f}")
+col5.metric("Current Value", f"₹{current_value:,.2f}")
+
 
 # Remove columns from table
 fund_df = fund_df.drop(columns=["FundName", "SchemeCode", "LatestNAV", "LatestNAVDate"])
