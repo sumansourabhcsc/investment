@@ -212,6 +212,11 @@ if monthly_data:
 
     final_df = pd.concat([pivot_df, total_df], ignore_index=True)
 
+
+
+    
+
+    st.markdown(f"### Year {selected_year}")
     # =========================
     # STYLING
     # =========================
@@ -226,9 +231,6 @@ if monthly_data:
         return [""] * len(col)
 
     
-
-    st.markdown(f"### Year {selected_year}")
-
     numeric_cols = final_df.select_dtypes(include="number").columns
 
     st.dataframe(
