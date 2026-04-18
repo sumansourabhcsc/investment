@@ -160,7 +160,7 @@ if monthly_data:
         "Code", "Fund", "Year", "Month", "Amount"
     ])
 
-    years = sorted(monthly_df["Year"].unique())
+    years = sorted(monthly_df["Year"].dropna().astype(int).unique())
     selected_year = st.selectbox("Select Year", years, index=len(years)-1)
 
     year_df = monthly_df[monthly_df["Year"] == selected_year]
@@ -237,6 +237,6 @@ if monthly_data:
     final_df.style
         .apply(highlight_total_row, axis=1)
         .apply(highlight_total_column, axis=0)
-        .format({col: "{:,.2f}" for col in numeric_cols}),
+        .format({col: "{:,.0f}" for col in numeric_cols}),
     use_container_width=True
 )
