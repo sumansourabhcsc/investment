@@ -39,6 +39,9 @@ jobs:
         run: |
           python utils/fetch_nav_all.py
 
+      - name: Generate Daily Summary
+        run: python scripts/generate_daily_summary.py
+
       # Commit & push updated NAV file
       - name: Commit and push changes
         run: |
@@ -46,4 +49,13 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git add data/nav_all_latest.csv
           git commit -m "Updated AMFI NAV list" || echo "No changes to commit"
+          git push
+
+
+      - name: Commit updated summary
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add data/daily_summary.csv
+          git commit -m "Update daily summary" || echo "No changes"
           git push
