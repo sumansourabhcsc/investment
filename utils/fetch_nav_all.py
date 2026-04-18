@@ -1,63 +1,65 @@
 import requests
 import os
 from datetime import datetime
+import pandas as pd
 
 AMFI_URL = "https://www.amfiindia.com/spages/NAVAll.txt"
 OUTPUT_DIR = "data"
-OUTPUT_FILE = f"{OUTPUT_DIR}/nav_all_latest.csv"   # changed to .csv
+OUTPUT_FILE = f"{OUTPUT_DIR}/nav_all_latest.csv"
 
 def fetch_and_clean_navall():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    response = requests.get(AMFI_URL)
-    response.raise_for_status()
-    raw_text = response.text
+    r = requests.get(AMFI_URL)
+    r.raise_for_status()
 
-    cleaned_rows = []
+    rows = []
 
-    for line in raw_text.splitlines():
+    for line in r.text.splitlines():
         line = line.strip()
 
-        # Skip unwanted lines
-        if not line or line.startswith("#") or "Scheme Code" in line:
-            continue
-        if "Mutual Fund" in line or "Schemes" in line:
+        if not line or "Scheme Code" in line or "Mutual Fund" in line:
             continue
 
         parts = line.split(";")
 
-        # Ensure valid structure
         if len(parts) != 6:
             continue
 
-        scheme_code, isin_growth, isin_reinv, scheme_name, nav, date = parts
+        scheme_code, isin_g, isin_r, name, nav, date = parts
 
-        # Validate NAV
         try:
             nav = float(nav)
         except:
             continue
 
-        # 🔥 Convert date format (17-Apr-2026 → 17-04-2026)
         try:
-            parsed_date = datetime.strptime(date, "%d-%b-%Y")
-            formatted_date = parsed_date.strftime("%d-%m-%Y")
+            date_obj = datetime.strptime(date, "%d-%b-%Y")
+            date = date_obj.strftime("%d-%m-%Y")
         except:
             continue
 
-        # 🔥 Use comma separator
-        cleaned_rows.append(
-            f"{scheme_code},{isin_growth},{isin_reinv},{scheme_name},{nav},{formatted_date}"
-        )
+        rows.append([
+            scheme_code.strip(),
+            isin_g.strip(),
+            isin_r.strip(),
+            name.strip(),
+            nav,
+            date
+        ])
 
-    # Save file
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        f.write("SchemeCode,ISIN_Growth,ISIN_Reinvestment,SchemeName,NAV,Date\n")
-        for row in cleaned_rows:
-            f.write(row + "\n")
+    df = pd.DataFrame(rows, columns=[
+        "SchemeCode",
+        "ISIN_Growth",
+        "ISIN_Reinvestment",
+        "SchemeName",
+        "NAV",
+        "Date"
+    ])
 
-    print("✅ Cleaned NAV file (CSV) saved successfully.")
+    df.to_csv(OUTPUT_FILE, index=False)
 
+    print("✅ NAV updated:", OUTPUT_FILE)
 
 if __name__ == "__main__":
     fetch_and_clean_navall()
