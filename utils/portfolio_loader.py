@@ -17,4 +17,3 @@ def load_all_funds(base_path="mutualfund"):
         return pd.DataFrame()
 
     return pd.concat(all_data, ignore_index=True)
-Great — now we fix portfolio_loader.py properly so XIRR works reliably.
