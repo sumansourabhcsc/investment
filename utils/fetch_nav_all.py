@@ -43,7 +43,7 @@ def fetch_and_clean_navall():
 
     # Save cleaned file
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        f.write(f"# Cleaned NAV file — Downloaded on {datetime.now()}\n")
+        #f.write(f"# Cleaned NAV file — Downloaded on {datetime.now()}\n")
         f.write("SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date\n")
         for row in cleaned_rows:
             f.write(row + "\n")
