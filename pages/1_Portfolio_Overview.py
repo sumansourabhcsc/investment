@@ -2,12 +2,12 @@ import streamlit as st
 import pandas as pd
 
 from config import mutual_funds
-from utils.data_loader import load_fund, load_nav, get_latest_nav_by_code
+from utils.data_loader import load_fund, load_nav, get_latest_nav
 from utils.calculations import calculate_invested_amount, calculate_current_value
 
 st.set_page_config(page_title="Portfolio", layout="wide")
 
-st.title("🏠 Mutual Fund Portfolio (Code-Based System)")
+st.title("🏠 Mutual Fund Portfolio (SchemeCode Driven)")
 
 nav_df = load_nav()
 
@@ -16,17 +16,20 @@ summary = []
 total_invested = 0
 total_current = 0
 
-for fund_name, scheme_code in mutual_funds.items():
+for fund_name, meta in mutual_funds.items():
 
     try:
+        code = meta["code"]
+        folder = meta["folder"]
+
         # 📁 Load investment data
-        fund_df = load_fund(fund_name.lower().replace(" ", "_"))
+        fund_df = load_fund(folder)
 
         # 📈 Get NAV by SchemeCode
-        nav, scheme_name = get_latest_nav_by_code(nav_df, scheme_code)
+        nav = get_latest_nav(nav_df, code)
 
         if nav is None:
-            st.warning(f"No NAV found for {fund_name} ({scheme_code})")
+            st.warning(f"No NAV found for {fund_name} ({code})")
             continue
 
         invested = calculate_invested_amount(fund_df)
@@ -37,7 +40,7 @@ for fund_name, scheme_code in mutual_funds.items():
 
         summary.append([
             fund_name,
-            scheme_code,
+            code,
             invested,
             current,
             current - invested
