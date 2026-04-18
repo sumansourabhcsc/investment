@@ -5,12 +5,12 @@ permissions:
 
 on:
   schedule:
-    - cron: "35 4 * * *"   # 10:05 AM IST
-    - cron: "35 8 * * *"   # 2:05 PM IST
-    - cron: "35 12 * * *"  # 6:05 PM IST
-    - cron: "35 15 * * *"  # 9:05 PM IST
-    - cron: "39 21 * * *"  # 3:09 AM IST
-    - cron: "35 23 * * *"  # 5:05 AM IST
+    - cron: "35 4 * * *"
+    - cron: "35 8 * * *"
+    - cron: "35 12 * * *"
+    - cron: "35 15 * * *"
+    - cron: "39 21 * * *"
+    - cron: "35 23 * * *"
   workflow_dispatch:
 
 jobs:
@@ -18,28 +18,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Setup Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
+      # Install dependencies from requirements.txt
       - name: Install dependencies
         run: |
-          pip install requests
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
+      # Run NAV script
       - name: Run NAV fetch script
         run: |
           python utils/fetch_nav_all.py
 
+      # Commit & push updated NAV file
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add data/nav_all_latest.txt
+          git add data/nav_all_latest.csv
           git commit -m "Updated AMFI NAV list" || echo "No changes to commit"
           git push
