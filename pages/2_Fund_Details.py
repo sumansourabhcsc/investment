@@ -120,20 +120,28 @@ st.plotly_chart(fig2, use_container_width=True)
 #st.plotly_chart(fig3, use_container_width=True)
 
 
+from utils.xirr import xirr
+
 st.subheader("📊 XIRR (Fund Return)")
 
-# Build cashflows
+# clean SIP cashflows
 cashflows = []
 
-for _, row in fund_df.iterrows():
-    cashflows.append((row["Date"], -row["Amount"]))
+fund_df_clean = fund_df.copy()
+fund_df_clean = fund_df_clean.dropna(subset=["Date", "Amount"])
 
-# current value as last inflow
-cashflows.append((latest_date, current_value))
+fund_df_clean["Date"] = pd.to_datetime(fund_df_clean["Date"], errors="coerce")
 
-# calculate XIRR
-try:
-    irr = xirr(cashflows)
-    st.metric("📈 XIRR", f"{irr*100:.2f}%")
-except:
-    st.warning("XIRR calculation failed")
+for _, row in fund_df_clean.iterrows():
+    cashflows.append((row["Date"], -float(row["Amount"])))
+
+# final value injection
+if "latest_date" in locals() and "current_value" in locals():
+    cashflows.append((pd.Timestamp(latest_date), float(current_value)))
+
+irr = xirr(cashflows)
+
+if irr is None:
+    st.warning("XIRR not stable for this fund (insufficient or irregular cashflows)")
+else:
+    st.metric("📈 XIRR", f"{irr * 100:.2f}%")
