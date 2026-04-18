@@ -141,19 +141,18 @@ if sip_count < 3:
 
 cashflows = []
 
+fund_df["Date"] = pd.to_datetime(fund_df["Date"])
+
 # SIP outflows
-for _, row in fund_df_clean.iterrows():
+for _, row in fund_df.iterrows():
     cashflows.append((row["Date"], -float(row["Amount"])))
 
 # FINAL VALUE (IMPORTANT FIX)
-total_units = fund_df_clean["Units"].sum()
+total_units = fund_df["Units"].iloc[-1]   # 👈 use last known units ONLY
 
 final_value = total_units * latest_nav
 
-# use last SIP date (more stable than NAV date)
-final_date = fund_df_clean["Date"].iloc[-1]
-
-cashflows.append((final_date, float(final_value)))
+cashflows.append((fund_df["Date"].iloc[-1], final_value))
 
 
 irr = xirr(cashflows)
