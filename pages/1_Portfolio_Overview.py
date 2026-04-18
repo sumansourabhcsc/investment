@@ -243,9 +243,6 @@ if monthly_data:
 
 
 
-latest_nav_date = nav_df["Date"].max().date()
-selected_date = st.date_input("Select Date", value=latest_nav_date)
-selected_date_str = selected_date.strftime("%d-%m-%Y")
 
 # Load NAV data
 nav_df = load_nav()
