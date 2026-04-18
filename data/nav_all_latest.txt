@@ -1,4 +1,4 @@
-# Cleaned NAV file — Downloaded on 2026-04-18 06:01:19.620542
+# Cleaned NAV file — Downloaded on 2026-04-18 09:26:44.353636
 SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 119551;INF209KA12Z1;INF209KA13Z9;Aditya Birla Sun Life Banking & PSU Debt Fund  - DIRECT - IDCW;104.7821;17-Apr-2026
 119552;INF209K01YM2;-;Aditya Birla Sun Life Banking & PSU Debt Fund  - DIRECT - MONTHLY IDCW;116.7674;17-Apr-2026
@@ -1165,16 +1165,16 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 112713;INF846K01354;-;Axis Liquid Fund - Retail Plan - Growth Option;2783.6674;17-Apr-2026
 112714;INF846K01396;INF846K01404;Axis Liquid Fund - Retail Plan - Monthly IDCW;1007.0244;17-Apr-2026
 112715;INF846K01370;INF846K01388;Axis Liquid Fund - Retail Plan - Weekly IDCW;1002.1569;17-Apr-2026
-151835;-;INF0QA701029;Bajaj Finserv Liquid Fund - Direct Plan - Daily - IDCW;1034.6939;17-Apr-2026
-151838;INF0QA701078;INF0QA701045;Bajaj Finserv Liquid Fund - Direct Plan - Fortnightly - IDCW;1037.4014;17-Apr-2026
-151833;INF0QA701011;-;Bajaj Finserv Liquid Fund - Direct Plan - Growth;1208.3012;17-Apr-2026
-151836;INF0QA701086;INF0QA701052;Bajaj Finserv Liquid Fund - Direct Plan - Monthly - IDCW;1035.0375;17-Apr-2026
-151834;INF0QA701060;INF0QA701037;Bajaj Finserv Liquid Fund - Direct Plan - Weekly - IDCW;1035.4664;17-Apr-2026
-151839;-;INF0QA701136;Bajaj Finserv Liquid Fund - Regular Plan - Daily - IDCW;1033.8241;17-Apr-2026
-151841;INF0QA701151;INF0QA701110;Bajaj Finserv Liquid Fund - Regular Plan - Fortnightly - IDCW;1036.4709;17-Apr-2026
-151837;INF0QA701094;-;Bajaj Finserv Liquid Fund - Regular Plan - Growth;1202.4609;17-Apr-2026
-151842;INF0QA701169;INF0QA701128;Bajaj Finserv Liquid Fund - Regular Plan - Monthly - IDCW;1034.1542;17-Apr-2026
-151840;INF0QA701144;INF0QA701102;Bajaj Finserv Liquid Fund - Regular Plan - Weekly - IDCW;1034.5602;17-Apr-2026
+151835;-;INF0QA701029;Bajaj Finserv Liquid Fund - Direct Plan - Daily - IDCW;1034.6939;19-Apr-2026
+151838;INF0QA701078;INF0QA701045;Bajaj Finserv Liquid Fund - Direct Plan - Fortnightly - IDCW;1037.7122;19-Apr-2026
+151833;INF0QA701011;-;Bajaj Finserv Liquid Fund - Direct Plan - Growth;1208.6632;19-Apr-2026
+151836;INF0QA701086;INF0QA701052;Bajaj Finserv Liquid Fund - Direct Plan - Monthly - IDCW;1035.3475;19-Apr-2026
+151834;INF0QA701060;INF0QA701037;Bajaj Finserv Liquid Fund - Direct Plan - Weekly - IDCW;1035.7767;19-Apr-2026
+151839;-;INF0QA701136;Bajaj Finserv Liquid Fund - Regular Plan - Daily - IDCW;1033.8241;19-Apr-2026
+151841;INF0QA701151;INF0QA701110;Bajaj Finserv Liquid Fund - Regular Plan - Fortnightly - IDCW;1036.7703;19-Apr-2026
+151837;INF0QA701094;-;Bajaj Finserv Liquid Fund - Regular Plan - Growth;1202.8079;19-Apr-2026
+151842;INF0QA701169;INF0QA701128;Bajaj Finserv Liquid Fund - Regular Plan - Monthly - IDCW;1034.4526;19-Apr-2026
+151840;INF0QA701144;INF0QA701102;Bajaj Finserv Liquid Fund - Regular Plan - Weekly - IDCW;1034.8586;19-Apr-2026
 108694;INF194K01VP5;INF194K01VO8;BANDHAN LIQUID FUND - Inst Plan B - Periodic Div;0.0;02-Oct-2008
 108692;INF194K01VZ4;INF194K01VY7;BANDHAN LIQUID Fund - Regular Plan - Daily IDCW;1001.4161;17-Apr-2026
 108690;INF194K01VX9;-;BANDHAN LIQUID Fund - Regular Plan - Growth;3307.689;17-Apr-2026
@@ -1200,20 +1200,20 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 111971;-;INF761K01CO4;BANK OF INDIA Liquid Fund- Regular Plan- Daily IDCW;1005.0;19-Apr-2026
 109254;INF761K01306;-;BANK OF INDIA Liquid Fund- Regular Plan- Growth;3157.4167;19-Apr-2026
 109255;-;INF761K01CP1;BANK OF INDIA Liquid Fund- Regular Plan- Weekly IDCW;1006.0512;19-Apr-2026
-119414;INF955L01AK2;-;Baroda BNP Paribas LIQUID FUND - DIRECT PLAN - DAILY IDCW OPTION;1002.0849;17-Apr-2026
-119415;INF955L01AL0;-;Baroda BNP Paribas LIQUID FUND - DIRECT PLAN - GROWTH OPTION;3191.564;17-Apr-2026
-119416;INF251K01SL8;-;Baroda BNP Paribas LIQUID FUND - DIRECT PLAN - WEEKLY IDCW OPTION;1221.5503;17-Apr-2026
+119414;INF955L01AK2;-;Baroda BNP Paribas LIQUID FUND - DIRECT PLAN - DAILY IDCW OPTION;1002.0849;19-Apr-2026
+119415;INF955L01AL0;-;Baroda BNP Paribas LIQUID FUND - DIRECT PLAN - GROWTH OPTION;3192.5194;19-Apr-2026
+119416;INF251K01SL8;-;Baroda BNP Paribas LIQUID FUND - DIRECT PLAN - WEEKLY IDCW OPTION;1221.916;19-Apr-2026
 139344;INF955L01GR4;-;Baroda BNP Paribas Liquid Fund - Plan C;1422.9738;14-Mar-2022
 116803;INF955L01534;INF955L01542;Baroda BNP Paribas Liquid Fund - Regular - Weekly IDCW Option;0.0;03-May-2013
-111707;INF955L01468;INF955L01476;Baroda BNP Paribas LIQUID FUND - Regular Plan - DAILY IDCW OPTION;1001.4429;17-Apr-2026
-111704;INF955L01484;-;Baroda BNP Paribas LIQUID FUND - Regular Plan - GROWTH OPTION;3148.6992;17-Apr-2026
-111705;INF251K01SK0;INF955L01500;Baroda BNP Paribas LIQUID FUND - Regular Plan - WEEKLY IDCW OPTION;1001.8143;17-Apr-2026
+111707;INF955L01468;INF955L01476;Baroda BNP Paribas LIQUID FUND - Regular Plan - DAILY IDCW OPTION;1001.3821;19-Apr-2026
+111704;INF955L01484;-;Baroda BNP Paribas LIQUID FUND - Regular Plan - GROWTH OPTION;3149.6288;19-Apr-2026
+111705;INF251K01SK0;INF955L01500;Baroda BNP Paribas LIQUID FUND - Regular Plan - WEEKLY IDCW OPTION;1002.1101;19-Apr-2026
 142248;-;-;BARODA BNP PARIBAS LIQUID FUND PLAN C IDCW ABOVE 3 YRS;1000.0;14-Mar-2022
 142246;-;-;BARODA BNP PARIBAS LIQUID FUND PLAN C IDCW UPTO 3YRS;1391.4327;14-Mar-2022
 142245;-;-;BARODA BNP PARIBAS LIQUID FUND PLAN C REDEMPTION ABOVE 3 YRS;1000.0;14-Mar-2022
 142247;-;-;BARODA BNP PARIBAS LIQUID FUND PLAN C REDEMPTION UPTO 3YRS;1387.3652;14-Mar-2022
-101408;INF955L01575;-;Baroda BNP Paribas LIQUID FUND- Defunct Plan -Growth Option;4635.6195;17-Apr-2026
-101407;INF955L01559;INF955L01567;Baroda BNP Paribas LIQUID FUND-Defunct Plan- IDCW Option;3824.8047;17-Apr-2026
+101408;INF955L01575;-;Baroda BNP Paribas LIQUID FUND- Defunct Plan -Growth Option;4636.9881;19-Apr-2026
+101407;INF955L01559;INF955L01567;Baroda BNP Paribas LIQUID FUND-Defunct Plan- IDCW Option;3825.9331;19-Apr-2026
 101409;INF955L01518;INF955L01526;Baroda BNP Paribas LIQUID FUND-Defunct Plan-Daily IDCW Option;1006.0602;04-Aug-2022
 118307;-;INF760K01FS0;CANARA ROBECO LIQUID FUND - DIRECT PLAN - DAILY IDCW (Reinvestment);1005.5;19-Apr-2026
 118305;INF760K01FU6;-;CANARA ROBECO LIQUID FUND - DIRECT PLAN - GROWTH OPTION;3320.4065;19-Apr-2026
@@ -1233,26 +1233,26 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 103347;INF740K01FK9;-;DSP Liquidity Fund - Regular Plan - Growth;3912.7193;17-Apr-2026
 103348;INF740K01FM5;INF740K01FL7;DSP Liquidity Fund - Regular Plan - IDCW - Weekly;1001.5763;17-Apr-2026
 103349;-;INF740KA1OE0;DSP Liquidity Fund- Regular Plan - IDCW - Daily;1001.4663;17-Apr-2026
-140194;INF754K01GY9;-;Edelweiss Liquid Fund - Direct Plan - Bonus Option;2082.2434;17-Apr-2026
-140196;INF754K01GM4;-;Edelweiss Liquid Fund - Direct Plan - Growth Option;3579.0819;17-Apr-2026
-140198;INF754K01GO0;INF754K01GN2;Edelweiss Liquid Fund - Direct Plan - IDCW Option;3579.0954;17-Apr-2026
-140192;INF754K01GX1;INF754K01GT9;Edelweiss Liquid Fund - Direct Plan Annual - IDCW Option;3579.0566;17-Apr-2026
-140193;-;INF754K01GP7;Edelweiss Liquid Fund - Direct Plan daily - IDCW Option;1194.4512;17-Apr-2026
-140199;INF754K01GV5;INF754K01GR3;Edelweiss Liquid Fund - Direct Plan Fortnightly - IDCW Option;2474.4547;17-Apr-2026
-140197;INF754K01GW3;INF754K01GS1;Edelweiss Liquid Fund - Direct Plan Monthly - IDCW Option;1010.9379;17-Apr-2026
-140195;INF754K01GU7;INF754K01GQ5;Edelweiss Liquid Fund - Direct Plan weekly - IDCW Option;2174.3454;17-Apr-2026
-140189;INF754K01HR1;-;Edelweiss Liquid Fund - Regular Plan - Bonus Option;2041.6093;17-Apr-2026
-140182;INF754K01GZ6;-;Edelweiss Liquid Fund - Regular Plan - Growth Option;3504.7009;17-Apr-2026
-140190;INF754K01GK8;INF754K01GL6;Edelweiss Liquid Fund - Regular Plan - IDCW Option;3504.7037;17-Apr-2026
-140188;INF754K01HQ3;INF754K01HP5;Edelweiss Liquid Fund - Regular Plan Annual - IDCW Option;2424.9509;17-Apr-2026
-140181;-;INF754K01HA7;Edelweiss Liquid Fund - Regular Plan Daily - IDCW Option;1297.6897;17-Apr-2026
-140184;INF754K01HK6;INF754K01HC3;Edelweiss Liquid Fund - Regular Plan Fortnightly - IDCW Option;2153.9527;17-Apr-2026
-140183;INF754K01HL4;INF754K01HD1;Edelweiss Liquid Fund - Regular Plan Monthly - IDCW Option;1089.5577;17-Apr-2026
-140185;INF754K01HJ8;INF754K01HB5;Edelweiss Liquid Fund - Regular Plan Weekly - IDCW Option;1215.9179;17-Apr-2026
-140176;INF754K01HE9;-;Edelweiss Liquid Fund - Retail Plan - Growth Option;3187.2388;17-Apr-2026
-140178;-;INF754K01HG4;Edelweiss Liquid Fund - Retail Plan - Weekly Dividend Option;1231.6882;17-Apr-2026
-140177;-;INF754K01HF6;Edelweiss Liquid Fund - Retail Plan Daily - IDCW Option;1142.1008;17-Apr-2026
-140180;-;INF754K01HI0;Edelweiss Liquid Fund - Retail Plan Monthly - IDCW Option;1251.7775;17-Apr-2026
+140194;INF754K01GY9;-;Edelweiss Liquid Fund - Direct Plan - Bonus Option;2082.5595;18-Apr-2026
+140196;INF754K01GM4;-;Edelweiss Liquid Fund - Direct Plan - Growth Option;3579.6253;18-Apr-2026
+140198;INF754K01GO0;INF754K01GN2;Edelweiss Liquid Fund - Direct Plan - IDCW Option;3579.6387;18-Apr-2026
+140192;INF754K01GX1;INF754K01GT9;Edelweiss Liquid Fund - Direct Plan Annual - IDCW Option;3579.6;18-Apr-2026
+140193;-;INF754K01GP7;Edelweiss Liquid Fund - Direct Plan daily - IDCW Option;1194.4512;18-Apr-2026
+140199;INF754K01GV5;INF754K01GR3;Edelweiss Liquid Fund - Direct Plan Fortnightly - IDCW Option;2474.8304;18-Apr-2026
+140197;INF754K01GW3;INF754K01GS1;Edelweiss Liquid Fund - Direct Plan Monthly - IDCW Option;1011.0914;18-Apr-2026
+140195;INF754K01GU7;INF754K01GQ5;Edelweiss Liquid Fund - Direct Plan weekly - IDCW Option;2174.6755;18-Apr-2026
+140189;INF754K01HR1;-;Edelweiss Liquid Fund - Regular Plan - Bonus Option;2041.9151;18-Apr-2026
+140182;INF754K01GZ6;-;Edelweiss Liquid Fund - Regular Plan - Growth Option;3505.2263;18-Apr-2026
+140190;INF754K01GK8;INF754K01GL6;Edelweiss Liquid Fund - Regular Plan - IDCW Option;3505.2291;18-Apr-2026
+140188;INF754K01HQ3;INF754K01HP5;Edelweiss Liquid Fund - Regular Plan Annual - IDCW Option;2425.3144;18-Apr-2026
+140181;-;INF754K01HA7;Edelweiss Liquid Fund - Regular Plan Daily - IDCW Option;1297.8843;18-Apr-2026
+140184;INF754K01HK6;INF754K01HC3;Edelweiss Liquid Fund - Regular Plan Fortnightly - IDCW Option;2154.2756;18-Apr-2026
+140183;INF754K01HL4;INF754K01HD1;Edelweiss Liquid Fund - Regular Plan Monthly - IDCW Option;1089.721;18-Apr-2026
+140185;INF754K01HJ8;INF754K01HB5;Edelweiss Liquid Fund - Regular Plan Weekly - IDCW Option;1216.1002;18-Apr-2026
+140176;INF754K01HE9;-;Edelweiss Liquid Fund - Retail Plan - Growth Option;3187.7166;18-Apr-2026
+140178;-;INF754K01HG4;Edelweiss Liquid Fund - Retail Plan - Weekly Dividend Option;1231.8728;18-Apr-2026
+140177;-;INF754K01HF6;Edelweiss Liquid Fund - Retail Plan Daily - IDCW Option;1142.2736;18-Apr-2026
+140180;-;INF754K01HI0;Edelweiss Liquid Fund - Retail Plan Monthly - IDCW Option;1251.9653;18-Apr-2026
 100541;-;INF090I01BA3;Franklin India Liquid Fund - Regular Plan - Daily - IDCW;1509.0075;17-Apr-2026
 100538;INF090I01BB1;-;Franklin India Liquid Fund - Regular Plan - Growth;6171.7331;17-Apr-2026
 100537;INF090I01BL0;INF090I01BI6;Franklin India Liquid Fund - Regular Plan - Weekly - IDCW;1245.4636;17-Apr-2026
@@ -1361,37 +1361,37 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 147164;-;INF00XX01218;ITI Liquid Fund - Regular Plan - Weekly IDCW Option;1002.7042;17-Apr-2026
 153651;INF22M001010;-;JioBlackRock Liquid Fund - Direct Plan - Growth Option;1049.8967;17-Apr-2026
 120410;INF192K01CN4;-;JM Liquid Fund (Direct) - Bonus Option - Bonus Option - Principal units;22.4898;27-Jan-2025
-120411;-;INF192K01CH6;JM Liquid Fund (Direct) - Daily IDCW;10.4302;17-Apr-2026
-120406;INF192K01CM6;-;JM Liquid Fund (Direct) - Growth Option;75.5454;17-Apr-2026
-120408;INF192K01CK0;INF192K01CL8;JM Liquid Fund (Direct) - Quarterly IDCW;42.8902;17-Apr-2026
-120407;INF192K01CI4;INF192K01CJ2;JM Liquid Fund (Direct) - Weekly IDCW;11.0125;17-Apr-2026
-100244;INF192K01866;INF192K01874;JM Liquid Fund (Regular) - Quarterly IDCW;42.2731;17-Apr-2026
-100247;INF192K01981;-;JM Liquid Fund (Regular) - Super Institutional Plan - Growth Option;42.9402;17-Apr-2026
-100233;INF192K01841;INF192K01858;JM Liquid Fund (Regular) - Weekly IDCW;11.0099;17-Apr-2026
-100234;INF192K01882;-;JM Liquid Fund - Growth Option;74.6861;17-Apr-2026
-148414;-;-;JM Liquid Fund - Unclaimed Application Refund Amount I.E.F. (Direct) - Growth Plan;41.4437;17-Apr-2026
-148413;-;-;JM Liquid Fund - Unclaimed Brokerage I.E.F. (Direct) - Growth Plan;41.4437;17-Apr-2026
+120411;-;INF192K01CH6;JM Liquid Fund (Direct) - Daily IDCW;10.4302;18-Apr-2026
+120406;INF192K01CM6;-;JM Liquid Fund (Direct) - Growth Option;75.5567;18-Apr-2026
+120408;INF192K01CK0;INF192K01CL8;JM Liquid Fund (Direct) - Quarterly IDCW;42.8966;18-Apr-2026
+120407;INF192K01CI4;INF192K01CJ2;JM Liquid Fund (Direct) - Weekly IDCW;11.0141;18-Apr-2026
+100244;INF192K01866;INF192K01874;JM Liquid Fund (Regular) - Quarterly IDCW;42.2793;18-Apr-2026
+100247;INF192K01981;-;JM Liquid Fund (Regular) - Super Institutional Plan - Growth Option;42.9465;18-Apr-2026
+100233;INF192K01841;INF192K01858;JM Liquid Fund (Regular) - Weekly IDCW;11.0115;18-Apr-2026
+100234;INF192K01882;-;JM Liquid Fund - Growth Option;74.6971;18-Apr-2026
+148414;-;-;JM Liquid Fund - Unclaimed Application Refund Amount I.E.F. (Direct) - Growth Plan;41.4437;18-Apr-2026
+148413;-;-;JM Liquid Fund - Unclaimed Brokerage I.E.F. (Direct) - Growth Plan;41.4437;18-Apr-2026
 148415;-;-;JM Liquid Fund - Withheld Brokerage I.E.F. (Direct) - Growth Plan;41.4437;27-Mar-2025
 139258;INF192K01LB0;-;JM Liquid Fund Unclaimed Dividend (Direct) Growth Plan;57.8229;24-Jan-2022
 139260;INF192K01LD6;-;JM Liquid Fund Unclaimed Dividend IEF (Direct) Growth Plan;41.4437;24-Jan-2022
 139257;INF192K01LA2;-;JM Liquid Fund Unclaimed Redemption (Direct) Growth Plan;57.823;24-Jan-2022
 139259;INF192K01LC8;-;JM Liquid Fund Unclaimed Redemption IEF (Direct) Growth Plan;41.4437;24-Jan-2022
-101549;INF192K01890;-;JM Liquid Fund (Regular) - Bonus Option - Principal Units;23.9147;17-Apr-2026
-101078;-;INF192K01833;JM Liquid Fund (Regular) - Daily IDCW;10.4302;17-Apr-2026
+101549;INF192K01890;-;JM Liquid Fund (Regular) - Bonus Option - Principal Units;23.9183;18-Apr-2026
+101078;-;INF192K01833;JM Liquid Fund (Regular) - Daily IDCW;10.4302;18-Apr-2026
 119764;-;INF174K01NH1;Kotak Liquid Fund - Direct Plan - Daily Reinvestment of Income Distribution cum capital withdrawal option;1222.81;17-Apr-2026
 119766;INF174K01NE8;-;Kotak Liquid Fund - Direct Plan - Growth;5593.7335;17-Apr-2026
 153585;INF174KA1WL3;INF174KA1WJ7;Kotak Liquid Fund - Direct Plan - Weekly - Reinvestment & Payout of Income Distribution cum capital withdrawal option;1001.527;10-Jul-2025
 100833;-;INF174K01NL3;Kotak Liquid Fund - Regular  - Daily Reinvestment of Income Distribution cum capital withdrawal option;1253.4583;17-Apr-2026
 100835;INF174K01NI9;-;Kotak Liquid Fund - Regular Plan - Growth;5536.2564;17-Apr-2026
 153586;INF174KA1WK5;INF174KA1WM1;Kotak Liquid Fund - Regular Plan - Weekly - Reinvestment & Payout of Income Distribution cum capital withdrawal option;1028.4961;17-Apr-2026
-120248;INF767K01DL5;INF767K01DM3;LIC MF Liquid Fund-Direct Plan-Daily IDCW;1035.2975;17-Apr-2026
-120249;INF767K01DN1;-;LIC MF Liquid Fund-Direct Plan-Growth;5026.8318;17-Apr-2026
-151930;INF397L01AK7;INF397L01AJ9;LIC MF Liquid Fund-Direct Plan-Monthly IDCW;1220.2412;17-Apr-2026
-151932;INF397L01AM3;INF397L01AL5;LIC MF Liquid Fund-Direct Plan-Weekly IDCW;1089.9286;17-Apr-2026
-101184;INF767K01IQ3;INF767K01IR1;LIC MF Liquid Fund-Regular Plan-Daily IDCW;1000.1751;17-Apr-2026
-101185;INF767K01IS9;-;LIC MF Liquid Fund-Regular Plan-Growth;4951.9157;17-Apr-2026
-151928;INF397L01976;INF397L01968;LIC MF Liquid Fund-Regular Plan-Monthly IDCW;1199.6593;17-Apr-2026
-151927;INF397L01950;INF397L01943;LIC MF Liquid Fund-Regular Plan-Weekly IDCW;1002.6338;17-Apr-2026
+120248;INF767K01DL5;INF767K01DM3;LIC MF Liquid Fund-Direct Plan-Daily IDCW;1035.2975;19-Apr-2026
+120249;INF767K01DN1;-;LIC MF Liquid Fund-Direct Plan-Growth;5028.3569;19-Apr-2026
+151930;INF397L01AK7;INF397L01AJ9;LIC MF Liquid Fund-Direct Plan-Monthly IDCW;1220.6114;19-Apr-2026
+151932;INF397L01AM3;INF397L01AL5;LIC MF Liquid Fund-Direct Plan-Weekly IDCW;1090.2592;19-Apr-2026
+101184;INF767K01IQ3;INF767K01IR1;LIC MF Liquid Fund-Regular Plan-Daily IDCW;1000.1751;19-Apr-2026
+101185;INF767K01IS9;-;LIC MF Liquid Fund-Regular Plan-Growth;4953.3989;19-Apr-2026
+151928;INF397L01976;INF397L01968;LIC MF Liquid Fund-Regular Plan-Monthly IDCW;1200.0187;19-Apr-2026
+151927;INF397L01950;INF397L01943;LIC MF Liquid Fund-Regular Plan-Weekly IDCW;1002.9341;19-Apr-2026
 139535;-;INF174V01051;Mahindra Manulife Liquid Fund - Direct Plan - Daily IDCW;1266.7408;19-Apr-2026
 139536;-;INF174V01069;Mahindra Manulife Liquid Fund - Direct Plan - Weekly IDCW;1003.465;19-Apr-2026
 139538;INF174V01044;-;Mahindra Manulife Liquid Fund - Direct Plan -Growth;1804.2186;19-Apr-2026
@@ -1468,25 +1468,25 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 138282;INF223J01BB6;-;PGIM India Insta Cash Fund-Institutional Plan-Growth;26.2743;28-Jul-2019
 138304;INF223J01VD0;-;PGIM India INSTA CASH FUND-Monthly Bonus Option;140.0664;28-Jul-2019
 138286;INF223J01BQ4;-;PGIM India Liquid Fund - Bonus Option;186.8975;21-Jan-2022
-138285;-;INF223J01BO9;PGIM India Liquid Fund - Daily Dividend;100.304;17-Apr-2026
-138297;INF223J01NR7;-;PGIM India Liquid Fund - Direct Plan - Daily Dividend;128.7455;17-Apr-2026
-138299;INF223J01NS5;-;PGIM India Liquid Fund - Direct Plan - Growth;361.2472;17-Apr-2026
-138298;INF223J01NT3;INF223J01NU1;PGIM India Liquid Fund - Direct Plan - Monthly Dividend;116.9451;17-Apr-2026
-138301;INF223J01NV9;INF223J01NW7;PGIM India Liquid Fund - Direct Plan - Weekly Dividend;100.6374;17-Apr-2026
-138288;INF223J01BP6;-;PGIM India Liquid Fund - Growth;356.6748;17-Apr-2026
-138287;INF223J01BL5;-;PGIM India Liquid Fund - Monthly Dividend;117.3907;17-Apr-2026
-138289;INF223J01BU6;-;PGIM India Liquid Fund - Weekly Dividend;100.6356;17-Apr-2026
+138285;-;INF223J01BO9;PGIM India Liquid Fund - Daily Dividend;100.304;18-Apr-2026
+138297;INF223J01NR7;-;PGIM India Liquid Fund - Direct Plan - Daily Dividend;128.7648;18-Apr-2026
+138299;INF223J01NS5;-;PGIM India Liquid Fund - Direct Plan - Growth;361.3015;18-Apr-2026
+138298;INF223J01NT3;INF223J01NU1;PGIM India Liquid Fund - Direct Plan - Monthly Dividend;116.9627;18-Apr-2026
+138301;INF223J01NV9;INF223J01NW7;PGIM India Liquid Fund - Direct Plan - Weekly Dividend;100.5195;18-Apr-2026
+138288;INF223J01BP6;-;PGIM India Liquid Fund - Growth;356.7274;18-Apr-2026
+138287;INF223J01BL5;-;PGIM India Liquid Fund - Monthly Dividend;117.4081;18-Apr-2026
+138289;INF223J01BU6;-;PGIM India Liquid Fund - Weekly Dividend;100.5193;18-Apr-2026
 138280;-;INF223J01BI1;PGIM India Liquid Fund-DIVIDEND-Daily Dividend;10.301;28-Jul-2019
 138279;INF223J01BR2;INF223J01BS0;PGIM India Liquid Fund-DIVIDEND-MONTHLY DIVIDEND;10.0577;30-Jul-2018
 138281;INF223J01BJ9;-;PGIM India Liquid Fund-Growth-GROWTH;27.706;28-Jul-2019
-143263;-;INF879O01118;Parag Parikh Liquid Fund- Direct Plan- Daily Reinvestment of IDCW;1001.7841;18-Apr-2026
-143269;INF879O01068;-;Parag Parikh Liquid Fund- Direct Plan- Growth;1531.5937;18-Apr-2026
-143262;INF879O01076;INF879O01084;Parag Parikh Liquid Fund- Direct Plan- Monthly IDCW;1008.5406;18-Apr-2026
-143265;-;INF879O01134;Parag Parikh Liquid Fund- Direct Plan- Weekly Reinvestment of IDCW;1002.8324;18-Apr-2026
-143264;-;INF879O01126;Parag Parikh Liquid Fund- Regular Plan- Daily Reinvestment of IDCW;1001.7841;18-Apr-2026
-143260;INF879O01035;-;Parag Parikh Liquid Fund- Regular Plan- Growth;1519.3682;18-Apr-2026
-143261;INF879O01043;INF879O01050;Parag Parikh Liquid Fund- Regular Plan- Monthly IDCW;1008.4924;18-Apr-2026
-143266;-;INF879O01142;Parag Parikh Liquid Fund- Regular Plan- Weekly Reinvestment of IDCW;1002.8197;18-Apr-2026
+143263;-;INF879O01118;Parag Parikh Liquid Fund- Direct Plan- Daily Reinvestment of IDCW;1001.7527;19-Apr-2026
+143269;INF879O01068;-;Parag Parikh Liquid Fund- Direct Plan- Growth;1531.822;19-Apr-2026
+143262;INF879O01076;INF879O01084;Parag Parikh Liquid Fund- Direct Plan- Monthly IDCW;1008.691;19-Apr-2026
+143265;-;INF879O01134;Parag Parikh Liquid Fund- Direct Plan- Weekly Reinvestment of IDCW;1002.9819;19-Apr-2026
+143264;-;INF879O01126;Parag Parikh Liquid Fund- Regular Plan- Daily Reinvestment of IDCW;1001.7527;19-Apr-2026
+143260;INF879O01035;-;Parag Parikh Liquid Fund- Regular Plan- Growth;1519.591;19-Apr-2026
+143261;INF879O01043;INF879O01050;Parag Parikh Liquid Fund- Regular Plan- Monthly IDCW;1008.6403;19-Apr-2026
+143266;-;INF879O01142;Parag Parikh Liquid Fund- Regular Plan- Weekly Reinvestment of IDCW;1002.9667;19-Apr-2026
 120837;INF966L01820;-;quant Liquid Fund - Growth Option - Direct Plan;44.4138;17-Apr-2026
 103225;INF966L01317;-;quant Liquid Fund - Growth Option - Regular Plan;43.1795;17-Apr-2026
 120838;INF966L01796;INF966L01812;quant Liquid Fund - Monthly IDCW Option - Direct Plan;15.8012;17-Apr-2026
@@ -1519,12 +1519,12 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 105283;INF200K01LY3;INF200K01LZ0;SBI Liquid Fund - Regular Plan - Fortnightly Income Distribution cum Capital Withdrawal Option (IDCW);1404.9561;17-Apr-2026
 105282;INF200K01MB9;INF200K01MC7;SBI Liquid Fund - Regular Plan - Weekly Income Distribution cum Capital Withdrawal Option (IDCW);1378.6058;17-Apr-2026
 105280;INF200K01MA1;-;SBI Liquid Fund - REGULAR PLAN -Growth;4281.0369;17-Apr-2026
-153035;INF680P01430;-;Shriram Liquid Fund - Direct Plan Growth Option;1093.8141;18-Apr-2026
-153036;INF680P01448;-;Shriram Liquid Fund - Regular Plan Growth Option;1091.6508;18-Apr-2026
-153282;-;-;Shriram Unclaimed IDCW Liquid Fund;1066.3357;18-Apr-2026
-153283;-;-;Shriram Unclaimed IDCW Stable Scheme Liquid Fund;1000.0;18-Apr-2026
-153280;-;-;Shriram Unclaimed Redemption Liquid Fund;1079.2128;18-Apr-2026
-153281;-;-;Shriram Unclaimed Redemption Stable Scheme Liquid Fund;1000.0;18-Apr-2026
+153035;INF680P01430;-;Shriram Liquid Fund - Direct Plan Growth Option;1093.9824;19-Apr-2026
+153036;INF680P01448;-;Shriram Liquid Fund - Regular Plan Growth Option;1091.8148;19-Apr-2026
+153282;-;-;Shriram Unclaimed IDCW Liquid Fund;1066.5485;19-Apr-2026
+153283;-;-;Shriram Unclaimed IDCW Stable Scheme Liquid Fund;1000.0;19-Apr-2026
+153280;-;-;Shriram Unclaimed Redemption Liquid Fund;1079.3787;19-Apr-2026
+153281;-;-;Shriram Unclaimed Redemption Stable Scheme Liquid Fund;1000.0;19-Apr-2026
 149744;-;INF903JA1JK3;Sundaram  Liquid Fund (Formerly Known as Principal Cash Management Fund) Direct IDCW;1152.6698;27-Jun-2025
 149742;-;INF903JA1JI7;Sundaram Liquid Fund (Formerly Known as  Principal Cash Management Fund) Regular Plan Principal Units;1274.1205;27-Jun-2025
 149663;-;INF173K01GT2;Sundaram Liquid Fund (Formerly Known as Principal Cash Management Fund )- Direct Plan - Income Distribution CUM Capital Withdrawal Option - Daily;1000.6367;13-Sep-2024
@@ -1580,27 +1580,27 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 142343;-;-;Union Liquid Fund - Unclaimed Amounts Plan - Redemption Beyond 3 years;1000.0;30-Nov-2021
 142342;-;-;Union Liquid Fund - Unclaimed Amounts Plan - Redemption Upto 3 years;1167.329;30-Nov-2021
 115402;-;INF582M01039;Union Liquid Fund - Weekly IDCW Option;1002.2239;17-Apr-2026
-134427;INF789FA1K63;INF789FA1K71;UTI Liquid Fund - Direct Plan - Annual IDCW;1996.5547;17-Apr-2026
-120558;-;INF789F01XP8;UTI Liquid Fund - Direct Plan - Daily IDCW (Reinvestment);1065.9811;17-Apr-2026
-141768;INF789FA1K89;INF789FA1K97;UTI Liquid Fund - Direct Plan - Flexi IDCW;1644.4522;17-Apr-2026
-140913;INF789FA1K06;INF789FA1K14;UTI Liquid Fund - Direct Plan - Fortnightly IDCW;1156.3675;17-Apr-2026
-140504;INF789FA1K48;INF789FA1K55;UTI Liquid Fund - Direct Plan - Half-Yearly IDCW;1559.5697;17-Apr-2026
-120794;INF789F01XR4;INF789F01XS2;UTI Liquid Fund - Direct Plan - Monthly IDCW;1047.645;17-Apr-2026
-140024;INF789FA1K22;INF789FA1K30;UTI Liquid Fund - Direct Plan - Quarterly IDCW;1885.6094;17-Apr-2026
-120777;-;INF789F01XT0;UTI Liquid Fund - Direct Plan - Weekly IDCW;1163.8106;17-Apr-2026
-133973;INF789FA1J66;INF789FA1J74;UTI Liquid Fund - Regular Plan - Annual IDCW;1982.3765;17-Apr-2026
-102010;-;INF789F01PG3;UTI Liquid Fund - Regular Plan - Daily IDCW (Reinvestment);1183.4424;17-Apr-2026
-140517;INF789FA1J82;INF789FA1J90;UTI Liquid Fund - Regular Plan - Flexi IDCW;1633.8311;17-Apr-2026
-139838;INF789FA1J09;INF789FA1J17;UTI Liquid Fund - Regular Plan - Fortnightly IDCW;1155.5248;17-Apr-2026
-144475;INF789FA1J41;INF789FA1J58;UTI Liquid Fund - Regular Plan - Half-Yearly IDCW;1380.2897;17-Apr-2026
-102011;INF789F01PI9;INF789F01PJ7;UTI Liquid Fund - Regular Plan - Monthly IDCW;1121.3992;17-Apr-2026
-135721;INF789FA1J25;INF789FA1J33;UTI Liquid Fund - Regular Plan - Quarterly IDCW;1871.8039;17-Apr-2026
-102013;-;INF789F01PK5;UTI Liquid Fund - Regular Plan - Weekly IDCW;1053.0901;17-Apr-2026
-120304;INF789F01XQ6;-;UTI-  Liquid Cash Plan - Direct Plan - Growth Option;4539.8196;17-Apr-2026
-102012;INF789F01PH1;-;UTI-  Liquid Cash Plan - Regular Plan - Growth Option;4495.7888;17-Apr-2026
-102008;INF789F01BC2;INF789F01BA6;UTI-  Liquid Cash Plan- Discontinued - Regular Plan - Monthly Dividend Option;1067.9921;17-Apr-2026
-102009;INF789F01BB4;-;UTI-  Liquid Cash Plan- Discontinued - Regular Plan -Growth;4079.6589;17-Apr-2026
-102007;-;INF789F01AZ5;UTI-  Liquid Cash Plan- Discontinued -Regular Plan Periodic Dividend Option;1135.4095;17-Apr-2026
+134427;INF789FA1K63;INF789FA1K71;UTI Liquid Fund - Direct Plan - Annual IDCW;1996.8564;18-Apr-2026
+120558;-;INF789F01XP8;UTI Liquid Fund - Direct Plan - Daily IDCW (Reinvestment);1065.9537;18-Apr-2026
+141768;INF789FA1K89;INF789FA1K97;UTI Liquid Fund - Direct Plan - Flexi IDCW;1644.7007;18-Apr-2026
+140913;INF789FA1K06;INF789FA1K14;UTI Liquid Fund - Direct Plan - Fortnightly IDCW;1156.5423;18-Apr-2026
+140504;INF789FA1K48;INF789FA1K55;UTI Liquid Fund - Direct Plan - Half-Yearly IDCW;1559.8054;18-Apr-2026
+120794;INF789F01XR4;INF789F01XS2;UTI Liquid Fund - Direct Plan - Monthly IDCW;1047.8034;18-Apr-2026
+140024;INF789FA1K22;INF789FA1K30;UTI Liquid Fund - Direct Plan - Quarterly IDCW;1885.8944;18-Apr-2026
+120777;-;INF789F01XT0;UTI Liquid Fund - Direct Plan - Weekly IDCW;1163.9866;18-Apr-2026
+133973;INF789FA1J66;INF789FA1J74;UTI Liquid Fund - Regular Plan - Annual IDCW;1982.67;18-Apr-2026
+102010;-;INF789F01PG3;UTI Liquid Fund - Regular Plan - Daily IDCW (Reinvestment);1183.6176;18-Apr-2026
+140517;INF789FA1J82;INF789FA1J90;UTI Liquid Fund - Regular Plan - Flexi IDCW;1634.073;18-Apr-2026
+139838;INF789FA1J09;INF789FA1J17;UTI Liquid Fund - Regular Plan - Fortnightly IDCW;1155.6958;18-Apr-2026
+144475;INF789FA1J41;INF789FA1J58;UTI Liquid Fund - Regular Plan - Half-Yearly IDCW;1380.4987;18-Apr-2026
+102011;INF789F01PI9;INF789F01PJ7;UTI Liquid Fund - Regular Plan - Monthly IDCW;1121.5652;18-Apr-2026
+135721;INF789FA1J25;INF789FA1J33;UTI Liquid Fund - Regular Plan - Quarterly IDCW;1872.081;18-Apr-2026
+102013;-;INF789F01PK5;UTI Liquid Fund - Regular Plan - Weekly IDCW;1053.246;18-Apr-2026
+120304;INF789F01XQ6;-;UTI-  Liquid Cash Plan - Direct Plan - Growth Option;4540.5058;18-Apr-2026
+102012;INF789F01PH1;-;UTI-  Liquid Cash Plan - Regular Plan - Growth Option;4496.4544;18-Apr-2026
+102008;INF789F01BC2;INF789F01BA6;UTI-  Liquid Cash Plan- Discontinued - Regular Plan - Monthly Dividend Option;1068.1502;18-Apr-2026
+102009;INF789F01BB4;-;UTI-  Liquid Cash Plan- Discontinued - Regular Plan -Growth;4080.2629;18-Apr-2026
+102007;-;INF789F01AZ5;UTI-  Liquid Cash Plan- Discontinued -Regular Plan Periodic Dividend Option;1135.5776;18-Apr-2026
 145969;-;INF03VN01019;WhiteOak Capital Liquid Fund- Direct plan-Daily Reinvestment of Income Distribution cum capital withdrawal option (IDCW);1001.9025;19-Apr-2026
 145966;INF03VN01027;INF03VN01035;WhiteOak Capital Liquid Fund- Direct plan-Fortnightly Payout/ Reinvestment of Income Distribution cum capital withdrawal option (IDCW);1004.1928;19-Apr-2026
 145971;INF03VN01043;-;WhiteOak Capital Liquid Fund- Direct plan-Growth Option;1482.9728;19-Apr-2026
@@ -2503,18 +2503,18 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 146678;INF846K01O23;-;Axis Overnight Fund - Regular Plan - Growth Option;1423.8097;17-Apr-2026
 146681;INF846K01O31;INF846K01O49;Axis Overnight Fund - Regular Plan - Monthly IDCW;1004.1974;17-Apr-2026
 146680;INF846K01O07;INF846K01O15;Axis Overnight Fund - Regular Plan - Weekly IDCW;1001.1937;17-Apr-2026
-153437;INF0QA701AE3;-;Bajaj Finserv Overnight Fund - Direct - Unclaimed less than 3 years IDCW Plan;1052.2414;17-Apr-2026
-153438;INF0QA701AF0;-;Bajaj Finserv Overnight Fund - Direct - Unclaimed less than 3 years Redemption Plan;1058.9523;17-Apr-2026
-151843;-;INF0QA701185;Bajaj Finserv Overnight Fund - Direct Plan - Daily - IDCW;1033.1412;17-Apr-2026
-151850;INF0QA701235;INF0QA701201;Bajaj Finserv Overnight Fund - Direct Plan - Fortnightly - IDCW;1034.6914;17-Apr-2026
-151849;INF0QA701177;-;Bajaj Finserv Overnight Fund - Direct Plan - Growth;1184.5149;17-Apr-2026
-151845;INF0QA701243;INF0QA701219;Bajaj Finserv Overnight Fund - Direct Plan - Monthly - IDCW;1033.4313;17-Apr-2026
-151844;INF0QA701227;INF0QA701193;Bajaj Finserv Overnight Fund - Direct Plan - Weekly - IDCW;1033.6985;17-Apr-2026
-151852;-;INF0QA701292;Bajaj Finserv Overnight Fund - Regular Plan - Daily - IDCW;1032.8859;17-Apr-2026
-151847;INF0QA701318;INF0QA701276;Bajaj Finserv Overnight Fund - Regular Plan - Fortnightly - IDCW;1034.4364;17-Apr-2026
-151851;INF0QA701250;-;Bajaj Finserv Overnight Fund - Regular Plan - Growth;1182.8666;17-Apr-2026
-151848;INF0QA701326;INF0QA701284;Bajaj Finserv Overnight Fund - Regular Plan - Monthly - IDCW;1033.1706;17-Apr-2026
-151846;INF0QA701300;INF0QA701268;Bajaj Finserv Overnight Fund - Regular Plan - Weekly - IDCW;1033.4254;17-Apr-2026
+153437;INF0QA701AE3;-;Bajaj Finserv Overnight Fund - Direct - Unclaimed less than 3 years IDCW Plan;1052.5862;19-Apr-2026
+153438;INF0QA701AF0;-;Bajaj Finserv Overnight Fund - Direct - Unclaimed less than 3 years Redemption Plan;1059.2394;19-Apr-2026
+151843;-;INF0QA701185;Bajaj Finserv Overnight Fund - Direct Plan - Daily - IDCW;1033.1412;19-Apr-2026
+151850;INF0QA701235;INF0QA701201;Bajaj Finserv Overnight Fund - Direct Plan - Fortnightly - IDCW;1034.9723;19-Apr-2026
+151849;INF0QA701177;-;Bajaj Finserv Overnight Fund - Direct Plan - Growth;1184.8362;19-Apr-2026
+151845;INF0QA701243;INF0QA701219;Bajaj Finserv Overnight Fund - Direct Plan - Monthly - IDCW;1033.7123;19-Apr-2026
+151844;INF0QA701227;INF0QA701193;Bajaj Finserv Overnight Fund - Direct Plan - Weekly - IDCW;1033.9789;19-Apr-2026
+151852;-;INF0QA701292;Bajaj Finserv Overnight Fund - Regular Plan - Daily - IDCW;1032.8859;19-Apr-2026
+151847;INF0QA701318;INF0QA701276;Bajaj Finserv Overnight Fund - Regular Plan - Fortnightly - IDCW;1034.7188;19-Apr-2026
+151851;INF0QA701250;-;Bajaj Finserv Overnight Fund - Regular Plan - Growth;1183.1841;19-Apr-2026
+151848;INF0QA701326;INF0QA701284;Bajaj Finserv Overnight Fund - Regular Plan - Monthly - IDCW;1033.4489;19-Apr-2026
+151846;INF0QA701300;INF0QA701268;Bajaj Finserv Overnight Fund - Regular Plan - Weekly - IDCW;1033.7046;19-Apr-2026
 146190;INF194KB1462;INF194KB1470;BANDHAN Overnight Fund - Direct Plan - Daily IDCW;1000.0098;17-Apr-2026
 146191;INF194KB1447;-;BANDHAN Overnight Fund - Direct Plan - Growth;1439.8317;17-Apr-2026
 146183;INF194KB1496;INF194KB1504;BANDHAN Overnight Fund - Direct Plan - Monthly IDCW;1003.4823;17-Apr-2026
@@ -2537,16 +2537,16 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 149414;-;-;BANK OF INDIA Overnight Fund Unclaimed IDCW Plan - Up to 3 Years;1289.5057;19-Apr-2026
 149415;-;-;BANK OF INDIA Overnight Fund Unclaimed Redemption Plan - Greater than 3 Years;1000.0;19-Apr-2026
 149413;-;-;BANK OF INDIA Overnight Fund Unclaimed Redemption Plan - Upto 3 Years;1289.7891;19-Apr-2026
-147197;-;INF955L01HW2;Baroda BNP Paribas Overnight Fund - Direct Plan - Daily IDCW;1000.0028;17-Apr-2026
-147196;INF955L01HV4;-;Baroda BNP Paribas Overnight Fund - Direct Plan - Growth;1418.0285;17-Apr-2026
-147195;-;INF955L01HX0;Baroda BNP Paribas Overnight Fund - Direct Plan - Weekly IDCW;1000.3729;17-Apr-2026
-149988;-;-;Baroda BNP Paribas Overnight Fund - Plan C - Unclaimed IDCW - Greater than 3 years;1000.0;17-Apr-2026
-149991;-;-;Baroda BNP Paribas Overnight Fund - Plan C - Unclaimed IDCW - Up to 3 years;1272.2939;17-Apr-2026
-149990;-;-;Baroda BNP Paribas Overnight Fund - Plan C - Unclaimed Redemption - Greater than 3 years;1000.0;17-Apr-2026
-149989;-;-;Baroda BNP Paribas Overnight Fund - Plan C - Unclaimed Redemption - Up to 3 years;1272.2642;17-Apr-2026
-147194;-;INF955L01HT8;Baroda BNP Paribas Overnight Fund - Regular Plan - Daily IDCW;1000.0018;17-Apr-2026
-147193;INF955L01HS0;-;Baroda BNP Paribas Overnight Fund - Regular Plan - Growth;1411.4744;17-Apr-2026
-147198;-;INF955L01HU6;Baroda BNP Paribas Overnight Fund - Regular Plan - Weekly IDCW;1000.8533;17-Apr-2026
+147197;-;INF955L01HW2;Baroda BNP Paribas Overnight Fund - Direct Plan - Daily IDCW;1000.0028;19-Apr-2026
+147196;INF955L01HV4;-;Baroda BNP Paribas Overnight Fund - Direct Plan - Growth;1418.413;19-Apr-2026
+147195;-;INF955L01HX0;Baroda BNP Paribas Overnight Fund - Direct Plan - Weekly IDCW;1000.6442;19-Apr-2026
+149988;-;-;Baroda BNP Paribas Overnight Fund - Plan C - Unclaimed IDCW - Greater than 3 years;1000.0;19-Apr-2026
+149991;-;-;Baroda BNP Paribas Overnight Fund - Plan C - Unclaimed IDCW - Up to 3 years;1272.6388;19-Apr-2026
+149990;-;-;Baroda BNP Paribas Overnight Fund - Plan C - Unclaimed Redemption - Greater than 3 years;1000.0;19-Apr-2026
+149989;-;-;Baroda BNP Paribas Overnight Fund - Plan C - Unclaimed Redemption - Up to 3 years;1272.6091;19-Apr-2026
+147194;-;INF955L01HT8;Baroda BNP Paribas Overnight Fund - Regular Plan - Daily IDCW;1000.0018;19-Apr-2026
+147193;INF955L01HS0;-;Baroda BNP Paribas Overnight Fund - Regular Plan - Growth;1411.8534;19-Apr-2026
+147198;-;INF955L01HU6;Baroda BNP Paribas Overnight Fund - Regular Plan - Weekly IDCW;1001.122;19-Apr-2026
 147532;-;INF760K01JN3;CANARA ROBECO OVERNIGHT FUND - DIRECT PLAN - DAILY IDCW (Reinvestment);1001.0012;19-Apr-2026
 147531;INF760K01JM5;-;CANARA ROBECO OVERNIGHT FUND - DIRECT PLAN - GROWTH OPTION;1393.951;19-Apr-2026
 147533;-;INF760K01JP8;CANARA ROBECO OVERNIGHT FUND - REGULAR PLAN - DAILY IDCW (Reinvestment);1001.0;19-Apr-2026
@@ -2561,22 +2561,22 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 149312;-;-;Unclaimed IDCW - Upto 3 years (Invested in DSP Overnight Fund);12.882;17-Apr-2026
 149311;-;-;Unclaimed Redemption - Beyond 3 years (Invested in DSP Overnight Fund);10.0;17-Apr-2026
 149310;-;-;Unclaimed Redemption - Upto 3 years (Invested in DSP Overnight Fund);12.882;17-Apr-2026
-147551;INF754K01KD5;INF754K01KC7;Edelweiss Overnight Fund - Direct Plan - Annual - IDCW Option;1396.9655;17-Apr-2026
-147557;-;INF754K01JW7;Edelweiss Overnight Fund - Direct Plan - Daily - IDCW Option;1000.2147;17-Apr-2026
-147550;INF754K01JZ0;INF754K01JY3;Edelweiss Overnight Fund - Direct Plan - Fortnightly - IDCW Option;1378.6301;17-Apr-2026
-147570;INF754K01JV9;-;Edelweiss Overnight Fund - Direct Plan - Growth;1396.5024;17-Apr-2026
-147554;INF754K01KB9;INF754K01KA1;Edelweiss Overnight Fund - Direct Plan - Monthly - IDCW Option;1060.9913;17-Apr-2026
-147558;-;INF754K01JX5;Edelweiss Overnight Fund - Direct Plan - Weekly - IDCW Option;1378.8876;17-Apr-2026
-147556;INF754K01KM6;INF754K01KL8;Edelweiss Overnight Fund - Regular Plan - Annual - IDCW Option;1391.3611;17-Apr-2026
-147552;-;INF754K01KF0;Edelweiss Overnight Fund - Regular Plan - Daily - IDCW Option;1008.367;17-Apr-2026
-147549;INF754K01KI4;INF754K01KH6;Edelweiss Overnight Fund - Regular Plan - Fortnightly - IDCW Option;1095.6117;17-Apr-2026
-147569;INF754K01KE3;-;Edelweiss Overnight Fund - Regular Plan - Growth;1391.35;17-Apr-2026
-147555;INF754K01KK0;INF754K01KJ2;Edelweiss Overnight Fund - Regular Plan - Monthly - IDCW Option;1007.6837;17-Apr-2026
-147553;-;INF754K01KG8;Edelweiss Overnight Fund - Regular Plan - Weekly - IDCW Option;1016.9623;17-Apr-2026
-149476;-;-;Edelweiss Overnight Fund - Unclaimed IDCW Plan - Above 3 years;1000.0;17-Apr-2026
-149477;-;-;Edelweiss Overnight Fund - Unclaimed IDCW Plan - Upto 3 years;1277.7244;17-Apr-2026
-149479;-;-;Edelweiss Overnight Fund - Unclaimed Redemption Plan - Above 3 years;1000.0;17-Apr-2026
-149478;-;-;Edelweiss Overnight Fund - Unclaimed Redemption Plan - Upto 3 years;1277.7227;17-Apr-2026
+147551;INF754K01KD5;INF754K01KC7;Edelweiss Overnight Fund - Direct Plan - Annual - IDCW Option;1397.1545;18-Apr-2026
+147557;-;INF754K01JW7;Edelweiss Overnight Fund - Direct Plan - Daily - IDCW Option;1000.2151;18-Apr-2026
+147550;INF754K01JZ0;INF754K01JY3;Edelweiss Overnight Fund - Direct Plan - Fortnightly - IDCW Option;1378.7671;18-Apr-2026
+147570;INF754K01JV9;-;Edelweiss Overnight Fund - Direct Plan - Growth;1396.6915;18-Apr-2026
+147554;INF754K01KB9;INF754K01KA1;Edelweiss Overnight Fund - Direct Plan - Monthly - IDCW Option;1061.1349;18-Apr-2026
+147558;-;INF754K01JX5;Edelweiss Overnight Fund - Direct Plan - Weekly - IDCW Option;1379.0751;18-Apr-2026
+147556;INF754K01KM6;INF754K01KL8;Edelweiss Overnight Fund - Regular Plan - Annual - IDCW Option;1391.5475;18-Apr-2026
+147552;-;INF754K01KF0;Edelweiss Overnight Fund - Regular Plan - Daily - IDCW Option;1008.367;18-Apr-2026
+147549;INF754K01KI4;INF754K01KH6;Edelweiss Overnight Fund - Regular Plan - Fortnightly - IDCW Option;1095.7589;18-Apr-2026
+147569;INF754K01KE3;-;Edelweiss Overnight Fund - Regular Plan - Growth;1391.5365;18-Apr-2026
+147555;INF754K01KK0;INF754K01KJ2;Edelweiss Overnight Fund - Regular Plan - Monthly - IDCW Option;1007.8187;18-Apr-2026
+147553;-;INF754K01KG8;Edelweiss Overnight Fund - Regular Plan - Weekly - IDCW Option;1017.0986;18-Apr-2026
+149476;-;-;Edelweiss Overnight Fund - Unclaimed IDCW Plan - Above 3 years;1000.0;18-Apr-2026
+149477;-;-;Edelweiss Overnight Fund - Unclaimed IDCW Plan - Upto 3 years;1277.8973;18-Apr-2026
+149479;-;-;Edelweiss Overnight Fund - Unclaimed Redemption Plan - Above 3 years;1000.0;18-Apr-2026
+149478;-;-;Edelweiss Overnight Fund - Unclaimed Redemption Plan - Upto 3 years;1277.8957;18-Apr-2026
 147215;-;INF090I01SM2;Franklin India Overnight Fund - Daily Dividend Plan - Daily - IDCW;1000.0001;17-Apr-2026
 147212;-;INF090I01ST7;Franklin India Overnight Fund - Direct Daily Dividend Plan - Daily - IDCW;1000.0007;17-Apr-2026
 147211;INF090I01SR1;INF090I01SQ3;Franklin India Overnight Fund - Direct Weekly Dividend Plan - Weekly - IDCW;1000.6715;17-Apr-2026
@@ -2663,28 +2663,28 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 147712;-;INF00XX01499;ITI Overnight Fund - Regular Plan - Weekly IDCW Option;1001.3881;17-Apr-2026
 153650;INF22M001036;-;JioBlackRock Overnight Fund - Direct Plan - Growth Option;1042.4896;17-Apr-2026
 154070;-;-;JioBlackRock Overnight Fund - Unclaimed Redemption - Upto 3 years - Growth Option;1019.4137;17-Apr-2026
-147838;-;INF192K01LY2;JM Overnight Fund (Direct) - Daily IDCW;1000.0;17-Apr-2026
-147835;INF192K01LZ9;INF192K01MA0;JM Overnight Fund (Direct) - Weekly IDCW;1000.3825;17-Apr-2026
-147839;-;INF192K01LU0;JM Overnight Fund (Regular) - Daily IDCW;1000.0;17-Apr-2026
-147836;INF192K01LX4;-;JM Overnight Fund (Regular) - Growth;1362.2292;17-Apr-2026
-147834;INF192K01LV8;INF192K01LW6;JM Overnight Fund (Regular) - Weekly IDCW;1000.3731;17-Apr-2026
-147837;INF192K01MB8;-;JM Overnight Fund - (Direct) - Growth;1368.3013;17-Apr-2026
-149828;INF192K01MJ1;-;JM Overnight Fund - (Direct) - Unclaimed IDCW - Growth Plan;1374.5864;17-Apr-2026
-149827;INF192K01ML7;-;JM Overnight Fund - (Direct) - Unclaimed IDCW I.E.F. - Growth Plan;1073.9936;17-Apr-2026
-149829;INF192K01MI3;-;JM Overnight Fund - (Direct) - Unclaimed Redemption - Growth Plan;1368.3213;17-Apr-2026
-149826;INF192K01MK9;-;JM Overnight Fund - (Direct) - Unclaimed Redemption I.E.F. - Growth Plan;1073.9936;17-Apr-2026
+147838;-;INF192K01LY2;JM Overnight Fund (Direct) - Daily IDCW;1000.0;18-Apr-2026
+147835;INF192K01LZ9;INF192K01MA0;JM Overnight Fund (Direct) - Weekly IDCW;1000.5115;18-Apr-2026
+147839;-;INF192K01LU0;JM Overnight Fund (Regular) - Daily IDCW;1000.0;18-Apr-2026
+147836;INF192K01LX4;-;JM Overnight Fund (Regular) - Growth;1362.4022;18-Apr-2026
+147834;INF192K01LV8;INF192K01LW6;JM Overnight Fund (Regular) - Weekly IDCW;1000.5001;18-Apr-2026
+147837;INF192K01MB8;-;JM Overnight Fund - (Direct) - Growth;1368.4777;18-Apr-2026
+149828;INF192K01MJ1;-;JM Overnight Fund - (Direct) - Unclaimed IDCW - Growth Plan;1374.7582;18-Apr-2026
+149827;INF192K01ML7;-;JM Overnight Fund - (Direct) - Unclaimed IDCW I.E.F. - Growth Plan;1073.9936;18-Apr-2026
+149829;INF192K01MI3;-;JM Overnight Fund - (Direct) - Unclaimed Redemption - Growth Plan;1368.4976;18-Apr-2026
+149826;INF192K01MK9;-;JM Overnight Fund - (Direct) - Unclaimed Redemption I.E.F. - Growth Plan;1073.9936;18-Apr-2026
 146141;INF174KA1BF9;-;Kotak Overnight Fund -Direct Plan-Growth Option;1440.4332;17-Apr-2026
 146142;INF174KA1BC6;-;Kotak Overnight Fund -Regular plan-Growth Option;1430.9674;17-Apr-2026
 146140;-;INF174KA1BE2;Kotak Overnight Fund-Direct Plan- Daily Reinvestment of Income Distribution cum capital withdrawal option;1003.6055;17-Apr-2026
 146138;-;INF174KA1BB8;Kotak Overnight Fund-Regular Plan- Daily Reinvestment of Income Distribution cum capital withdrawal option;1004.7568;17-Apr-2026
-147516;-;INF767K01QG7;LIC MF Overnight Fund-Direct Plan-Daily IDCW;1108.1306;17-Apr-2026
-147515;INF767K01QI3;-;LIC MF Overnight Fund-Direct Plan-Growth;1399.4669;17-Apr-2026
-147513;INF767K01QE2;INF767K01QF9;LIC MF Overnight Fund-Direct Plan-IDCW;1399.6339;17-Apr-2026
-147514;-;INF767K01QH5;LIC MF Overnight Fund-Direct Plan-Weekly IDCW;1091.7662;17-Apr-2026
-147517;-;INF767K01QB8;LIC MF Overnight Fund-Regular Plan-Daily IDCW;1106.3366;17-Apr-2026
-147519;INF767K01QD4;-;LIC MF Overnight Fund-Regular Plan-Growth;1387.9083;17-Apr-2026
-147512;INF767K01PZ9;INF767K01QA0;LIC MF Overnight Fund-Regular Plan-IDCW;1227.5922;17-Apr-2026
-147518;-;INF767K01QC6;LIC MF Overnight Fund-Regular Plan-Weekly IDCW;1179.7616;17-Apr-2026
+147516;-;INF767K01QG7;LIC MF Overnight Fund-Direct Plan-Daily IDCW;1108.4347;19-Apr-2026
+147515;INF767K01QI3;-;LIC MF Overnight Fund-Direct Plan-Growth;1399.8442;19-Apr-2026
+147513;INF767K01QE2;INF767K01QF9;LIC MF Overnight Fund-Direct Plan-IDCW;1400.0111;19-Apr-2026
+147514;-;INF767K01QH5;LIC MF Overnight Fund-Direct Plan-Weekly IDCW;1092.0617;19-Apr-2026
+147517;-;INF767K01QB8;LIC MF Overnight Fund-Regular Plan-Daily IDCW;1106.6326;19-Apr-2026
+147519;INF767K01QD4;-;LIC MF Overnight Fund-Regular Plan-Growth;1388.2789;19-Apr-2026
+147512;INF767K01PZ9;INF767K01QA0;LIC MF Overnight Fund-Regular Plan-IDCW;1227.9205;19-Apr-2026
+147518;-;INF767K01QC6;LIC MF Overnight Fund-Regular Plan-Weekly IDCW;1180.0765;19-Apr-2026
 147563;-;INF174V01846;Mahindra Manulife Overnight Fund - Direct Plan - Daily IDCW;1401.2737;19-Apr-2026
 147564;INF174V01838;-;Mahindra Manulife Overnight Fund - Direct Plan -Growth;1397.8347;19-Apr-2026
 147566;-;INF174V01820;Mahindra Manulife Overnight Fund - Regular Plan - Daily IDCW;1231.2524;19-Apr-2026
@@ -2712,12 +2712,12 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 150369;INF0J8L01081;-;NJ Overnight Fund - Direct Plan - Growth Option;1249.3532;17-Apr-2026
 150368;INF0J8L01073;-;NJ Overnight Fund - Regular Plan - Growth Option;1244.6978;17-Apr-2026
 152116;-;-;NJ Overnight Fund - Unclaimed Redemption Plan - Upto 3 Years;1085.2304;17-Apr-2026
-147605;-;INF663L01T35;PGIM India Overnight Fund - Direct Plan - Daily Dividend Option;1000.0087;17-Apr-2026
-147606;INF663L01T01;-;PGIM India Overnight Fund - Direct Plan - Growth Option;1391.9056;17-Apr-2026
-147608;INF663L01T19;INF663L01T27;PGIM India Overnight Fund - Direct Plan - Weekly Dividend Option;1001.64;17-Apr-2026
-147609;-;INF663L01T76;PGIM India Overnight Fund - Regular Plan - Daily Dividend Option;1000.0;17-Apr-2026
-147607;INF663L01T50;INF663L01T68;PGIM India Overnight Fund - Regular Plan - Weekly Dividend Option;1007.9559;17-Apr-2026
-147600;INF663L01T43;-;PGIM India Overnight Fund - Regular Plan- Growth Option;1385.7365;17-Apr-2026
+147605;-;INF663L01T35;PGIM India Overnight Fund - Direct Plan - Daily Dividend Option;1000.0087;18-Apr-2026
+147606;INF663L01T01;-;PGIM India Overnight Fund - Direct Plan - Growth Option;1392.0898;18-Apr-2026
+147608;INF663L01T19;INF663L01T27;PGIM India Overnight Fund - Direct Plan - Weekly Dividend Option;999.9571;18-Apr-2026
+147609;-;INF663L01T76;PGIM India Overnight Fund - Regular Plan - Daily Dividend Option;1000.0;18-Apr-2026
+147607;INF663L01T50;INF663L01T68;PGIM India Overnight Fund - Regular Plan - Weekly Dividend Option;1007.1609;18-Apr-2026
+147600;INF663L01T43;-;PGIM India Overnight Fund - Regular Plan- Growth Option;1385.9189;18-Apr-2026
 151190;INF966L01AZ7;-;quant Overnight Fund - Growth Option - Direct Plan;12.3386;17-Apr-2026
 151195;INF966L01BC4;-;quant Overnight Fund - Growth Option - Regular Plan;12.2958;17-Apr-2026
 151193;INF966L01BA8;INF966L01BB6;quant Overnight Fund - IDCW Option - Direct Plan;12.3436;17-Apr-2026
@@ -2735,14 +2735,14 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 114297;-;INF200K01LN6;SBI Overnight Fund - Regular Plan - Daily Income Distribution cum Capital Withdrawal Option (IDCW);1356.4084;17-Apr-2026
 101206;INF200K01LQ9;-;SBI OVERNIGHT FUND - REGULAR PLAN - GROWTH;4330.838;17-Apr-2026
 103140;INF200K01LO4;INF200K01LP1;SBI Overnight Fund - Regular Plan - Weekly Income Distribution cum Capital Withdrawal Option (IDCW);1384.9861;17-Apr-2026
-150562;INF680P01323;-;Shriram Overnight Fund -  Direct Growth;12.4688;18-Apr-2026
+150562;INF680P01323;-;Shriram Overnight Fund -  Direct Growth;12.4705;19-Apr-2026
 150566;INF680P01281;INF680P01299;Shriram Overnight Fund -  Regular Fortnightly IDCW;10.0049;02-Feb-2023
-150561;-;INF680P01331;Shriram Overnight Fund - Direct Daily IDCW;10.0001;18-Apr-2026
+150561;-;INF680P01331;Shriram Overnight Fund - Direct Daily IDCW;10.0001;19-Apr-2026
 150564;INF680P01364;INF680P01372;Shriram Overnight Fund - Direct Fortnightly IDCW;10.0046;22-Sep-2022
-150567;INF680P01380;INF680P01398;Shriram Overnight Fund - Direct Monthly IDCW;10.0039;18-Apr-2026
-150558;-;INF680P01257;Shriram Overnight Fund - Regular Daily IDCW;10.0001;18-Apr-2026
-150565;INF680P01232;-;Shriram Overnight Fund - Regular Growth;12.431;18-Apr-2026
-150560;INF680P01307;INF680P01315;Shriram Overnight Fund - Regular Monthly IDCW;10.0043;18-Apr-2026
+150567;INF680P01380;INF680P01398;Shriram Overnight Fund - Direct Monthly IDCW;10.0053;19-Apr-2026
+150558;-;INF680P01257;Shriram Overnight Fund - Regular Daily IDCW;10.0001;19-Apr-2026
+150565;INF680P01232;-;Shriram Overnight Fund - Regular Growth;12.4326;19-Apr-2026
+150560;INF680P01307;INF680P01315;Shriram Overnight Fund - Regular Monthly IDCW;10.0056;19-Apr-2026
 150559;INF680P01265;INF680P01273;Shriram Overnight Fund - Regular Weekly IDCW;10.0035;26-Jun-2024
 146964;INF903JA1HJ9;-;Sundaram Overnight Fund Direct Plan - Daily Reinvestment of Income Distribution cum Capital Withdrawal (IDCW);1000.03;13-Sep-2024
 146956;INF903JA1HL5;-;Sundaram Overnight Fund Direct Plan - Fortnightly Reinvestment of Income Distribution cum Capital Withdrawal (IDCW);1067.4522;13-Sep-2024
@@ -2774,13 +2774,13 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 149452;-;-;Union Overnight Fund - Unclaimed Amounts Plan - IDCW Upto 3 years;1280.2644;17-Apr-2026
 149453;-;-;Union Overnight Fund - Unclaimed Amounts Plan - Redemption Beyond 3 years;1000.0;17-Apr-2026
 149454;-;-;Union Overnight Fund - Unclaimed Amounts Plan - Redemption Upto 3 years;1279.9809;17-Apr-2026
-100814;INF789F01604;-;UTI - Overnight  Fund - Regular Plan - Growth Option;3654.4487;17-Apr-2026
-120785;INF789FB1S71;-;UTI - Overnight Fund - Direct Plan - Growth Option;3695.5682;17-Apr-2026
-124266;-;INF789FB1S89;UTI Overnight Fund - Direct Plan - Daily IDCW;1371.6621;17-Apr-2026
-120786;INF789FB1T05;INF789FB1S97;UTI Overnight Fund - Direct Plan - Periodic IDCW;1939.4856;17-Apr-2026
-124265;-;INF789FB1T13;UTI Overnight Fund - Regular Plan - Daily IDCW;1370.8617;17-Apr-2026
-100813;INF789F01588;INF789F01596;UTI Overnight Fund - Regular Plan - Periodic IDCW;1882.6448;17-Apr-2026
-153436;INF0R8F01075;-;Zerodha Overnight Fund - Direct Plan - Growth Option;10.5652;17-Apr-2026
+100814;INF789F01604;-;UTI - Overnight  Fund - Regular Plan - Growth Option;3654.94;18-Apr-2026
+120785;INF789FB1S71;-;UTI - Overnight Fund - Direct Plan - Growth Option;3696.0709;18-Apr-2026
+124266;-;INF789FB1S89;UTI Overnight Fund - Direct Plan - Daily IDCW;1371.6621;18-Apr-2026
+120786;INF789FB1T05;INF789FB1S97;UTI Overnight Fund - Direct Plan - Periodic IDCW;1939.7494;18-Apr-2026
+124265;-;INF789FB1T13;UTI Overnight Fund - Regular Plan - Daily IDCW;1370.8617;18-Apr-2026
+100813;INF789F01588;INF789F01596;UTI Overnight Fund - Regular Plan - Periodic IDCW;1882.8979;18-Apr-2026
+153436;INF0R8F01075;-;Zerodha Overnight Fund - Direct Plan - Growth Option;10.568;19-Apr-2026
 119496;INF209KA1KQ6;INF209K01XL6;Aditya Birla Sun Life Short Term Fund - DIRECT - IDCW;10.8406;17-Apr-2026
 119498;INF209K01XK8;-;Aditya Birla Sun Life Short Term Fund - Growth - Direct Plan;53.897;17-Apr-2026
 101844;INF209K01942;-;Aditya Birla Sun Life Short Term Fund - Growth - Regular Plan;49.5652;17-Apr-2026
@@ -3333,10 +3333,10 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 119768;INF174K01LA0;INF174K01LB8;Kotak Contra Fund - Direct Plan - IDCW -Payout & Re-investment of Income Distribution cum capital withdrawal option- Direct;63.32;17-Apr-2026
 103040;INF174K01245;-;Kotak Contra Fund - Regular Plan - Growth;149.457;17-Apr-2026
 103039;INF174K01260;INF174K01252;Kotak Contra Fund - Regular Plan - IDCW - Payout & Re-investment of Income Distribution cum capital withdrawal option;51.517;17-Apr-2026
-119835;INF200K01RA0;-;SBI CONTRA FUND - DIRECT PLAN - GROWTH;408.3402;16-Apr-2026
-119724;INF200K01QY2;INF200K01QZ9;SBI Contra Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);86.1775;16-Apr-2026
-100915;INF200K01347;INF200K01354;SBI Contra Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);64.4546;16-Apr-2026
-102414;INF200K01362;-;SBI CONTRA FUND - REGULAR PLAN -GROWTH;371.6988;16-Apr-2026
+119835;INF200K01RA0;-;SBI CONTRA FUND - DIRECT PLAN - GROWTH;411.7989;17-Apr-2026
+119724;INF200K01QY2;INF200K01QZ9;SBI Contra Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);86.9075;17-Apr-2026
+100915;INF200K01347;INF200K01354;SBI Contra Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);64.9992;17-Apr-2026
+102414;INF200K01362;-;SBI CONTRA FUND - REGULAR PLAN -GROWTH;374.8396;17-Apr-2026
 119507;INF209K01WA1;-;Aditya Birla Sun Life Dividend Yield Fund - Growth - Direct Plan;508.45;17-Apr-2026
 101738;INF209K01405;-;Aditya Birla Sun Life Dividend Yield Fund - Growth - Regular Plan;460.1;17-Apr-2026
 119506;INF209K01Q55;INF209K01WB9;Aditya Birla Sun Life Dividend Yield Fund -DIRECT - IDCW;47.78;17-Apr-2026
@@ -3720,10 +3720,10 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 109831;INF966L01432;INF966L01440;quant Flexi Cap Fund - IDCW Option - Regular Plan;72.0232;17-Apr-2026
 149450;INF0K1H01024;-;Samco Flexi Cap Fund - Direct Plan - Growth Option;10.22;17-Apr-2026
 149449;INF0K1H01016;-;Samco Flexi Cap Fund - Regular Plan - Growth Option;9.61;17-Apr-2026
-119718;INF200K01UG1;-;SBI Flexicap Fund - DIRECT PLAN - Growth Option;119.9033;16-Apr-2026
-119717;INF200K01UE6;INF200K01UF3;SBI Flexicap Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);59.9312;16-Apr-2026
-103216;INF200K01230;INF200K01248;SBI Flexicap Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);47.7764;16-Apr-2026
-103215;INF200K01222;-;SBI Flexicap Fund - REGULAR PLAN -Growth Option;106.6969;16-Apr-2026
+119718;INF200K01UG1;-;SBI Flexicap Fund - DIRECT PLAN - Growth Option;120.6377;17-Apr-2026
+119717;INF200K01UE6;INF200K01UF3;SBI Flexicap Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);60.2983;17-Apr-2026
+103216;INF200K01230;INF200K01248;SBI Flexicap Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);48.068;17-Apr-2026
+103215;INF200K01222;-;SBI Flexicap Fund - REGULAR PLAN -Growth Option;107.3481;17-Apr-2026
 144905;INF680P01109;-;Shriram Flexi Cap Fund - Direct Growth;22.3204;17-Apr-2026
 144906;INF680P01117;INF680P01125;Shriram Flexi Cap Fund - Direct-IDCW;22.0983;17-Apr-2026
 144902;INF680P01075;-;Shriram Flexi Cap Fund - Regular Growth;19.5356;17-Apr-2026
@@ -3858,10 +3858,10 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 120834;INF966L01853;-;quant Focused Fund - Growth Option-Direct Plan;92.593;17-Apr-2026
 120835;INF966L01838;INF966L01846;quant Focused Fund - IDCW Option - Direct Plan;54.1271;17-Apr-2026
 109274;INF966L01358;INF966L01366;quant Focused Fund - IDCW Option - Regular Plan;61.3883;17-Apr-2026
-119834;INF200K01RH5;INF200K01RI3;SBI Focused Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);102.8924;16-Apr-2026
-119727;INF200K01RJ1;-;SBI FOCUSED FUND - DIRECT PLAN -GROWTH;422.2263;16-Apr-2026
-102765;INF200K01388;INF200K01396;SBI Focused Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);68.3878;16-Apr-2026
-102756;INF200K01370;-;SBI FOCUSED FUND - REGULAR PLAN -GROWTH;373.8905;16-Apr-2026
+119834;INF200K01RH5;INF200K01RI3;SBI Focused Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);103.875;17-Apr-2026
+119727;INF200K01RJ1;-;SBI FOCUSED FUND - DIRECT PLAN -GROWTH;426.2584;17-Apr-2026
+102765;INF200K01388;INF200K01396;SBI Focused Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);69.0396;17-Apr-2026
+102756;INF200K01370;-;SBI FOCUSED FUND - REGULAR PLAN -GROWTH;377.4536;17-Apr-2026
 149533;INF173K01EK6;-;Sundaram Focused Fund (Formerly Known as Principal Focused Multicap Fund)- Direct Plan - Growth Option;174.023;17-Apr-2026
 149534;INF173K01EM2;INF173K01EL4;Sundaram Focused Fund (Formerly Known as Principal Focused Multicap Fund)- Direct Plan - Income Distribution CUM Capital Withdrawal Option (IDCW);40.7839;17-Apr-2026
 149531;INF173K01197;INF173K01205;Sundaram Focused Fund (Formerly Known as Principal Focused Multicap Fund)- Income Distribution CUM Capital Withdrawal Option (IDCW);37.1998;17-Apr-2026
@@ -4003,10 +4003,10 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 104514;INF966L01325;INF966L01333;quant Large & Mid Cap Fund - IDCW Option - Regular Plan;68.7259;17-Apr-2026
 153534;INF0K1H01271;-;Samco Large & Mid Cap Fund - Direct Plan - Growth Option;9.12;17-Apr-2026
 153533;INF0K1H01289;-;Samco Large & Mid Cap Fund - Regular Plan - Growth Option;9.0;17-Apr-2026
-119720;INF200K01UH9;INF200K01UI7;SBI Large & Midcap Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);358.9129;16-Apr-2026
-101530;INF200K01289;INF200K01297;SBI Large & Midcap Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);285.0096;16-Apr-2026
-119721;INF200K01UJ5;-;SBI LARGE & MIDCAP FUND -DIRECT PLAN -Growth;688.6016;16-Apr-2026
-103024;INF200K01305;-;SBI LARGE & MIDCAP FUND- REGULAR PLAN -Growth;630.8507;16-Apr-2026
+119720;INF200K01UH9;INF200K01UI7;SBI Large & Midcap Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);362.294;17-Apr-2026
+101530;INF200K01289;INF200K01297;SBI Large & Midcap Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);287.6884;17-Apr-2026
+119721;INF200K01UJ5;-;SBI LARGE & MIDCAP FUND -DIRECT PLAN -Growth;695.0885;17-Apr-2026
+103024;INF200K01305;-;SBI LARGE & MIDCAP FUND- REGULAR PLAN -Growth;636.7802;17-Apr-2026
 119565;INF903J01PP3;INF903J01PQ1;Sundaram Large and Midcap Direct Plan - Income Distribution cum Capital Withdrawal (IDCW);33.2885;17-Apr-2026
 119566;INF903J01PR9;-;Sundaram Large and Midcap Fund Direct Plan - Growth;96.4974;17-Apr-2026
 105001;INF903J01DT1;-;Sundaram Large and Midcap Fund Regular Plan - Growth;85.1127;17-Apr-2026
@@ -5262,10 +5262,10 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 119709;INF200K01SE0;-;SBI ESG Exclusionary Strategy Fund - Direct Plan -Growth;259.8636;17-Apr-2026
 104523;INF200K01214;-;SBI ESG Exclusionary Strategy Fund - Regular Plan - Growth;236.119;17-Apr-2026
 101295;INF200K01198;INF200K01206;SBI ESG Exclusionary Strategy Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);73.845;17-Apr-2026
-119782;INF200K01UN7;INF200K01UO5;SBI Healthcare Opportunities Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);342.9576;16-Apr-2026
-119783;INF200K01UP2;-;SBI HEALTHCARE OPPORTUNITIES FUND - DIRECT PLAN -GROWTH;493.6271;16-Apr-2026
-100644;INF200K01453;INF200K01461;SBI Healthcare Opportunities Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);269.5037;16-Apr-2026
-102823;INF200K01446;-;SBI HEALTHCARE OPPORTUNITIES FUND - REGULAR PLAN -GROWTH;427.8197;16-Apr-2026
+119782;INF200K01UN7;INF200K01UO5;SBI Healthcare Opportunities Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);345.1765;17-Apr-2026
+119783;INF200K01UP2;-;SBI HEALTHCARE OPPORTUNITIES FUND - DIRECT PLAN -GROWTH;496.8207;17-Apr-2026
+100644;INF200K01453;INF200K01461;SBI Healthcare Opportunities Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);271.2401;17-Apr-2026
+102823;INF200K01446;-;SBI HEALTHCARE OPPORTUNITIES FUND - REGULAR PLAN -GROWTH;430.5761;17-Apr-2026
 119700;INF200K01RS2;-;SBI INFRASTRUCTURE FUND -  DIRECT PLAN - GROWTH;53.5317;17-Apr-2026
 106096;INF200K01CT2;-;SBI INFRASTRUCTURE FUND -  REGULAR PLAN - GROWTH;49.2531;17-Apr-2026
 119695;INF200K01RQ6;INF200K01RR4;SBI Infrastructure Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);47.3764;17-Apr-2026
@@ -5290,10 +5290,10 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 153151;INF200KB1514;INF200KB1522;SBI Quant Fund- Direct Plan- Income Distribution cum Capital Withdrawal Option (IDCW);10.2392;17-Apr-2026
 153153;INF200KB1472;-;SBI Quant Fund- Regular Plan- Growth;10.0854;17-Apr-2026
 153152;INF200KB1480;INF200KB1498;SBI Quant Fund- Regular Plan- Income Distribution Cum Capital Withdrawal Option (IDCW);10.0854;17-Apr-2026
-120578;INF200K01RV6;-;SBI TECHNOLOGY OPPORTUNITIES FUND - DIRECT PLAN - GROWTH;222.0954;16-Apr-2026
-119731;INF200K01RT0;INF200K01RU8;SBI Technology Opportunities Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);157.7467;16-Apr-2026
-120577;INF200K01VS4;-;SBI TECHNOLOGY OPPORTUNITIES FUND - REGULAR PLAN - GROWTH;193.5533;16-Apr-2026
-100643;INF200K01420;INF200K01438;SBI Technology Opportunities Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);116.5551;16-Apr-2026
+120578;INF200K01RV6;-;SBI TECHNOLOGY OPPORTUNITIES FUND - DIRECT PLAN - GROWTH;222.7062;17-Apr-2026
+119731;INF200K01RT0;INF200K01RU8;SBI Technology Opportunities Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);158.1806;17-Apr-2026
+120577;INF200K01VS4;-;SBI TECHNOLOGY OPPORTUNITIES FUND - REGULAR PLAN - GROWTH;194.0805;17-Apr-2026
+100643;INF200K01420;INF200K01438;SBI Technology Opportunities Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);116.8726;17-Apr-2026
 153076;INF680P01455;-;Shriram Multi Sector Rotation Fund - Direct Plan Growth Option;7.9362;17-Apr-2026
 153077;INF680P01463;-;Shriram Multi Sector Rotation Fund - Regular Plan Growth Option;7.7557;17-Apr-2026
 152677;INF903JA1LQ6;-;Sundaram Business Cycle Fund Direct Plan Growth;10.4456;17-Apr-2026
@@ -6580,10 +6580,10 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 144487;INF789F1A835;INF789F1A827;UTI Equity Savings Fund - Regular Plan - Quarterly IDCW;18.8604;17-Apr-2026
 153355;INF03VN01AB7;-;WhiteOak Capital Equity Savings Fund Direct Plan Growth;11.417;17-Apr-2026
 153356;INF03VN01AC5;-;WhiteOak Capital Equity Savings Fund Regular Plan Growth;11.233;17-Apr-2026
-153774;INF579M01BM2;-;360 ONE Multi Asset Allocation Fund - Direct Plan - Growth;12.1063;16-Apr-2026
-153773;INF579M01BN0;INF579M01BO8;360 ONE Multi Asset Allocation Fund - Direct Plan - IDCW;12.1063;16-Apr-2026
-153772;INF579M01BJ8;-;360 ONE Multi Asset Allocation Fund - Regular Plan - Growth;11.9797;16-Apr-2026
-153775;INF579M01BK6;INF579M01BL4;360 ONE Multi Asset Allocation Fund - Regular Plan - IDCW;11.9797;16-Apr-2026
+153774;INF579M01BM2;-;360 ONE Multi Asset Allocation Fund - Direct Plan - Growth;12.1237;17-Apr-2026
+153773;INF579M01BN0;INF579M01BO8;360 ONE Multi Asset Allocation Fund - Direct Plan - IDCW;12.1237;17-Apr-2026
+153772;INF579M01BJ8;-;360 ONE Multi Asset Allocation Fund - Regular Plan - Growth;11.9964;17-Apr-2026
+153775;INF579M01BK6;INF579M01BL4;360 ONE Multi Asset Allocation Fund - Regular Plan - IDCW;11.9964;17-Apr-2026
 151307;INF209KB15R9;-;Aditya Birla Sun Life Multi Asset Allocation Fund-Direct Growth;17.2751;17-Apr-2026
 151308;INF209KB16R7;INF209KB17R5;Aditya Birla Sun Life Multi Asset Allocation Fund-Direct IDCW;15.6167;17-Apr-2026
 151309;INF209KB12R6;-;Aditya Birla Sun Life Multi Asset Allocation Fund-Regular Growth;16.5076;17-Apr-2026
@@ -6612,10 +6612,10 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 153468;INF760K01LJ7;INF760K01LL3;Canara Robeco Multi Asset Allocation Fund - Direct Plan - IDCW;11.06;17-Apr-2026
 153466;INF760K01LG3;-;Canara Robeco Multi Asset Allocation Fund - Regular Plan - Growth;10.91;17-Apr-2026
 153467;INF760K01LI9;INF760K01LK5;Canara Robeco Multi Asset Allocation Fund - Regular Plan - IDCW;10.91;17-Apr-2026
-154232;INF226401059;-;Capitalmind Multi Asset Allocation Fund-Direct-Growth;10.2289;16-Apr-2026
-154212;INF226401067;INF226401075;Capitalmind Multi Asset Allocation Fund-Direct-IDCW;10.2289;16-Apr-2026
-154231;INF226401083;-;Capitalmind Multi Asset Allocation Fund-Regular-Growth;10.216;16-Apr-2026
-154213;INF226401091;INF226401109;Capitalmind Multi Asset Allocation Fund-Regular-IDCW;10.216;16-Apr-2026
+154232;INF226401059;-;Capitalmind Multi Asset Allocation Fund-Direct-Growth;10.2239;17-Apr-2026
+154212;INF226401067;INF226401075;Capitalmind Multi Asset Allocation Fund-Direct-IDCW;10.2239;17-Apr-2026
+154231;INF226401083;-;Capitalmind Multi Asset Allocation Fund-Regular-Growth;10.2106;17-Apr-2026
+154213;INF226401091;INF226401109;Capitalmind Multi Asset Allocation Fund-Regular-IDCW;10.2106;17-Apr-2026
 152056;INF740KA1TE9;-;DSP Multi Asset Allocation Fund - Direct - Growth;16.5613;17-Apr-2026
 152055;INF740KA1TF6;INF740KA1TG4;DSP Multi Asset Allocation Fund - Direct - IDCW;15.7732;17-Apr-2026
 152053;INF740KA1TB5;-;DSP Multi Asset Allocation Fund - Regular - Growth;16.0057;17-Apr-2026
@@ -7174,9 +7174,9 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 129193;INF336L01IJ0;-;HSBC Multi Asset Active FOF - Growth Direct;42.8421;17-Apr-2026
 129194;INF336L01IH4;INF336L01II2;HSBC Multi Asset Active FOF Direct Plan IDCW;22.2798;17-Apr-2026
 129192;INF336L01IE1;INF336L01IF8;HSBC Multi Asset Active FOF IDCW;31.9746;17-Apr-2026
-120700;INF109K01X40;-;ICICI Prudential Aggressive Hybrid Active FOF - Direct Plan - Growth;235.5538;16-Apr-2026
-102135;INF109K01852;-;ICICI Prudential Aggressive Hybrid Active FOF - Growth;218.7139;16-Apr-2026
-102136;INF109K01FR2;INF109K01860;ICICI Prudential Aggressive Hybrid Active FOF - IDCW;169.5443;16-Apr-2026
+120700;INF109K01X40;-;ICICI Prudential Aggressive Hybrid Active FOF - Direct Plan - Growth;237.1232;17-Apr-2026
+102135;INF109K01852;-;ICICI Prudential Aggressive Hybrid Active FOF - Growth;220.1638;17-Apr-2026
+102136;INF109K01FR2;INF109K01860;ICICI Prudential Aggressive Hybrid Active FOF - IDCW;170.6683;17-Apr-2026
 143904;INF109KC1FW3;-;ICICI Prudential BHARAT 22 FOF - Cumulative Option;36.5655;17-Apr-2026
 143903;INF109KC1FX1;-;ICICI Prudential BHARAT 22 FOF - Direct Plan Cumulative Option;36.5774;17-Apr-2026
 149331;INF109KC1V91;-;ICICI Prudential BSE 500 ETF FOF - Direct Plan - Growth;15.6823;17-Apr-2026
@@ -7189,18 +7189,18 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 102143;INF109K01FS0;INF109K01886;ICICI Prudential Diversified Debt Strategy Active FOF - IDCW;40.7342;17-Apr-2026
 154266;INF109K1A468;-;ICICI Prudential Diversified Equity All Cap Active FOF - Direct Plan - Growth;10.704;17-Apr-2026
 154265;INF109K1A450;-;ICICI Prudential Diversified Equity All Cap Active FOF - Growth;10.7009;17-Apr-2026
-148035;INF109KC1I49;-;ICICI Prudential Diversified Equity All Cap Omni FOF - Direct Plan - Growth;31.7655;16-Apr-2026
-148036;INF109KC1I64;INF109KC1I56;ICICI Prudential Diversified Equity All Cap Omni FOF - Direct Plan - IDCW;24.739;16-Apr-2026
-148033;INF109KC1I15;-;ICICI Prudential Diversified Equity All Cap Omni FOF - Growth;30.3978;16-Apr-2026
-148034;INF109KC1I31;INF109KC1I23;ICICI Prudential Diversified Equity All Cap Omni FOF - IDCW;23.5027;16-Apr-2026
-120679;INF109K01X16;-;ICICI Prudential Dynamic Asset Allocation Active FOF - Direct Plan - Growth;135.9852;16-Apr-2026
-120680;INF109K01W90;INF109K01X08;ICICI Prudential Dynamic Asset Allocation Active FOF - Direct Plan - IDCW;106.6392;16-Apr-2026
-102137;INF109K01837;-;ICICI Prudential Dynamic Asset Allocation Active FOF - Growth;122.1263;16-Apr-2026
-102138;INF109K01FJ9;INF109K01845;ICICI Prudential Dynamic Asset Allocation Active FOF - IDCW;93.8533;16-Apr-2026
-147648;INF109KC1F34;-;ICICI Prudential Global Advantage Fund (FOF) - Direct Plan - Growth Option;22.1541;16-Apr-2026
-147645;INF109KC1F42;-;ICICI Prudential Global Advantage Fund (FOF) - Direct Plan - IDCW;22.1541;16-Apr-2026
-147647;INF109KC1F00;-;ICICI Prudential Global Advantage Fund (FOF) - Growth Option;21.1904;16-Apr-2026
-147646;INF109KC1F18;-;ICICI Prudential Global Advantage Fund (FOF) - IDCW;21.1897;16-Apr-2026
+148035;INF109KC1I49;-;ICICI Prudential Diversified Equity All Cap Omni FOF - Direct Plan - Growth;32.0213;17-Apr-2026
+148036;INF109KC1I64;INF109KC1I56;ICICI Prudential Diversified Equity All Cap Omni FOF - Direct Plan - IDCW;24.9381;17-Apr-2026
+148033;INF109KC1I15;-;ICICI Prudential Diversified Equity All Cap Omni FOF - Growth;30.6419;17-Apr-2026
+148034;INF109KC1I31;INF109KC1I23;ICICI Prudential Diversified Equity All Cap Omni FOF - IDCW;23.6915;17-Apr-2026
+120679;INF109K01X16;-;ICICI Prudential Dynamic Asset Allocation Active FOF - Direct Plan - Growth;136.6419;17-Apr-2026
+120680;INF109K01W90;INF109K01X08;ICICI Prudential Dynamic Asset Allocation Active FOF - Direct Plan - IDCW;107.1541;17-Apr-2026
+102137;INF109K01837;-;ICICI Prudential Dynamic Asset Allocation Active FOF - Growth;122.7124;17-Apr-2026
+102138;INF109K01FJ9;INF109K01845;ICICI Prudential Dynamic Asset Allocation Active FOF - IDCW;94.3037;17-Apr-2026
+147648;INF109KC1F34;-;ICICI Prudential Global Advantage Fund (FOF) - Direct Plan - Growth Option;22.058;17-Apr-2026
+147645;INF109KC1F42;-;ICICI Prudential Global Advantage Fund (FOF) - Direct Plan - IDCW;22.058;17-Apr-2026
+147647;INF109KC1F00;-;ICICI Prudential Global Advantage Fund (FOF) - Growth Option;21.0981;17-Apr-2026
+147646;INF109KC1F18;-;ICICI Prudential Global Advantage Fund (FOF) - IDCW;21.0974;17-Apr-2026
 120685;INF109K01U92;-;ICICI Prudential Gold ETF FOF - Direct Plan - Growth;48.2735;17-Apr-2026
 120686;INF109K01U76;INF109K01U84;ICICI Prudential Gold ETF FOF - Direct Plan - IDCW;48.278;17-Apr-2026
 115833;INF109K01TK8;-;ICICI Prudential Gold ETF FOF - Growth;46.526;17-Apr-2026
@@ -7383,10 +7383,10 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 141072;INF082J01341;-;Quantum Multi Asset Active FOF - Regular Plan Growth Option;36.1382;17-Apr-2026
 150390;INF082J01416;-;Quantum Nifty 50 ETF Fund of Fund - Direct Plan - Growth;14.3992;17-Apr-2026
 150389;INF082J01424;-;Quantum Nifty 50 ETF Fund of Fund - Regular Plan - Growth;14.3353;17-Apr-2026
-153832;INF200KB1AA9;-;SBI Dynamic Asset Allocation Active FoF - Direct Plan - Growth;10.0141;16-Apr-2026
-153831;INF200KB1977;-;SBI Dynamic Asset Allocation Active FoF - Regular Plan - Growth;9.9529;16-Apr-2026
-153834;INF200KB1985;INF200KB1993;SBI Dynamic Asset Allocation Active FoF - Regular Plan - Income Distribution Cum Capital Withdrawal Option;9.9529;16-Apr-2026
-153833;INF200KB1AB7;INF200KB1AC5;SBI Dynamic Asset Allocation Active FoF- Direct Plan- Income Cum Distribution Capital Withdrawal Option;10.0136;16-Apr-2026
+153832;INF200KB1AA9;-;SBI Dynamic Asset Allocation Active FoF - Direct Plan - Growth;10.0585;17-Apr-2026
+153831;INF200KB1977;-;SBI Dynamic Asset Allocation Active FoF - Regular Plan - Growth;9.9967;17-Apr-2026
+153834;INF200KB1985;INF200KB1993;SBI Dynamic Asset Allocation Active FoF - Regular Plan - Income Distribution Cum Capital Withdrawal Option;9.9967;17-Apr-2026
+153833;INF200KB1AB7;INF200KB1AC5;SBI Dynamic Asset Allocation Active FoF- Direct Plan- Income Cum Distribution Capital Withdrawal Option;10.058;17-Apr-2026
 119789;INF200K01RN3;INF200K01RO1;SBI Gold Fund - Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);46.0452;17-Apr-2026
 115677;INF200K01HB9;INF200K01HC7;SBI Gold Fund - Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);44.0067;17-Apr-2026
 115676;INF200K01HA1;-;SBI GOLD FUND REGULAR PLAN - GROWTH;44.0;17-Apr-2026
@@ -7633,17 +7633,17 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 149300;INF663L01W71;INF663L01W89;PGIM India Global Select Real Estate Securities Fund of Fund - Direct Plan - IDCW Option;9.01;20-Jan-2023
 149299;INF663L01W97;-;PGIM India Global Select Real Estate Securities Fund of Fund - Regular Plan - Growth Option;13.19;17-Apr-2026
 149301;INF663L01X05;INF663L01X13;PGIM India Global Select Real Estate Securities Fund of Fund - Regular Plan - IDCW Option;8.93;20-Jan-2023
-148760;INF200KA1U28;-;SBI US Specific Equity Active FoF - Direct Plan - Growth;24.0059;16-Apr-2026
-148761;INF200KA1U36;INF200KA1U44;SBI US Specific Equity Active FoF- Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);24.0059;16-Apr-2026
-148762;INF200KA1T96;-;SBI US Specific Equity Active FoF- Regular Plan - Growth;23.1293;16-Apr-2026
-148759;INF200KA1U02;INF200KA1U10;SBI US Specific Equity Active FoF- Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);23.1285;16-Apr-2026
+148760;INF200KA1U28;-;SBI US Specific Equity Active FoF - Direct Plan - Growth;24.1998;17-Apr-2026
+148761;INF200KA1U36;INF200KA1U44;SBI US Specific Equity Active FoF- Direct Plan - Income Distribution cum Capital Withdrawal Option (IDCW);24.1998;17-Apr-2026
+148762;INF200KA1T96;-;SBI US Specific Equity Active FoF- Regular Plan - Growth;23.3157;17-Apr-2026
+148759;INF200KA1U02;INF200KA1U10;SBI US Specific Equity Active FoF- Regular Plan - Income Distribution cum Capital Withdrawal Option (IDCW);23.3149;17-Apr-2026
 119602;INF903J01OB6;-;Sundaram Global Brand Theme-Equity Active FOF - Direct Growth;45.0812;16-Apr-2026
 119601;INF903J01NZ7;INF903J01OA8;Sundaram Global Brand Theme-Equity Active FOF - Direct IDCW;37.8339;16-Apr-2026
 106370;INF903J01EX1;-;Sundaram Global Brand Theme-Equity Active FOF - Regular Growth;40.8818;16-Apr-2026
 106369;INF903J01EY9;INF903J01EZ6;Sundaram Global Brand Theme-Equity Active FOF - Regular IDCW;33.0481;16-Apr-2026
 153357;INF579M01BB5;-;360 ONE Gold ETF;147.0075;17-Apr-2026
 115127;INF209KB18D3;-;Aditya Birla Sun Life Gold ETF;132.4585;17-Apr-2026
-153826;INF1J2R01114;-;ANGEL ONE GOLD ETF;14.1779;16-Apr-2026
+153826;INF1J2R01114;-;ANGEL ONE GOLD ETF;14.0671;17-Apr-2026
 113434;INF846K01W80;-;Axis Gold ETF;125.5966;17-Apr-2026
 153930;INF194KB1KJ7;-;Bandhan Gold ETF;150.4304;17-Apr-2026
 152231;INF251K01SU9;-;Baroda BNP Paribas Gold ETF;145.8396;17-Apr-2026
@@ -8967,7 +8967,7 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 153531;INF1J2R01064;-;ANGEL ONE NIFTY 50 ETF;9.9904;17-Apr-2026
 153332;INF1J2R01015;-;ANGEL ONE NIFTY TOTAL MARKET ETF;11.5777;17-Apr-2026
 153957;INF1J2R01148;-;ANGEL ONE NIFTY TOTAL MARKET MOMENTUM QUALITY 50 ETF;10.0334;17-Apr-2026
-154205;INF1J2R01171;-;ANGEL ONE SILVER ETF;9.497;16-Apr-2026
+154205;INF1J2R01171;-;ANGEL ONE SILVER ETF;9.4719;17-Apr-2026
 151585;INF846K010Q0;-;Axis BSE Sensex ETF;80.9022;17-Apr-2026
 141545;INF846K01W98;-;Axis Nifty 50 ETF;267.7281;17-Apr-2026
 148926;INF846K01Z04;-;Axis Nifty AAA Bond Plus SDL Apr 2026 50:50 ETF;13.3657;17-Apr-2026
@@ -8977,7 +8977,7 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 148799;INF846K01Y96;-;Axis IT ETF;348.115;17-Apr-2026
 153414;INF846KA1119;-;Axis Nifty500 Value 50 ETF;33.8384;17-Apr-2026
 150610;INF846K011K1;-;Axis Silver ETF;246.3504;17-Apr-2026
-152638;INF0QA701854;-;Bajaj Finserv Nifty 1D Rate Liquid ETF;1077.6889;17-Apr-2026
+152638;INF0QA701854;-;Bajaj Finserv Nifty 1D Rate Liquid ETF;1077.9696;19-Apr-2026
 152356;INF0QA701722;-;Bajaj Finserv Nifty 50 ETF;248.9451;17-Apr-2026
 152357;INF0QA701714;-;Bajaj Finserv Nifty Bank ETF;57.2511;17-Apr-2026
 139840;INF194KA1T91;-;BANDHAN BSE Sensex ETF;848.8895;17-Apr-2026
@@ -9011,7 +9011,7 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 148445;INF754K01LE1;-;BHARAT Bond ETF- April 2031;1402.6059;17-Apr-2026
 153180;INF754K01TX4;-;Edelweiss BSE Capital Markets & Insurance  ETF - Growth;24.5894;17-Apr-2026
 153947;INF754K01VY8;-;Edelweiss BSE Sensex ETF - Growth;78.5018;17-Apr-2026
-153920;INF754K01VW2;-;Edelweiss Nifty 1D Rate Liquid ETF - Growth;1026.9371;17-Apr-2026
+153920;INF754K01VW2;-;Edelweiss Nifty 1D Rate Liquid ETF - Growth;1027.0698;18-Apr-2026
 153966;INF754K01VX0;-;Edelweiss Nifty 50 ETF - Growth;24.3698;17-Apr-2026
 152857;INF754K01TE4;-;Edelweiss Nifty Bank ETF - Growth;56.8195;17-Apr-2026
 153841;INF754K01VV4;-;Edelweiss Nifty LargeMidcap 250 ETF - Growth;16.2343;17-Apr-2026
@@ -9229,7 +9229,7 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 148541;INF200KA1S22;-;SBI Nifty Private Bank ETF;275.6321;17-Apr-2026
 152749;INF200KB1282;-;SBI Nifty50 Equal Weight ETF;32.8062;17-Apr-2026
 152725;INF200KB1217;-;SBI Silver ETF;242.865;17-Apr-2026
-152741;INF680P01422;-;Shriram Nifty 1D Rate Liquid ETF - Growth;1100.5935;18-Apr-2026
+152741;INF680P01422;-;Shriram Nifty 1D Rate Liquid ETF - Growth;1100.7289;19-Apr-2026
 145801;INF277K015R5;-;Tata Nifty 50 Exchange Traded Fund;263.3318;17-Apr-2026
 149959;INF277KA1364;-;Tata Nifty India Digital Exchange Traded Fund;83.9627;17-Apr-2026
 147614;INF277K010X4;-;Tata Nifty Private Bank Exchange Traded Fund;279.6562;17-Apr-2026
@@ -9245,7 +9245,7 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 152050;INF789F1AYX9;-;UTI Nifty Midcap 150 Exchange Traded Fund;222.2975;17-Apr-2026
 151730;INF789F1AYK6;-;UTI Silver Exchange Traded Fund;239.5917;17-Apr-2026
 152667;INF0R8F01067;-;Zerodha Nifty 100 ETF;10.5331;17-Apr-2026
-152327;INF0R8F01034;-;Zerodha Nifty 1D Rate Liquid ETF - Growth Option;113.6459;17-Apr-2026
+152327;INF0R8F01034;-;Zerodha Nifty 1D Rate Liquid ETF - Growth Option;113.6749;19-Apr-2026
 153905;INF0R8F01166;-;Zerodha Nifty 50 ETF;9.7019;17-Apr-2026
 153811;INF0R8F01133;-;Zerodha Nifty 8-13 Yr G-Sec ETF;29.7716;17-Apr-2026
 152668;INF0R8F01059;-;Zerodha Nifty Midcap 150 ETF;11.0421;17-Apr-2026
@@ -9274,8 +9274,8 @@ SchemeCode;ISIN_Growth;ISIN_Reinvestment;SchemeName;NAV;Date
 101127;INF109K01605;-;ICICI Prudential Children's Fund - Regular Plan;325.08;17-Apr-2026
 120285;INF767K01FB1;-;LIC MF Children's Fund-Direct Plan-Growth;35.625;17-Apr-2026
 101271;INF767K01048;-;LIC MF Children's Fund-Regular Plan-Growth;31.7628;17-Apr-2026
-148490;INF200KA1R07;-;SBI Children's Fund - Investment Plan - Direct Plan - Growth;47.9143;16-Apr-2026
-148489;INF200KA1Q99;-;SBI Children's Fund - Investment Plan - Regular Plan - Growth;44.6768;16-Apr-2026
+148490;INF200KA1R07;-;SBI Children's Fund - Investment Plan - Direct Plan - Growth;48.4446;17-Apr-2026
+148489;INF200KA1Q99;-;SBI Children's Fund - Investment Plan - Regular Plan - Growth;45.1702;17-Apr-2026
 119719;INF200K01QR6;-;SBI Children's Fund - Savings Plan - DIRECT PLAN - GROWTH;123.5161;17-Apr-2026
 101169;INF200K01776;-;SBI Children's Fund - Savings Plan - REGULAR PLAN - GROWTH;112.9948;17-Apr-2026
 101491;INF277K01AJ5;-;Tata Childrens Fund -Regular Plan-Growth Option;56.2407;17-Apr-2026
