@@ -297,6 +297,8 @@ for fund_name, meta in mutual_funds.items():
     # Use absolute_gain_loss difference as "change in value"
     change_in_value = float(row_today["absolute_gain_loss"]) - float(row_prev["absolute_gain_loss"])
 
+
+
     # % change in NAV
     nav_today = float(row_today["nav"])
     nav_prev = float(row_prev["nav"])
