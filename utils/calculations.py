@@ -32,12 +32,13 @@ def merge_nav_with_portfolio(portfolio_df, nav_df, mutual_funds):
     # 4. Rename columns
     # -------------------------------
     merged.rename(
-        columns={
-            "NAV": "LatestNAV",
-            "Date": "LatestNAVDate"
-        },
-        inplace=True
+    columns={
+        "NAV_Latest": "LatestNAV",
+        "Date_Latest": "LatestNAVDate"
+    },
+    inplace=True
     )
+
 
     return merged
 
