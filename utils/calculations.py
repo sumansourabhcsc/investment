@@ -70,8 +70,21 @@ def merge_nav_with_portfolio(portfolio_df, nav_df, mutual_funds):
 # -----------------------------
 def calculate_summary(df):
 
-    df = df.dropna(subset=["LatestNAV", "LatestNAVDate", "Date_Purchase"])
+    # -----------------------------
+    # SAFETY CHECK (avoid KeyError)
+    # -----------------------------
+    required_cols = ["Units", "Amount", "LatestNAV", "Date_Purchase"]
 
+    for col in required_cols:
+        if col not in df.columns:
+            df[col] = None
+
+    # Drop only what is actually usable
+    df = df.dropna(subset=["Units", "Amount", "LatestNAV", "Date_Purchase"])
+
+    # -----------------------------
+    # BASIC CALCULATIONS
+    # -----------------------------
     df["CurrentValue"] = df["Units"] * df["LatestNAV"]
     df["Invested"] = df["Amount"]
 
@@ -79,34 +92,39 @@ def calculate_summary(df):
         "Invested": "sum",
         "CurrentValue": "sum",
         "LatestNAV": "last",
-        "LatestNAVDate": "last"
+        "Date_Purchase": "last"
     }).reset_index()
 
     summary["ProfitLoss"] = summary["CurrentValue"] - summary["Invested"]
     summary["ReturnPct"] = (summary["ProfitLoss"] / summary["Invested"]) * 100
 
+    # -----------------------------
+    # XIRR CALCULATION
+    # -----------------------------
     xirr_values = []
 
     for fund in summary["FundName"]:
         fdf = df[df["FundName"] == fund]
 
+        if fdf.empty:
+            xirr_values.append(None)
+            continue
+
         cashflows = list(-fdf["Amount"].abs())
         dates = list(fdf["Date_Purchase"])
 
         latest_nav = fdf["LatestNAV"].iloc[-1]
-
         final_value = fdf["Units"].sum() * latest_nav
-        final_date = fdf["LatestNAVDate"].iloc[-1]
+        final_date = fdf["Date_Purchase"].max()
 
         cashflows.append(final_value)
         dates.append(final_date)
 
-        if not (any(c > 0 for c in cashflows) and any(c < 0 for c in cashflows)):
+        try:
+            rate = xirr(cashflows, dates)
+            xirr_values.append(rate * 100 if rate else None)
+        except:
             xirr_values.append(None)
-            continue
-
-        rate = xirr(cashflows, dates)
-        xirr_values.append(rate * 100 if rate else None)
 
     summary["XIRR"] = [
         f"{x:.2f}%" if x is not None else "N/A"
