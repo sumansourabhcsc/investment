@@ -58,6 +58,9 @@ for fund_name, meta in mutual_funds.items():
     except Exception as e:
         st.error(f"{fund_name} error: {e}")
 
+
+absolute_return_overall = ((total_current - total_invested) / total_invested * 100) if total_invested > 0 else 0
+
 # Load all SIP transactions for XIRR
 all_funds_df = load_all_funds()
 
@@ -69,12 +72,13 @@ overall_xirr = compute_overall_xirr(all_funds_df)
 # 📊 METRICS (NOW ON TOP)
 # =========================
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 
 col1.metric("💰 Total Invested", f"₹{total_invested:,.2f}")
 col2.metric("📈 Current Value", f"₹{total_current:,.2f}")
 col3.metric("📊 Total P&L", f"₹{total_current - total_invested:,.2f}")
-col4.metric("📌 XIRR (Overall)", f"{overall_xirr*100:.2f}%")
+col4.metric("📉 Absolute Return", f"{absolute_return_overall:.2f}%")
+col5.metric("📌 XIRR (Overall)", f"{overall_xirr*100:.2f}%")
 
 
 st.divider()
