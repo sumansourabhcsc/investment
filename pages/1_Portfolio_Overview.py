@@ -220,7 +220,7 @@ if monthly_data:
     # =========================
     # STYLING
     # =========================
-    def highlight_total(row):
+    def highlight_total_row(row):
         if row["Fund"] == "TOTAL":
             return ["background-color: #5c1a33; color: white; font-weight: bold"] * len(row)
         return [""] * len(row)
