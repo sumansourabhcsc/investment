@@ -63,7 +63,7 @@ avg_buy_nav = invested / total_units if total_units > 0 else 0
 absolute_return = ((current_value - invested) / invested) * 100 if invested > 0 else 0
 
 
-st.caption(f"Last NAV Date: {latest_date}")
+#st.caption(f"Last NAV Date: {latest_date}")
 st.caption(f"📅 **Latest NAV:** ₹{latest_nav:.2f}  (as of {latest_date})")
 
 #st.caption(f"📅 Latest NAV", ₹{latest_nav:.2f})
