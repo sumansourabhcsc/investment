@@ -242,19 +242,27 @@ if monthly_data:
     use_container_width=True
 )
 
+############################################################
 
+change_in_value = row_today["current_value"] - row_prev["current_value"]
+pct_change_nav = ((row_today["nav"] - row_prev["nav"]) / row_prev["nav"]) * 100
+indicator = "🟢 ↑" if row_today["nav"] > row_prev["nav"] else "🔴 ↓"
 
+# =========================
+# 📅 DAILY CHANGE SECTION
+# =========================
+
+import os
 
 # Load NAV data
 nav_df = load_nav()
 
-# Get latest NAV date
+# Latest NAV date
 latest_nav_date = nav_df["Date"].max().date()
 
-# Date selector defaults to latest NAV date
+# Date selector
 selected_date = st.date_input("Select Date", value=latest_nav_date)
 selected_date_str = selected_date.strftime("%d-%m-%Y")
-
 
 daily_rows = []
 
@@ -268,44 +276,53 @@ for fund_name, meta in mutual_funds.items():
         continue
 
     df_daily = pd.read_csv(file_path)
-
-    # Ensure date is parsed
     df_daily["date"] = pd.to_datetime(df_daily["date"], format="%d-%m-%Y")
 
     # Filter for selected date
-    row = df_daily[df_daily["date"] == pd.to_datetime(selected_date_str)]
+    df_daily = df_daily.sort_values("date")
 
-    if row.empty:
+    row_today = df_daily[df_daily["date"] == pd.to_datetime(selected_date_str)]
+
+    if row_today.empty:
         continue
 
-    row = row.iloc[0]
+    row_today = row_today.iloc[-1]
+
+    # Get previous day row
+    prev_rows = df_daily[df_daily["date"] < pd.to_datetime(selected_date_str)]
+
+    if prev_rows.empty:
+        continue
+
+    row_prev = prev_rows.iloc[-1]
+
+    # Compute metrics
+    change_in_value = row_today["current_value"] - row_prev["current_value"]
+    pct_change_nav = ((row_today["nav"] - row_prev["nav"]) / row_prev["nav"]) * 100
+    indicator = "🟢 ↑" if row_today["nav"] > row_prev["nav"] else "🔴 ↓"
 
     daily_rows.append([
+        row_today["date"].strftime("%d-%m-%Y"),
         fund_name,
-        row["absolute_gain_loss"],
-        row["total_return_pct"],
-        row["xirr_annual"],
-        row["nav"]
+        code,
+        round(change_in_value, 2),
+        f"{pct_change_nav:.2f}%",
+        indicator
     ])
 
 df_daily = pd.DataFrame(daily_rows, columns=[
-    "Fund",
+    "Date",
+    "Fund Name",
+    "Fund Code",
     "Change in Value",
-    "% Change (NAV)",
-    "XIRR (Annual)",
-    "NAV"
+    "% Change in NAV",
+    "Indicator"
 ])
 
-
-df_daily["Indicator"] = df_daily["Change in Value"].apply(
-    lambda x: "🟢 ↑" if x > 0 else "🔴 ↓"
-)
-
-
 st.subheader(f"📅 Daily Change for {selected_date_str}")
-
 st.dataframe(df_daily, use_container_width=True)
 
 st.markdown(
     f"### 💹 Total Change Across All Funds: **₹{df_daily['Change in Value'].sum():,.2f}**"
 )
+
