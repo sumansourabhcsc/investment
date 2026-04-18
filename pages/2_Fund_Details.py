@@ -103,18 +103,17 @@ st.plotly_chart(fig2, use_container_width=True)
 # =========================
 # FUND GROWTH VALUE (OPTIONAL VIEW)
 # =========================
-'''
-st.subheader("💹 Fund Value Growth")
 
-fund_df_sorted = fund_df.sort_values("Date").copy()
-fund_df_sorted["Value"] = fund_df_sorted["Units"].cumsum() * latest_nav
+#st.subheader("💹 Fund Value Growth")
 
-fig3 = px.line(
-    fund_df_sorted,
-    x="Date",
-    y="Value",
-    title="Estimated Portfolio Value Growth"
-)
+#fund_df_sorted = fund_df.sort_values("Date").copy()
+#fund_df_sorted["Value"] = fund_df_sorted["Units"].cumsum() * latest_nav
 
-st.plotly_chart(fig3, use_container_width=True)
-'''
+#fig3 = px.line(
+ #   fund_df_sorted,
+  #  x="Date",
+   # y="Value",
+    #title="Estimated Portfolio Value Growth"
+#)
+
+#st.plotly_chart(fig3, use_container_width=True)
