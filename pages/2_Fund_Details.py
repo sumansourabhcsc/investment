@@ -64,7 +64,7 @@ absolute_return = ((current_value - invested) / invested) * 100 if invested > 0 
 
 
 st.caption(f"Last NAV Date: {latest_date}")
-st.caption(f"📅 Latest NAV", f"₹{latest_nav:.2f}")
+st.caption(f"📅 Latest NAV", ₹{latest_nav:.2f})
 col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
 
 def metric_normal(col, label, value):
