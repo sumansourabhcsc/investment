@@ -121,4 +121,89 @@ df = pd.DataFrame(summary, columns=[
 
 st.dataframe(df, use_container_width=True)
 
+st.divider()
+st.subheader("📊 Monthly Investment Summary by Fund & Year")
+
+monthly_data = []
+
+for fund_name, meta in mutual_funds.items():
+    try:
+        folder = meta["folder"]
+        code = meta["code"]
+
+        df = load_fund(folder)
+
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+        df = df.dropna(subset=["Date"])
+
+        df["Year"] = df["Date"].dt.year
+        df["Month"] = df["Date"].dt.month
+
+        grouped = df.groupby(["Year", "Month"])["Amount"].sum().reset_index()
+
+        for _, row in grouped.iterrows():
+            monthly_data.append([
+                code,
+                fund_name,
+                row["Year"],
+                row["Month"],
+                row["Amount"]
+            ])
+
+    except Exception as e:
+        st.warning(f"{fund_name} skipped: {e}")
+
+
+if monthly_data:
+
+    monthly_df = pd.DataFrame(monthly_data, columns=[
+        "Code", "Fund", "Year", "Month", "Amount"
+    ])
+
+    years = sorted(monthly_df["Year"].unique())
+
+    selected_year = st.selectbox("Select Year", years, index=len(years)-1)
+
+    year_df = monthly_df[monthly_df["Year"] == selected_year]
+
+    pivot_df = year_df.pivot_table(
+        index=["Code", "Fund"],
+        columns="Month",
+        values="Amount",
+        aggfunc="sum",
+        fill_value=0
+    ).reset_index()
+
+
+    month_map = {
+        1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr",
+        5: "May", 6: "Jun", 7: "Jul", 8: "Aug",
+        9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"
+    }
+
+    pivot_df = pivot_df.rename(columns=month_map)
+
+    # Ensure all months exist
+    for m in month_map.values():
+        if m not in pivot_df.columns:
+            pivot_df[m] = 0
+
+    # Order columns
+    cols = ["Code", "Fund"] + list(month_map.values())
+    pivot_df = pivot_df[cols]
+
+
+    total_row = ["", "TOTAL"]
+
+    for m in month_map.values():
+        total_row.append(pivot_df[m].sum())
+
+    total_row.append(pivot_df["Total"].sum())
+
+    total_df = pd.DataFrame([total_row], columns=pivot_df.columns)
+
+    final_df = pd.concat([pivot_df, total_df], ignore_index=True)
+
+
+
 
