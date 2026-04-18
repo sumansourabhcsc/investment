@@ -161,7 +161,6 @@ if monthly_data:
     ])
 
     years = sorted(monthly_df["Year"].unique())
-
     selected_year = st.selectbox("Select Year", years, index=len(years)-1)
 
     year_df = monthly_df[monthly_df["Year"] == selected_year]
@@ -174,7 +173,9 @@ if monthly_data:
         fill_value=0
     ).reset_index()
 
-
+    # =========================
+    # MONTH FORMAT
+    # =========================
     month_map = {
         1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr",
         5: "May", 6: "Jun", 7: "Jul", 8: "Aug",
@@ -188,22 +189,40 @@ if monthly_data:
         if m not in pivot_df.columns:
             pivot_df[m] = 0
 
-    # Order columns
-    cols = ["Code", "Fund"] + list(month_map.values())
-    pivot_df = pivot_df[cols]
+    # Column order
+    month_cols = list(month_map.values())
+    pivot_df = pivot_df[["Code", "Fund"] + month_cols]
 
+    # =========================
+    # ✅ CREATE TOTAL COLUMN (FIRST!)
+    # =========================
+    pivot_df["Total"] = pivot_df[month_cols].sum(axis=1)
 
-    total_row = ["", "TOTAL"]
+    # =========================
+    # ✅ NOW CREATE TOTAL ROW
+    # =========================
+    total_values = ["", "TOTAL"]
 
-    for m in month_map.values():
-        total_row.append(pivot_df[m].sum())
+    for m in month_cols:
+        total_values.append(pivot_df[m].sum())
 
-    total_row.append(pivot_df["Total"].sum())
+    total_values.append(pivot_df["Total"].sum())
 
-    total_df = pd.DataFrame([total_row], columns=pivot_df.columns)
+    total_df = pd.DataFrame([total_values], columns=pivot_df.columns)
 
     final_df = pd.concat([pivot_df, total_df], ignore_index=True)
 
+    # =========================
+    # STYLING
+    # =========================
+    def highlight_total(row):
+        if row["Fund"] == "TOTAL":
+            return ["background-color: #5c1a33; color: white; font-weight: bold"] * len(row)
+        return [""] * len(row)
 
+    st.markdown(f"### Year {selected_year}")
 
-
+    st.dataframe(
+        final_df.style.apply(highlight_total, axis=1),
+        use_container_width=True
+    )
