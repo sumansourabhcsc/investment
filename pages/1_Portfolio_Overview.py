@@ -6,6 +6,8 @@ from utils.data_loader import load_fund, load_nav
 from utils.calculations import calculate_invested_amount, calculate_current_value
 from utils.load_funds import load_all_funds
 from utils.xirr_overall import compute_overall_xirr
+from utils.data_loader import load_fund, load_nav
+from utils.xirr_helper import compute_fund_xirr
 
 
 # ✅ MUST BE FIRST Streamlit command
@@ -42,6 +44,8 @@ for fund_name, meta in mutual_funds.items():
         invested = calculate_invested_amount(fund_df)
         current = calculate_current_value(fund_df, latest_nav)
 
+        fund_xirr = compute_fund_xirr(fund_df, latest_nav)
+
         total_invested += invested
         total_current += current
 
@@ -52,7 +56,8 @@ for fund_name, meta in mutual_funds.items():
             current,
             current - invested,
             latest_nav,
-            latest_date
+            latest_date,
+            fund_xirr
         ])
 
     except Exception as e:
@@ -107,7 +112,8 @@ df = pd.DataFrame(summary, columns=[
     "Current",
     "P&L",
     "Latest NAV",
-    "NAV Date"
+    "NAV Date",
+    "XIRR"
 ])
 
 st.dataframe(df, use_container_width=True)
