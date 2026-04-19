@@ -132,8 +132,6 @@ with col1:
     st.dataframe(df, use_container_width=True)
 
 with col2:
-    #st.subheader("Allocation")
-
     # Donut chart using Current Value
     fig = px.pie(
         df,
@@ -143,14 +141,16 @@ with col2:
         title="Fund Allocation"
     )
 
-    # Hide labels + legend
+    # Show percent inside slices
     fig.update_traces(
         textinfo="percent",
         textposition="inside"
     )
+
+    # Hide legend
     fig.update_layout(showlegend=False)
 
-    # Add center text
+    # Center text (optional)
     fig.update_layout(
         annotations=[
             dict(
@@ -163,8 +163,9 @@ with col2:
         ]
     )
 
-    # Render only ONCE with a unique key
+    # Render only once with unique key
     st.plotly_chart(fig, use_container_width=True, key="allocation_donut")
+
 
 # =========================
 # 📋 TABLE BELOW & Pie Chart - END
