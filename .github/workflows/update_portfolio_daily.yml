@@ -47,7 +47,7 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
-          git add portfolio_daily.csv
+          git add data/portfolio_daily.csv
 
           git commit -m "Updated portfolio daily summary" || echo "No changes to commit"
 
