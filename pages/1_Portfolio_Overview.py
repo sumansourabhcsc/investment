@@ -141,6 +141,8 @@ with col2:
     )
 
     fig.update_traces(textinfo="none")
+    fig.update_layout(showlegend=False)
+
     st.plotly_chart(fig, use_container_width=True)
 
 #st.dataframe(df, use_container_width=True)
