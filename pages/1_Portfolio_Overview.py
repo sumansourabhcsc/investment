@@ -170,6 +170,37 @@ with col2:
 # =========================
 # 📋 TABLE BELOW & Pie Chart - END
 # =========================
+st.divider()
+# =========================
+# 📊 DAILY SUMMARY (from portfolio_daily.csv)
+# =========================
+
+import pandas as pd
+
+# Load daily summary file
+daily_path = "data/portfolio_daily.csv"
+daily_df = pd.read_csv(daily_path)
+
+# Convert Date to proper datetime (handles dd-mm-yyyy)
+daily_df["Date"] = pd.to_datetime(daily_df["Date"], format="%d-%m-%Y")
+
+# Sort latest date on top
+daily_df = daily_df.sort_values("Date", ascending=False)
+
+# Format date back to dd-mm-yyyy for display
+daily_df["Date"] = daily_df["Date"].dt.strftime("%d-%m-%Y")
+
+st.subheader("Daily Summary Dataset")
+
+st.dataframe(
+    daily_df,
+    use_container_width=True,
+)
+
+# =========================
+# 📊 DAILY SUMMARY (from portfolio_daily.csv) - END
+# =========================
+
 
 st.divider()
 st.subheader("📊 Monthly Investment Summary by Fund & Year")
