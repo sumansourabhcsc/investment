@@ -140,10 +140,10 @@ with col2:
         title="Fund Allocation"
     )
 
-    fig.update_traces(textposition="inside", textinfo="percent+label")
+    fig.update_traces(textposition="inside", textinfo="percent")
     st.plotly_chart(fig, use_container_width=True)
 
-st.dataframe(df, use_container_width=True)
+#st.dataframe(df, use_container_width=True)
 
 st.divider()
 st.subheader("📊 Monthly Investment Summary by Fund & Year")
