@@ -108,7 +108,7 @@ st.divider()
 # =========================
 # 📋 TABLE BELOW
 # =========================
-
+st.subheader("Fund Details")
 df = pd.DataFrame(summary, columns=[
     "Fund",
     "SchemeCode",
