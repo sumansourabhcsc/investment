@@ -1,5 +1,10 @@
-import os
 import pandas as pd
+import os
+import sys
+
+# Add project root to Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 
 from utils.data_loader import load_nav, load_fund
 from utils.calculations import calculate_invested_amount, calculate_current_value
