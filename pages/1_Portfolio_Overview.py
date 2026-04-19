@@ -132,7 +132,7 @@ with col1:
     st.dataframe(df, use_container_width=True)
 
 with col2:
-    st.subheader("Allocation")
+    #st.subheader("Allocation")
 
     # Donut chart using Current Value
     fig = px.pie(
