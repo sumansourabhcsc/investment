@@ -120,6 +120,27 @@ df = pd.DataFrame(summary, columns=[
     "XIRR"
 ])
 
+# Layout: Table (left) + Donut Chart (right)
+col1, col2 = st.columns([2, 1])
+
+with col1:
+    st.dataframe(df, use_container_width=True)
+
+with col2:
+    st.subheader("Allocation")
+
+    # Donut chart using Current Value
+    fig = px.pie(
+        df,
+        names="Fund",
+        values="Current",
+        hole=0.5,
+        title="Fund Allocation"
+    )
+
+    fig.update_traces(textposition="inside", textinfo="percent+label")
+    st.plotly_chart(fig, use_container_width=True)
+
 st.dataframe(df, use_container_width=True)
 
 st.divider()
