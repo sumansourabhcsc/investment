@@ -140,7 +140,7 @@ with col2:
         title="Fund Allocation"
     )
 
-    fig.update_traces(textposition="inside", textinfo="percent")
+    fig.update_traces(textinfo="none")
     st.plotly_chart(fig, use_container_width=True)
 
 #st.dataframe(df, use_container_width=True)
