@@ -5,12 +5,12 @@ permissions:
 
 on:
   schedule:
-     - cron: "35 4 * * *"
-     - cron: "35 8 * * *"
-     - cron: "35 12 * * *"
-     - cron: "35 15 * * *"
-     - cron: "39 21 * * *"
-     - cron: "35 23 * * *"
+     - cron: "45 4 * * *"
+     - cron: "45 8 * * *"
+     - cron: "45 12 * * *"
+     - cron: "45 15 * * *"
+     - cron: "49 21 * * *"
+     - cron: "45 23 * * *"
   workflow_dispatch:
 
 # ✅ Prevent overlapping runs
