@@ -56,7 +56,7 @@ def compute_portfolio_snapshot():
     # ---------------------------------------------------------
     # LOAD PREVIOUS SNAPSHOT (if exists)
     # ---------------------------------------------------------
-    file_path = "portfolio_daily.csv"
+    file_path = "data/portfolio_daily.csv"
     prev_change = 0
     prev_change_pct = 0
     indicator = "🟢 ↑"
