@@ -142,6 +142,22 @@ with col2:
 
     fig.update_traces(textinfo="none")
     fig.update_layout(showlegend=False)
+    center_text = "100%"
+
+    # Add text inside donut
+    fig.update_layout(
+        annotations=[
+            dict(
+                text=center_text,
+                x=0.5,
+                y=0.5,
+                font_size=28,
+                showarrow=False
+            )
+        ]
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
     st.plotly_chart(fig, use_container_width=True)
 
