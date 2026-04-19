@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import plotly.express as
 
 from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
@@ -9,6 +10,7 @@ from utils.load_funds import load_all_funds
 from utils.xirr_overall import compute_overall_xirr
 from utils.data_loader import load_fund, load_nav
 from utils.xirr_helper import compute_fund_xirr
+
 
 
 # ✅ MUST BE FIRST Streamlit command
