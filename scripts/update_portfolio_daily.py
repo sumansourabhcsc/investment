@@ -21,6 +21,11 @@ def compute_portfolio_snapshot():
 
     # Latest NAV date across all funds
     latest_nav_date = nav_df["Date"].max().date()
+    # Ensure data folder exists
+    ensure_folder("data")
+
+    # File path inside data folder
+    file_path = "data/portfolio_daily.csv"
 
     total_invested = 0
     total_current = 0
@@ -56,7 +61,7 @@ def compute_portfolio_snapshot():
     # ---------------------------------------------------------
     # LOAD PREVIOUS SNAPSHOT (if exists)
     # ---------------------------------------------------------
-    file_path = "data/portfolio_daily.csv"
+    #file_path = "data/portfolio_daily.csv"
     prev_change = 0
     prev_change_pct = 0
     indicator = "🟢 ↑"
