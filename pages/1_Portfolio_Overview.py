@@ -108,6 +108,9 @@ metric_normal(col5, "📌 **XIRR (Overall)**", f"{overall_xirr*100:.2f}%")
 st.divider()
 
 # =========================
+# 📋 TABLE BELOW & Pie Chart
+# =========================
+# =========================
 # 📋 TABLE BELOW
 # =========================
 st.subheader("Fund Details")
@@ -140,15 +143,15 @@ with col2:
         title="Fund Allocation"
     )
 
+    # Hide labels + legend
     fig.update_traces(textinfo="none")
     fig.update_layout(showlegend=False)
-    center_text = "100%"
 
-    # Add text inside donut
+    # Add center text
     fig.update_layout(
         annotations=[
             dict(
-                text=center_text,
+                text="100%",
                 x=0.5,
                 y=0.5,
                 font_size=28,
@@ -157,11 +160,12 @@ with col2:
         ]
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    # Render only ONCE with a unique key
+    st.plotly_chart(fig, use_container_width=True, key="allocation_donut")
 
-    st.plotly_chart(fig, use_container_width=True)
-
-#st.dataframe(df, use_container_width=True)
+# =========================
+# 📋 TABLE BELOW & Pie Chart - END
+# =========================
 
 st.divider()
 st.subheader("📊 Monthly Investment Summary by Fund & Year")
