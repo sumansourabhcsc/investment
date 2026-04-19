@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
-import plotly.express as
+import plotly.express as px
 
 from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
