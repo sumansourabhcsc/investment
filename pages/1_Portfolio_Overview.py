@@ -144,7 +144,10 @@ with col2:
     )
 
     # Hide labels + legend
-    fig.update_traces(textinfo="none")
+    fig.update_traces(
+        textinfo="percent",
+        textposition="inside"
+    )
     fig.update_layout(showlegend=False)
 
     # Add center text
