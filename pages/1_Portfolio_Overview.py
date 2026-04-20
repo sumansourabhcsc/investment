@@ -129,7 +129,7 @@ df = pd.DataFrame(summary, columns=[
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    st.dataframe(df, use_container_width=True, height=len(df) * 35)
+    st.dataframe(df, use_container_width=True, height=len(df) * 45)
 
 with col2:
     # Donut chart using Current Value
