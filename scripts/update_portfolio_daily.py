@@ -97,15 +97,24 @@ def compute_portfolio_snapshot():
     # ---------------------------------------------------------
     if os.path.exists(file_path):
         df_existing = pd.read_csv(file_path)
+    
+        # Convert Date column to string (consistent format)
+        df_existing["Date"] = df_existing["Date"].astype(str)
 
-        # Avoid duplicate entries
-        if new_row["Date"] in df_existing["Date"].astype(str).values:
-            print("Already updated for today.")
-            return
+        if new_row["Date"] in df_existing["Date"].values:
+            # 🔥 UPDATE existing row
+            df_existing.loc[df_existing["Date"] == new_row["Date"], list(new_row.keys())] = list(new_row.values())
+            print("Existing entry updated for today.")
+        else:
+            # ➕ INSERT new row
+            df_existing = pd.concat([df_existing, pd.DataFrame([new_row])], ignore_index=True)
+            print("New entry added for today.")
 
-        df_updated = pd.concat([df_existing, pd.DataFrame([new_row])], ignore_index=True)
+        df_updated = df_existing
+
     else:
         df_updated = pd.DataFrame([new_row])
+        print("File created and entry added.")
 
     df_updated.to_csv(file_path, index=False)
     print("Portfolio snapshot updated.")
