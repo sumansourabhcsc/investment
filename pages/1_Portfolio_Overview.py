@@ -197,6 +197,58 @@ st.dataframe(
     use_container_width=True,
 )
 
+#####Graph
+import plotly.graph_objects as go
+
+# Convert again to datetime for plotting
+daily_df["Date"] = pd.to_datetime(daily_df["Date"], format="%d-%m-%Y")
+
+# Sort ascending for proper chart flow
+daily_df = daily_df.sort_values("Date")
+
+# Convert % column to float
+daily_df["OneDayChangePct_val"] = daily_df["OneDayChangePct"].str.replace("%", "").astype(float)
+
+
+from plotly.subplots import make_subplots
+
+fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+# Bar (daily change)
+fig.add_trace(
+    go.Bar(
+        x=daily_df["Date"],
+        y=daily_df["OneDayChange"],
+        name="Daily Change",
+        marker_color=["green" if x > 0 else "red" for x in daily_df["OneDayChange"]],
+        opacity=0.6
+    ),
+    secondary_y=False
+)
+
+# Line (total value)
+fig.add_trace(
+    go.Scatter(
+        x=daily_df["Date"],
+        y=daily_df["TotalValue"],
+        name="Total Value",
+        mode="lines+markers"
+    ),
+    secondary_y=True
+)
+
+fig.update_layout(
+    title="Portfolio Performance",
+    hovermode="x unified"
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
+
+
+
+
+
 # =========================
 # 📊 DAILY SUMMARY (from portfolio_daily.csv) - END
 # =========================
