@@ -126,7 +126,7 @@ df = pd.DataFrame(summary, columns=[
 ])
 
 # Layout: Table (left) + Donut Chart (right)
-col1, col2 = st.columns([2, 1])
+col1, col2 = st.columns([7, 1])
 
 with col1:
     st.dataframe(df, use_container_width=True, height=len(df) * 40)
