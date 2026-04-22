@@ -190,8 +190,8 @@ if __name__ == "__main__":
             size=40,
             color="#00f5d4",
             pulse_count=6,
-            speed=0.5,
-            label="PULSER",
+            speed=1.5,
+            label="",
             height=400,
         )
 
