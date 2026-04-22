@@ -187,12 +187,12 @@ if __name__ == "__main__":
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         pulser(
-            size=size,
-            color=color,
-            pulse_count=rings,
-            speed=speed,
-            label=label,
-            height=height,
+            size=80,
+            color="#00f5d4",
+            pulse_count=6,
+            speed=1.8,
+            label="PULSER",
+            height=220,
         )
 
     st.divider()
