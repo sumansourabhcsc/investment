@@ -168,20 +168,20 @@ if __name__ == "__main__":
         unsafe_allow_html=True,
     )
 
-    st.title("🔴 Pulser Component")
-    st.markdown("A reusable animated radar / sonar pulser for Streamlit apps.")
+   # st.title("🔴 Pulser Component")
+  #  st.markdown("A reusable animated radar / sonar pulser for Streamlit apps.")
 
     st.divider()
 
     # ── Sidebar controls ──────────────────────────────────────────────────────
-    with st.sidebar:
-        st.header("Customize")
-        color   = st.color_picker("Color",        "#00f5d4")
-        size    = st.slider("Core size (px)",      40, 160, 80, step=10)
-        rings   = st.slider("Ripple rings",        1, 6, 3)
-        speed   = st.slider("Speed (seconds)",     0.5, 4.0, 1.8, step=0.1)
-        label   = st.text_input("Label text",      "SCANNING")
-        height  = st.slider("Container height",    120, 400, 220, step=20)
+  #  with st.sidebar:
+   #     st.header("Customize")
+    #    color   = st.color_picker("Color",        "#00f5d4")
+     #   size    = st.slider("Core size (px)",      40, 160, 80, step=10)
+      #  rings   = st.slider("Ripple rings",        1, 6, 3)
+       # speed   = st.slider("Speed (seconds)",     0.5, 4.0, 1.8, step=0.1)
+        #label   = st.text_input("Label text",      "SCANNING")
+       # height  = st.slider("Container height",    120, 400, 220, step=20)
 
     # ── Render ────────────────────────────────────────────────────────────────
     col1, col2, col3 = st.columns([1, 2, 1])
