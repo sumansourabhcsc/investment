@@ -196,7 +196,7 @@ if __name__ == "__main__":
         )
 
     st.divider()
-    st.subheader("Usage in your own app")
+#    st.subheader("Usage in your own app")
 #     st.code(
 #         """
 # from pulser import pulser
