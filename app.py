@@ -192,27 +192,27 @@ if __name__ == "__main__":
             pulse_count=6,
             speed=1.8,
             label="PULSER",
-            height=220,
+            height=400,
         )
 
     st.divider()
     st.subheader("Usage in your own app")
-    st.code(
-        """
-from pulser import pulser
+#     st.code(
+#         """
+# from pulser import pulser
 
-# Minimal — just drop it anywhere in your Streamlit page
-pulser()
+# # Minimal — just drop it anywhere in your Streamlit page
+# pulser()
 
-# Customised
-pulser(
-    size=80,
-    color="#ff6b6b",
-    pulse_count=3,
-    speed=1.8,
-    label="LIVE",
-    height=220,
-)
-""",
-        language="python",
-    )
+# # Customised
+# pulser(
+#     size=80,
+#     color="#ff6b6b",
+#     pulse_count=3,
+#     speed=1.8,
+#     label="LIVE",
+#     height=220,
+# )
+# """,
+#         language="python",
+#     )
