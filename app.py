@@ -171,7 +171,7 @@ if __name__ == "__main__":
    # st.title("🔴 Pulser Component")
   #  st.markdown("A reusable animated radar / sonar pulser for Streamlit apps.")
 
-    st.divider()
+  #  st.divider()
 
     # ── Sidebar controls ──────────────────────────────────────────────────────
   #  with st.sidebar:
@@ -187,15 +187,15 @@ if __name__ == "__main__":
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         pulser(
-            size=80,
+            size=40,
             color="#00f5d4",
             pulse_count=6,
-            speed=1.8,
+            speed=0.5,
             label="PULSER",
             height=400,
         )
 
-    st.divider()
+#    st.divider()
 #    st.subheader("Usage in your own app")
 #     st.code(
 #         """
