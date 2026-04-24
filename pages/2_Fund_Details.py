@@ -39,7 +39,7 @@ fund_df = load_fund(folder)
 # =========================
 # LOAD DAILY SNAPSHOT
 # =========================
-daily_path = f"mutualfund/{selected_fund}/daily_{scheme_code}.csv"
+daily_path = f"{selected_fund}/daily_{scheme_code}.csv"
 
 try:
     daily_df = pd.read_csv(daily_path)
