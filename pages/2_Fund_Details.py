@@ -163,3 +163,35 @@ else:
         df_display["Daily Change %"] = df_display["NAV"].pct_change(-1) * 100
 
     st.dataframe(df_display, use_container_width=True)
+
+
+st.divider()
+
+# =========================
+# 📈 CURRENT VALUE TREND
+# =========================
+st.subheader("📈 Portfolio Value Trend")
+
+if daily_df.empty:
+    st.info("No data available to plot")
+else:
+    chart_df = daily_df.copy()
+
+    # Ensure sorted oldest → latest for proper graph
+    chart_df = chart_df.sort_values("date")
+
+    fig = px.line(
+        chart_df,
+        x="date",
+        y="current_value",
+        markers=True,
+        title="Portfolio Value Over Time"
+    )
+
+    fig.update_layout(
+        xaxis_title="Date",
+        yaxis_title="Current Value (₹)",
+        hovermode="x unified"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
