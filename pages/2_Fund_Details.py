@@ -40,7 +40,7 @@ fund_df = load_fund(folder)
 # LOAD DAILY SNAPSHOT
 # =========================
 daily_path = f"mutualfund/{folder}/daily_{scheme_code}.csv"
-st.write("Selected Fund:", selected_fund)
+#st.write("Selected Fund:", selected_fund)
 #st.write("Folder:", folder)
 #st.write("Daily Path:", daily_path)
 
