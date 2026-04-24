@@ -22,12 +22,12 @@ nav_df = load_nav()
 # FUND SELECTION (SAFE)
 # =========================
 fund_options = list(mutual_funds.keys())
-print(fund_options )
+st.title(fund_options )
 selected_fund = st.selectbox("Select Fund", fund_options)
-print(selected_fund)
+st.title(selected_fund)
 scheme_code = mutual_funds[selected_fund]["code"]
 folder = mutual_funds[selected_fund]["folder"]
-print(folder)
+st.title(folder)
 
 # =========================
 # LOAD DATA
