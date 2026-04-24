@@ -26,6 +26,7 @@ fund_options = list(mutual_funds.keys())
 selected_fund = st.selectbox("Select Fund", fund_options)
 #st.title(selected_fund)
 scheme_code = mutual_funds[selected_fund]["code"]
+st.title(scheme_code)
 folder = mutual_funds[selected_fund]["folder"]
 #st.title(folder)
 
@@ -41,7 +42,7 @@ fund_df = load_fund(folder)
 # GET LATEST NAV (BY CODE)
 # =========================
 match = nav_df[nav_df["SchemeCode"] == str(scheme_code)]
-st.title(match)
+#st.title(match)
 if match.empty:
     st.error("No NAV data found for this fund")
     st.stop()
