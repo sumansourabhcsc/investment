@@ -6,6 +6,13 @@ from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
 from utils.xirr_helper import compute_fund_xirr
 
+from pathlib import Path
+
+# Get project root (adjust if needed)
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+daily_path = BASE_DIR / folder / f"daily_{scheme_code}.csv"
+
 
 
 # =========================
@@ -137,6 +144,10 @@ fund_df_sorted["Date"] = fund_df_sorted["Date"].dt.date
 st.dataframe(fund_df_sorted, use_container_width=True)
 
 st.divider()
+
+
+st.write("DEBUG PATH:", daily_path)
+st.write("FILE EXISTS:", daily_path.exists())
 
 # =========================
 # DAILY SNAPSHOT TABLE
