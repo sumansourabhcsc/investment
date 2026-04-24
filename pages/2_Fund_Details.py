@@ -34,24 +34,6 @@ folder = mutual_funds[selected_fund]["folder"]
 fund_df = load_fund(folder)
 
 
-# =========================
-# LOAD DAILY SNAPSHOT
-# =========================
-daily_path = f"{folder}.csv"
-
-try:
-    daily_df = pd.read_csv(daily_path)
-
-    # Convert date
-    daily_df["Date"] = pd.to_datetime(daily_df["Date"], format="%d-%m-%Y")
-
-    # Sort latest first
-    daily_df = daily_df.sort_values("Date", ascending=False).reset_index(drop=True)
-
-except FileNotFoundError:
-    daily_df = pd.DataFrame()
-
-
 
 
 # =========================
@@ -139,24 +121,4 @@ st.dataframe(fund_df_sorted, use_container_width=True)
 
 st.divider()
 
-
-
-# =========================
-# DAILY SNAPSHOT TABLE
-# =========================
-st.subheader("📅 Daily NAV Movement")
-
-if daily_df.empty:
-    st.info("No daily snapshot data available for this fund")
-else:
-    df_display = daily_df.copy()
-
-    # Format date nicely
-    df_display["Date"] = df_display["Date"].dt.date
-
-    # Optional: Calculate daily change %
-    if "NAV" in df_display.columns:
-        df_display["Daily Change %"] = df_display["NAV"].pct_change(-1) * 100
-
-    st.dataframe(df_display, use_container_width=True)
 
