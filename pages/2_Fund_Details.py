@@ -6,12 +6,6 @@ from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
 from utils.xirr_helper import compute_fund_xirr
 
-from pathlib import Path
-
-# Get project root (adjust if needed)
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-daily_path = BASE_DIR / folder / f"daily_{scheme_code}.csv"
 
 
 
