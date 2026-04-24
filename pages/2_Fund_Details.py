@@ -48,7 +48,7 @@ try:
     daily_df = pd.read_csv(daily_path)
 
     # Convert date
-    daily_df["Date"] = pd.to_datetime(daily_df["Date"], format="%d-%m-%Y")
+    daily_df["Date"] = pd.to_datetime(daily_df["date"], format="%d-%m-%Y")
 
     # Sort latest first
     daily_df = daily_df.sort_values("Date", ascending=False).reset_index(drop=True)
