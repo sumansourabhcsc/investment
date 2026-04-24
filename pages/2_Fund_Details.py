@@ -37,7 +37,7 @@ fund_df = load_fund(folder)
 # =========================
 # LOAD DAILY SNAPSHOT
 # =========================
-daily_path = f"{folder}/daily_{scheme_code}.csv"
+daily_path = f"{folder}.csv"
 
 try:
     daily_df = pd.read_csv(daily_path)
@@ -140,8 +140,6 @@ st.dataframe(fund_df_sorted, use_container_width=True)
 st.divider()
 
 
-st.write("DEBUG PATH:", daily_path)
-st.write("FILE EXISTS:", daily_path.exists())
 
 # =========================
 # DAILY SNAPSHOT TABLE
