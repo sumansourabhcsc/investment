@@ -171,6 +171,100 @@ with col2:
 
 st.divider()
 
+########################
+
+import requests
+from datetime import date, timedelta
+import plotly.express as px
+
+st.divider()
+
+# =========================
+# NAV HISTORY SECTION
+# =========================
+st.subheader("📈 NAV History")
+
+# Date range selector - default last 1 year
+col_d1, col_d2 = st.columns(2)
+with col_d1:
+    start_date = st.date_input(
+        "Start Date",
+        value=date.today() - timedelta(days=365),
+        max_value=date.today()
+    )
+with col_d2:
+    end_date = st.date_input(
+        "End Date",
+        value=date.today(),
+        min_value=start_date,
+        max_value=date.today()
+    )
+
+# Fetch NAV history
+@st.cache_data(ttl=3600)
+def fetch_nav_history(fund_code, start_date, end_date):
+    url = f"https://api.mfapi.in/mf/{fund_code}"
+    params = {
+        "startDate": start_date.strftime("%d-%m-%Y"),
+        "endDate": end_date.strftime("%d-%m-%Y")
+    }
+    try:
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        if "data" in data and data["data"]:
+            df = pd.DataFrame(data["data"])
+            df["date"] = pd.to_datetime(df["date"], format="%d-%m-%Y")
+            df["nav"] = pd.to_numeric(df["nav"], errors="coerce")
+            df = df.sort_values("date", ascending=True).reset_index(drop=True)
+            df.rename(columns={"date": "Date", "nav": "NAV"}, inplace=True)
+            return df
+        return pd.DataFrame()
+    except Exception as e:
+        st.error(f"Failed to fetch NAV history: {e}")
+        return pd.DataFrame()
+
+nav_df = fetch_nav_history(scheme_code, start_date, end_date)
+
+if nav_df.empty:
+    st.warning("No NAV history data available for the selected date range.")
+else:
+    col_table, col_chart = st.columns([1, 2])
+
+    with col_table:
+        st.markdown("**NAV Table**")
+        display_df = nav_df.copy()
+        display_df["Date"] = display_df["Date"].dt.date
+        display_df["NAV"] = display_df["NAV"].round(4)
+        st.dataframe(display_df, use_container_width=True, height=400)
+
+    with col_chart:
+        st.markdown("**NAV Trend**")
+        fig = px.line(
+            nav_df,
+            x="Date",
+            y="NAV",
+            title="NAV Movement Over Time",
+            labels={"NAV": "NAV (₹)", "Date": "Date"},
+            template="plotly_white"
+        )
+        fig.update_traces(line_color="#4F8BF9", line_width=2)
+        fig.update_layout(
+            hovermode="x unified",
+            margin=dict(l=10, r=10, t=40, b=10),
+            height=400
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+st.divider()
+
+
+
+################################
+
+
+
+
 # =========================
 # 📈 CURRENT VALUE TREND
 # =========================
