@@ -228,7 +228,7 @@ def fetch_nav_history(fund_code, start_date_str, end_date_str):
 start_date_str = start_date.strftime("%d-%m-%Y")
 end_date_str = end_date.strftime("%d-%m-%Y")
 
-nav_df = fetch_nav_history(fund_code, start_date_str, end_date_str)
+nav_df = fetch_nav_history(scheme_code, start_date_str, end_date_str)
 
 if nav_df.empty:
     st.warning("No NAV history data available for the selected date range.")
