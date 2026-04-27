@@ -240,6 +240,7 @@ else:
     with col_table:
         st.markdown("**NAV Table**")
         display_df = nav_df.copy()
+        display_df = display_df.sort_values("Date", ascending=False).reset_index(drop=True)  # ← add this
         display_df["Date"] = display_df["Date"].dt.date
         display_df["NAV"] = display_df["NAV"].round(4)
         st.dataframe(display_df, use_container_width=True, height=400)
