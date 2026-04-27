@@ -202,11 +202,11 @@ with col_d2:
 
 # Fetch NAV history
 @st.cache_data(ttl=3600)
-def fetch_nav_history(fund_code, start_date, end_date):
+def fetch_nav_history(fund_code, start_date_str, end_date_str):
     url = f"https://api.mfapi.in/mf/{fund_code}"
     params = {
-        "startDate": start_date.strftime("%d-%m-%Y"),
-        "endDate": end_date.strftime("%d-%m-%Y")
+        "startDate": start_date_str,
+        "endDate": end_date_str
     }
     try:
         response = requests.get(url, params=params, timeout=10)
@@ -224,7 +224,11 @@ def fetch_nav_history(fund_code, start_date, end_date):
         st.error(f"Failed to fetch NAV history: {e}")
         return pd.DataFrame()
 
-nav_df = fetch_nav_history(scheme_code, start_date, end_date)
+# Convert to string BEFORE passing to the function
+start_date_str = start_date.strftime("%d-%m-%Y")
+end_date_str = end_date.strftime("%d-%m-%Y")
+
+nav_df = fetch_nav_history(fund_code, start_date_str, end_date_str)
 
 if nav_df.empty:
     st.warning("No NAV history data available for the selected date range.")
