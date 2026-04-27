@@ -200,16 +200,12 @@ with col_d2:
         max_value=date.today()
     )
 
-# Fetch NAV history
+# Fetch ALL NAV history (no date params — API ignores them)
 @st.cache_data(ttl=3600)
-def fetch_nav_history(fund_code, start_date_str, end_date_str):
+def fetch_nav_history(fund_code):
     url = f"https://api.mfapi.in/mf/{fund_code}"
-    params = {
-        "startDate": start_date_str,
-        "endDate": end_date_str
-    }
     try:
-        response = requests.get(url, params=params, timeout=10)
+        response = requests.get(url, timeout=10)
         response.raise_for_status()
         data = response.json()
         if "data" in data and data["data"]:
@@ -224,11 +220,17 @@ def fetch_nav_history(fund_code, start_date_str, end_date_str):
         st.error(f"Failed to fetch NAV history: {e}")
         return pd.DataFrame()
 
-# Convert to string BEFORE passing to the function
-start_date_str = start_date.strftime("%d-%m-%Y")
-end_date_str = end_date.strftime("%d-%m-%Y")
+# Fetch once and cache, then filter by selected dates
+nav_df_full = fetch_nav_history(scheme_code)
 
-nav_df = fetch_nav_history(scheme_code, start_date_str, end_date_str)
+# Filter based on selected date range (done outside cache so it reacts to date changes)
+if not nav_df_full.empty:
+    nav_df = nav_df_full[
+        (nav_df_full["Date"].dt.date >= start_date) &
+        (nav_df_full["Date"].dt.date <= end_date)
+    ].reset_index(drop=True)
+else:
+    nav_df = pd.DataFrame()
 
 if nav_df.empty:
     st.warning("No NAV history data available for the selected date range.")
