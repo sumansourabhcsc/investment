@@ -134,15 +134,15 @@ st.divider()
 # =========================
 # SIP HISTORY TABLE
 # =========================
-st.subheader("📋 SIP History (Latest → Oldest)")
+#st.subheader("📋 SIP History (Latest → Oldest)")
 
-fund_df_sorted = fund_df.sort_values(by="Date", ascending=False).reset_index(drop=True)
-fund_df_sorted["Date"] = fund_df_sorted["Date"].dt.date
+#fund_df_sorted = fund_df.sort_values(by="Date", ascending=False).reset_index(drop=True)
+#fund_df_sorted["Date"] = fund_df_sorted["Date"].dt.date
 
-st.dataframe(fund_df_sorted, use_container_width=True)
+#st.dataframe(fund_df_sorted, use_container_width=True)
 
 
-st.divider()
+#st.divider()
 
 col1, col2 = st.columns(2)
 
