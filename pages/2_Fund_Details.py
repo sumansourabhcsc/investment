@@ -141,29 +141,33 @@ fund_df_sorted["Date"] = fund_df_sorted["Date"].dt.date
 
 st.dataframe(fund_df_sorted, use_container_width=True)
 
-st.divider()
 
 st.divider()
 
-# =========================
-# DAILY SNAPSHOT TABLE
-# =========================
-st.subheader("📅 Daily NAV Movement")
+col1, col2 = st.columns(2)
 
-if daily_df.empty:
-    st.info("No daily snapshot data available for this fund")
-else:
-    df_display = daily_df.copy()
+with col1:
+    # =========================
+    # SIP HISTORY TABLE
+    # =========================
+    st.subheader("📋 SIP History (Latest → Oldest)")
+    fund_df_sorted = fund_df.sort_values(by="Date", ascending=False).reset_index(drop=True)
+    fund_df_sorted["Date"] = fund_df_sorted["Date"].dt.date
+    st.dataframe(fund_df_sorted, use_container_width=True)
 
-    # Format date nicely
-    df_display["Date"] = df_display["Date"].dt.date
-
-    # Optional: Calculate daily change %
-    if "NAV" in df_display.columns:
-        df_display["Daily Change %"] = df_display["NAV"].pct_change(-1) * 100
-
-    st.dataframe(df_display, use_container_width=True)
-
+with col2:
+    # =========================
+    # DAILY SNAPSHOT TABLE
+    # =========================
+    st.subheader("📅 Daily NAV Movement")
+    if daily_df.empty:
+        st.info("No daily snapshot data available for this fund")
+    else:
+        df_display = daily_df.copy()
+        df_display["Date"] = df_display["Date"].dt.date
+        if "NAV" in df_display.columns:
+            df_display["Daily Change %"] = df_display["NAV"].pct_change(-1) * 100
+        st.dataframe(df_display, use_container_width=True)
 
 st.divider()
 
