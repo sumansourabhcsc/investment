@@ -2,44 +2,45 @@ import streamlit as st
 import pandas as pd
 import os
 import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
 from utils.calculations import calculate_invested_amount, calculate_current_value
 from utils.load_funds import load_all_funds
 from utils.xirr_overall import compute_overall_xirr
+from utils.data_loader import load_fund, load_nav
 from utils.xirr_helper import compute_fund_xirr
 
-# =========================
-# PAGE CONFIG
-# =========================
+
+
+# ✅ MUST BE FIRST Streamlit command
 st.set_page_config(page_title="Portfolio", layout="wide")
 
-st.title("🏠 Mutual Fund Portfolio")
+st.title("🏠 Mutual Fund Portfolio Overview")
 
-# =========================
-# LOAD DATA
-# =========================
 nav_df = load_nav()
 
 summary = []
+
 total_invested = 0
 total_current = 0
 
 for fund_name, meta in mutual_funds.items():
+
     try:
         code = meta["code"]
         folder = meta["folder"]
 
         fund_df = load_fund(folder)
+
         match = nav_df[nav_df["SchemeCode"] == str(code)]
 
         if match.empty:
+            st.warning(f"No NAV found for {fund_name} ({code})")
             continue
 
         latest_row = match.sort_values("Date", ascending=False).iloc[0]
+
         latest_nav = float(latest_row["NAV"])
         latest_date = latest_row["Date"].date()
 
@@ -47,6 +48,9 @@ for fund_name, meta in mutual_funds.items():
         current = calculate_current_value(fund_df, latest_nav)
 
         fund_xirr = compute_fund_xirr(fund_df, latest_nav)
+        fund_xirr_percent = fund_xirr * 100
+        fund_xirr_display = f"{fund_xirr_percent:.2f}%"
+
 
         total_invested += invested
         total_current += current
@@ -59,211 +63,388 @@ for fund_name, meta in mutual_funds.items():
             current - invested,
             latest_nav,
             latest_date,
-            f"{fund_xirr*100:.2f}%"
+            fund_xirr_display
         ])
 
     except Exception as e:
         st.error(f"{fund_name} error: {e}")
 
+
+absolute_return_overall = ((total_current - total_invested) / total_invested * 100) if total_invested > 0 else 0
+
+# Load all SIP transactions for XIRR
+all_funds_df = load_all_funds()
+
+# Compute overall XIRR
+overall_xirr = compute_overall_xirr(all_funds_df)
+
+
+# =========================
+# 📊 METRICS (NOW ON TOP)
+# =========================
+def metric_normal(col, label, value):
+    col.markdown(
+        f"""
+        <div style='padding:8px 0;'>
+            <span style='font-weight:600;'>{label}</span><br>
+            <span style='font-size:1.1rem;'>{value}</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+
+col1, col2, col3, col4, col5 = st.columns(5)
+
+metric_normal(col1, "💰 **Total Invested**", f"₹{total_invested:,.2f}")
+metric_normal(col2, "📈 **Current Value**", f"₹{total_current:,.2f}")
+metric_normal(col3, "📊 **Total P&L**", f"₹{total_current - total_invested:,.2f}")
+metric_normal(col4, "📉 **Absolute Return**", f"{absolute_return_overall:.2f}%")
+metric_normal(col5, "📌 **XIRR (Overall)**", f"{overall_xirr*100:.2f}%")
+
+
+
+st.divider()
+
+# =========================
+# 📋 TABLE BELOW & Pie Chart
+# =========================
+# =========================
+# 📋 TABLE BELOW
+# =========================
+st.subheader("Fund Details")
 df = pd.DataFrame(summary, columns=[
-    "Fund", "SchemeCode", "Invested", "Current",
-    "P&L", "Latest NAV", "NAV Date", "XIRR"
+    "Fund",
+    "SchemeCode",
+    "Invested",
+    "Current",
+    "P&L",
+    "Latest NAV",
+    "NAV Date",
+    "XIRR"
 ])
 
-absolute_return = ((total_current - total_invested) / total_invested * 100) if total_invested else 0
-overall_xirr = compute_overall_xirr(load_all_funds())
+# Layout: Table (left) + Donut Chart (right)
+col1, col2 = st.columns([7, 1])
 
-# =========================
-# KPI CARDS
-# =========================
-def metric_card(label, value):
-    return f"""
-    <div style="
-        padding:12px;
-        border-radius:12px;
-        background: linear-gradient(135deg, #1f2937, #111827);
-        text-align:center;">
-        <div style="font-size:13px; color:#9CA3AF;">{label}</div>
-        <div style="font-size:20px; font-weight:bold;">{value}</div>
-    </div>
-    """
+with col1:
+    st.dataframe(df, use_container_width=True, height=len(df) * 40)
 
-# =========================
-# TABS
-# =========================
-tab1, tab2, tab3, tab4 = st.tabs([
-    "📊 Overview",
-    "📈 Performance",
-    "📅 Daily",
-    "📆 Monthly"
-])
-
-# =========================
-# 📊 TAB 1: OVERVIEW
-# =========================
-with tab1:
-
-    col1, col2, col3, col4, col5 = st.columns(5)
-
-    col1.markdown(metric_card("Invested", f"₹{total_invested:,.0f}"), unsafe_allow_html=True)
-    col2.markdown(metric_card("Current", f"₹{total_current:,.0f}"), unsafe_allow_html=True)
-    col3.markdown(metric_card("P&L", f"₹{total_current-total_invested:,.0f}"), unsafe_allow_html=True)
-    col4.markdown(metric_card("Return", f"{absolute_return:.2f}%"), unsafe_allow_html=True)
-    col5.markdown(metric_card("XIRR", f"{overall_xirr*100:.2f}%"), unsafe_allow_html=True)
-
-    st.divider()
-
-    col1, col2 = st.columns([3, 2])
-
-    with col1:
-        def color_pnl(val):
-            if pd.isna(val):
-                return ""
-            return "color: green; font-weight: bold" if val > 0 else "color: red; font-weight: bold"
-
-        styled_df = df.style \
-            .format({
-                "Invested": "₹{:,.0f}",
-                "Current": "₹{:,.0f}",
-                "P&L": "₹{:,.0f}",
-                "Latest NAV": "{:.2f}"
-            }) \
-            .map(color_pnl, subset=["P&L"])
-
-        st.dataframe(styled_df, use_container_width=True, height=350)
-
-    with col2:
-        fig = px.pie(df, names="Fund", values="Current", hole=0.5)
-        fig.update_layout(height=400, showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-
-# =========================
-# 📈 TAB 2: PERFORMANCE
-# =========================
-with tab2:
-
-    daily_df = pd.read_csv("data/portfolio_daily.csv")
-    daily_df["Date"] = pd.to_datetime(daily_df["Date"], format="%d-%m-%Y")
-    daily_df = daily_df.sort_values("Date")
-
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-    fig.add_trace(
-        go.Bar(
-            x=daily_df["Date"],
-            y=daily_df["OneDayChange"],
-            name="Daily Change",
-            marker_color=["green" if x > 0 else "red" for x in daily_df["OneDayChange"]],
-            opacity=0.6
-        ),
-        secondary_y=False
+with col2:
+    # Donut chart using Current Value
+    fig = px.pie(
+        df,
+        names="Fund",
+        values="Current",
+        hole=0.5,
+        title="Fund Allocation"
     )
 
-    fig.add_trace(
-        go.Scatter(
-            x=daily_df["Date"],
-            y=daily_df["TotalValue"],
-            name="Total Value",
-            mode="lines"
-        ),
-        secondary_y=True
+    # Show percent inside slices
+    fig.update_traces(
+        textinfo="percent",
+        textposition="inside"
     )
 
+    # Hide legend
+    fig.update_layout(showlegend=False)
+
+    # Center text (optional)
     fig.update_layout(
-        template="plotly_dark",
-        height=400,
-        hovermode="x unified"
+        annotations=[
+            dict(
+                text="100%",
+                x=0.5,
+                y=0.5,
+                font_size=28,
+                showarrow=False
+            )
+        ]
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    # Render only once with unique key
+    st.plotly_chart(fig, use_container_width=True, key="allocation_donut")
+
 
 # =========================
-# 📅 TAB 3: DAILY
+# 📋 TABLE BELOW & Pie Chart - END
 # =========================
-with tab3:
+st.divider()
+# =========================
+# 📊 DAILY SUMMARY (from portfolio_daily.csv)
+# =========================
 
-    st.subheader("Daily Summary")
+import pandas as pd
 
-    daily_df = pd.read_csv("data/portfolio_daily.csv")
-    daily_df["Date"] = pd.to_datetime(daily_df["Date"], format="%d-%m-%Y")
-    daily_df = daily_df.sort_values("Date", ascending=False)
+# Load daily summary file
+daily_path = "data/portfolio_daily.csv"
+daily_df = pd.read_csv(daily_path)
 
-    st.dataframe(daily_df, use_container_width=True, height=400)
+# Convert Date to proper datetime (handles dd-mm-yyyy)
+daily_df["Date"] = pd.to_datetime(daily_df["Date"], format="%d-%m-%Y")
 
-    st.divider()
+# Sort latest date on top
+daily_df = daily_df.sort_values("Date", ascending=False)
 
-    st.subheader("Daily Change")
+# Format date back to dd-mm-yyyy for display
+daily_df["Date"] = daily_df["Date"].dt.strftime("%d-%m-%Y")
 
-    latest_nav_date = nav_df["Date"].max().date()
-    selected_date = st.date_input("Select Date", value=latest_nav_date)
+st.subheader("Daily Summary Dataset")
 
-    rows = []
+st.dataframe(
+    daily_df,
+    use_container_width=True,
+)
 
-    for fund_name, meta in mutual_funds.items():
-        file_path = f"mutualfund/{meta['folder']}/daily_{meta['code']}.csv"
-        if not os.path.exists(file_path):
-            continue
+#####Graph
+import plotly.graph_objects as go
 
-        df_d = pd.read_csv(file_path)
-        df_d["date"] = pd.to_datetime(df_d["date"], format="%d-%m-%Y", errors="coerce")
-        df_d = df_d.dropna().sort_values("date")
+# Convert again to datetime for plotting
+daily_df["Date"] = pd.to_datetime(daily_df["Date"], format="%d-%m-%Y")
 
-        today = df_d[df_d["date"] == pd.to_datetime(selected_date)]
-        prev = df_d[df_d["date"] < pd.to_datetime(selected_date)]
+# Sort ascending for proper chart flow
+daily_df = daily_df.sort_values("Date")
 
-        if today.empty or prev.empty:
-            continue
+# Convert % column to float
+daily_df["OneDayChangePct_val"] = daily_df["OneDayChangePct"].str.replace("%", "").astype(float)
 
-        t = today.iloc[-1]
-        p = prev.iloc[-1]
 
-        change = float(t["absolute_gain_loss"]) - float(p["absolute_gain_loss"])
+from plotly.subplots import make_subplots
 
-        rows.append([
-            fund_name,
-            round(change, 2)
-        ])
+fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-    df_change = pd.DataFrame(rows, columns=["Fund", "Change"])
+# Bar (daily change)
+fig.add_trace(
+    go.Bar(
+        x=daily_df["Date"],
+        y=daily_df["OneDayChange"],
+        name="Daily Change",
+        marker_color=["green" if x > 0 else "red" for x in daily_df["OneDayChange"]],
+        opacity=0.6
+    ),
+    secondary_y=False
+)
 
-    st.dataframe(df_change, use_container_width=True)
+# Line (total value)
+fig.add_trace(
+    go.Scatter(
+        x=daily_df["Date"],
+        y=daily_df["TotalValue"],
+        name="Total Value",
+        mode="lines+markers"
+    ),
+    secondary_y=True
+)
 
-    st.markdown(f"### 💹 Total Change: ₹{df_change['Change'].sum():,.2f}")
+fig.update_layout(
+    title="Portfolio Performance",
+    hovermode="x unified",
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=-0.3,
+        xanchor="center",
+        x=0.5
+    )
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
+
+
+
+
 
 # =========================
-# 📆 TAB 4: MONTHLY
+# 📊 DAILY SUMMARY (from portfolio_daily.csv) - END
 # =========================
-with tab4:
 
-    monthly_data = []
 
-    for fund_name, meta in mutual_funds.items():
-        try:
-            df = load_fund(meta["folder"])
-            df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+st.divider()
+st.subheader("📊 Monthly Investment Summary by Fund & Year")
 
-            df["Year"] = df["Date"].dt.year
-            df["Month"] = df["Date"].dt.month
+monthly_data = []
 
-            grouped = df.groupby(["Year", "Month"])["Amount"].sum().reset_index()
+for fund_name, meta in mutual_funds.items():
+    try:
+        folder = meta["folder"]
+        code = meta["code"]
 
-            for _, r in grouped.iterrows():
-                monthly_data.append([
-                    fund_name,
-                    int(r["Year"]),
-                    int(r["Month"]),
-                    r["Amount"]
-                ])
-        except:
-            pass
+        df = load_fund(folder)
 
-    monthly_df = pd.DataFrame(monthly_data, columns=["Fund", "Year", "Month", "Amount"])
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+        df = df.dropna(subset=["Date"])
 
-    years = sorted(monthly_df["Year"].unique())
-    selected_year = st.selectbox("Year", years, index=len(years)-1)
+        df["Year"] = df["Date"].dt.year
+        df["Month"] = df["Date"].dt.month
 
-    df_year = monthly_df[monthly_df["Year"] == selected_year]
+        grouped = df.groupby(["Year", "Month"])["Amount"].sum().reset_index()
 
-    pivot = df_year.pivot_table(index="Fund", columns="Month", values="Amount", fill_value=0)
+        for _, row in grouped.iterrows():
+            monthly_data.append([
+                code,
+                fund_name,
+                row["Year"],
+                row["Month"],
+                row["Amount"]
+            ])
 
-    st.dataframe(pivot, use_container_width=True)
+    except Exception as e:
+        st.warning(f"{fund_name} skipped: {e}")
+
+
+if monthly_data:
+
+    monthly_df = pd.DataFrame(monthly_data, columns=[
+        "Code", "Fund", "Year", "Month", "Amount"
+    ])
+
+    years = sorted(monthly_df["Year"].dropna().astype(int).unique())
+    selected_year = st.selectbox("Select Year", years, index=len(years)-1)
+
+    year_df = monthly_df[monthly_df["Year"] == selected_year]
+
+    pivot_df = year_df.pivot_table(
+        index=["Code", "Fund"],
+        columns="Month",
+        values="Amount",
+        aggfunc="sum",
+        fill_value=0
+    ).reset_index()
+
+    # =========================
+    # MONTH FORMAT
+    # =========================
+    month_map = {
+        1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr",
+        5: "May", 6: "Jun", 7: "Jul", 8: "Aug",
+        9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"
+    }
+
+    pivot_df = pivot_df.rename(columns=month_map)
+
+    # Ensure all months exist
+    for m in month_map.values():
+        if m not in pivot_df.columns:
+            pivot_df[m] = 0
+
+    # Column order
+    month_cols = list(month_map.values())
+    pivot_df = pivot_df[["Code", "Fund"] + month_cols]
+
+    # =========================
+    # ✅ CREATE TOTAL COLUMN (FIRST!)
+    # =========================
+    pivot_df["Total"] = pivot_df[month_cols].sum(axis=1)
+
+    # =========================
+    # ✅ NOW CREATE TOTAL ROW
+    # =========================
+    total_values = ["", "TOTAL"]
+
+    for m in month_cols:
+        total_values.append(pivot_df[m].sum())
+
+    total_values.append(pivot_df["Total"].sum())
+
+    total_df = pd.DataFrame([total_values], columns=pivot_df.columns)
+
+    final_df = pd.concat([pivot_df, total_df], ignore_index=True)
+
+
+
+    
+
+    st.markdown(f"### Year {selected_year}")
+    # =========================
+    # STYLING
+    # =========================
+    def highlight_total_row(row):
+        if row["Fund"] == "TOTAL":
+            return ["background-color: #5c1a33; color: white; font-weight: bold"] * len(row)
+        return [""] * len(row)
+
+    def highlight_total_column(col):
+        if col.name == "Total":
+            return ["background-color: #5c1a33; color: white; font-weight: bold"] * len(col)
+        return [""] * len(col)
+
+    
+    numeric_cols = final_df.select_dtypes(include="number").columns
+
+    st.dataframe(
+    final_df.style
+        .apply(highlight_total_row, axis=1)
+        .apply(highlight_total_column, axis=0)
+        .format({col: "{:,.0f}" for col in numeric_cols}),
+    use_container_width=True
+)
+
+############################################################
+
+# ---------------------------------------------------------
+# DAILY CHANGE TABLE
+# ---------------------------------------------------------
+st.divider()
+st.subheader("📅 Daily Change Across Funds")
+
+latest_nav_date = nav_df["Date"].max().date()
+selected_date = st.date_input("Select Date", value=latest_nav_date)
+selected_date_dt = pd.to_datetime(selected_date)
+
+daily_rows = []
+
+for fund_name, meta in mutual_funds.items():
+    folder = meta["folder"]
+    code = meta["code"]
+
+    file_path = f"mutualfund/{folder}/daily_{code}.csv"
+    if not os.path.exists(file_path):
+        continue
+
+    df_daily = pd.read_csv(file_path)
+    df_daily.columns = df_daily.columns.str.strip()
+    df_daily["date"] = pd.to_datetime(df_daily["date"], format="%d-%m-%Y", errors="coerce")
+    df_daily = df_daily.dropna(subset=["date"]).sort_values("date")
+
+    today_rows = df_daily[df_daily["date"] == selected_date_dt]
+    if today_rows.empty:
+        continue
+
+    row_today = today_rows.iloc[-1]
+    prev_rows = df_daily[df_daily["date"] < selected_date_dt]
+    if prev_rows.empty:
+        continue
+
+    row_prev = prev_rows.iloc[-1]
+
+    change_in_value = float(row_today["absolute_gain_loss"]) - float(row_prev["absolute_gain_loss"])
+    nav_today = float(row_today["nav"])
+    nav_prev = float(row_prev["nav"])
+    pct_change_nav = ((nav_today - nav_prev) / nav_prev * 100) if nav_prev != 0 else 0
+    indicator = "🟢 ↑" if nav_today > nav_prev else "🔴 ↓"
+
+    daily_rows.append([
+        row_today["date"].strftime("%d-%m-%Y"),
+        fund_name,
+        code,
+        round(change_in_value, 2),
+        f"{pct_change_nav:.2f}%",
+        indicator
+    ])
+
+df_daily = pd.DataFrame(daily_rows, columns=[
+    "Date",
+    "Fund Name",
+    "Fund Code",
+    "Change in Value",
+    "% Change in NAV",
+    "Indicator"
+])
+
+st.dataframe(df_daily, width="stretch")
+
+st.markdown(
+    f"### 💹 Total Change Across All Funds: **₹{df_daily['Change in Value'].sum():,.2f}**"
+)
