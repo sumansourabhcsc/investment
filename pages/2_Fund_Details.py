@@ -223,6 +223,30 @@ def fetch_nav_history(fund_code):
 # Fetch once and cache, then filter by selected dates
 nav_df_full = fetch_nav_history(scheme_code)
 
+
+
+# =========================
+# NAV STATS (HIGH / LOW)
+# =========================
+max_row = nav_df.loc[nav_df["NAV"].idxmax()]
+min_row = nav_df.loc[nav_df["NAV"].idxmin()]
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.metric(
+        label="🔼 Highest NAV",
+        value=round(max_row["NAV"], 4),
+        delta=f"on {max_row['Date'].date()}"
+    )
+
+with col2:
+    st.metric(
+        label="🔽 Lowest NAV",
+        value=round(min_row["NAV"], 4),
+        delta=f"on {min_row['Date'].date()}"
+    )
+
 # Filter based on selected date range (done outside cache so it reacts to date changes)
 if not nav_df_full.empty:
     nav_df = nav_df_full[
@@ -236,6 +260,8 @@ if nav_df.empty:
     st.warning("No NAV history data available for the selected date range.")
 else:
     col_table, col_chart = st.columns([1, 2])
+
+
 
     with col_table:
         st.markdown("**NAV Table**")
