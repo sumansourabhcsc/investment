@@ -134,7 +134,7 @@ with tab1:
 
     with col2:
         fig = px.pie(df, names="Fund", values="Current", hole=0.5)
-        fig.update_layout(height=350)
+        fig.update_layout(height=350, showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
 
 # =========================
