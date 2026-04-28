@@ -117,7 +117,9 @@ with tab1:
 
     with col1:
         def color_pnl(val):
-            return "color: green" if val > 0 else "color: red"
+            if pd.isna(val):
+                return ""
+            return "color: green; font-weight: bold" if val > 0 else "color: red; font-weight: bold"
 
         styled_df = df.style \
             .format({
@@ -126,7 +128,7 @@ with tab1:
                 "P&L": "₹{:,.0f}",
                 "Latest NAV": "{:.2f}"
             }) \
-            .applymap(color_pnl, subset=["P&L"])
+            .map(color_pnl, subset=["P&L"])
 
         st.dataframe(styled_df, use_container_width=True, height=350)
 
