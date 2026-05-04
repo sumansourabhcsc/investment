@@ -167,6 +167,28 @@ with col2:
     st.plotly_chart(fig, use_container_width=True, key="allocation_donut")
 
 
+
+import plotly.express as px
+
+fig_bar = px.bar(
+    df,
+    x=["Total"] * len(df),   # single bar
+    y="Current",
+    color="Fund",
+    title="Fund Allocation - Stacked Bar"
+)
+
+fig_bar.update_layout(
+    barmode="stack",
+    showlegend=True
+)
+
+st.plotly_chart(fig_bar, use_container_width=True, key="stacked_bar")
+
+
+
+
+
 # =========================
 # 📋 TABLE BELOW & Pie Chart - END
 # =========================
