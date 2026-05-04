@@ -167,24 +167,18 @@ with col2:
     st.plotly_chart(fig, use_container_width=True, key="allocation_donut")
 
 
-
-import plotly.express as px
-
-fig_bar = px.bar(
+fig_tree = px.treemap(
     df,
-    x=["Total"] * len(df),   # single bar
-    y="Current",
-    color="Fund",
-    title="Fund Allocation - Stacked Bar"
+    path=["Fund"],      # hierarchy (can extend later)
+    values="Current",
+    title="Fund Allocation - Treemap"
 )
 
-fig_bar.update_layout(
-    barmode="stack",
-    showlegend=True
+fig_tree.update_traces(
+    textinfo="label+percent entry"
 )
 
-st.plotly_chart(fig_bar, use_container_width=True, key="stacked_bar")
-
+st.plotly_chart(fig_tree, use_container_width=True, key="treemap")
 
 
 
