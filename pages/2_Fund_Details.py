@@ -311,6 +311,9 @@ if daily_df.empty:
 else:
     chart_df = daily_df.copy()
 
+    # ✅ Convert to datetime (IMPORTANT)
+    chart_df["date"] = pd.to_datetime(chart_df["date"], format="%d-%m-%Y")
+
     # Ensure sorted oldest → latest for proper graph
     chart_df = chart_df.sort_values("date")
 
