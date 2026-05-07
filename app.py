@@ -225,12 +225,21 @@ if __name__ == "__main__":
 
 import streamlit as st
 import requests
+import time
+
+# -----------------------------------
+# GitHub Configuration
+# -----------------------------------
 
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 
 OWNER = "sumansourabhcsc"
 REPO = "investment"
 BRANCH = "main"
+
+# -----------------------------------
+# Trigger Workflow Function
+# -----------------------------------
 
 def trigger_workflow(workflow_file):
 
@@ -253,23 +262,31 @@ def trigger_workflow(workflow_file):
 
     return response
 
+# -----------------------------------
+# Streamlit UI
+# -----------------------------------
 
-workflows = [
-    "fetch_nav_daily.yml",
-    "update_fund_snapshots.yml",
-    "update_fetch_nav_daily.yml"
-]
+st.title("GitHub Workflow Runner")
 
-for wf in workflows:
+if st.button("Run All Workflows"):
 
-    st.write(f"Triggering: {wf}")
+    workflows = [
+        "fetch_nav_daily.yml",
+        "update_fund_snapshots.yml",
+        "update_fetch_nav_daily.yml"
+    ]
 
-    response = trigger_workflow(wf)
+    for wf in workflows:
 
-    st.write("Status Code:", response.status_code)
-    st.write("Response:", response.text)
+        st.write(f"Triggering: {wf}")
 
-    if response.status_code == 204:
-        st.success(f"{wf} triggered successfully")
-    else:
-        st.error(f"Failed to trigger {wf}")
+        response = trigger_workflow(wf)
+
+        st.write("Status:", response.status_code)
+
+        if response.status_code == 204:
+            st.success(f"{wf} started successfully")
+        else:
+            st.error(response.text)
+
+        time.sleep(2)
