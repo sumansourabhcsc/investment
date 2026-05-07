@@ -227,6 +227,13 @@ import streamlit as st
 import requests
 import time
 
+import streamlit as st
+
+token = st.secrets["GITHUB_TOKEN"]
+
+st.write("Token Length:", len(token))
+st.write("First 5 chars:", token[:5])
+
 # -----------------------------------
 # GitHub Configuration
 # -----------------------------------
@@ -290,3 +297,4 @@ if st.button("Run All Workflows"):
             st.error(response.text)
 
         time.sleep(2)
+
