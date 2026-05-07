@@ -195,7 +195,7 @@ if __name__ == "__main__":
             height=400,
         )
 
-#    st.divider()
+    st.divider()
 #    st.subheader("Usage in your own app")
 #     st.code(
 #         """
@@ -216,3 +216,74 @@ if __name__ == "__main__":
 # """,
 #         language="python",
 #     )
+
+
+
+
+
+########################################################
+
+import streamlit as st
+import requests
+import time
+
+# -----------------------------
+# GitHub Configuration
+# -----------------------------
+GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
+
+OWNER = "YOUR_GITHUB_USERNAME"
+REPO = "YOUR_REPO_NAME"
+BRANCH = "main"
+
+# -----------------------------
+# Trigger Workflow Function
+# -----------------------------
+def trigger_workflow(workflow_file):
+
+    url = f"https://api.github.com/repos/{OWNER}/{REPO}/actions/workflows/{workflow_file}/dispatches"
+
+    headers = {
+        "Authorization": f"Bearer {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    payload = {
+        "ref": BRANCH
+    }
+
+    response = requests.post(
+        url,
+        headers=headers,
+        json=payload
+    )
+
+    return response.status_code
+
+
+# -----------------------------
+# Streamlit UI
+# -----------------------------
+st.title("GitHub Workflow Runner")
+
+if st.button("Run All Workflows"):
+
+    workflows = [
+        "fetch_nav_daily.yml",
+        "update_fund_snapshots.yml",
+        "update_fetch_nav_daily.yml"
+    ]
+
+    for workflow in workflows:
+
+        st.write(f"Triggering: {workflow}")
+
+        status = trigger_workflow(workflow)
+
+        if status == 204:
+            st.success(f"{workflow} triggered successfully")
+        else:
+            st.error(f"Failed to trigger {workflow}")
+
+        # small delay between triggers
+        time.sleep(2)
