@@ -216,7 +216,25 @@ if __name__ == "__main__":
 # """,
 #         language="python",
 #     )
+#########################################
+##########################################
 
+import requests
+import streamlit as st
+
+token = st.secrets["GITHUB_TOKEN"]
+
+headers = {
+    "Authorization": f"token {token}"
+}
+
+response = requests.get(
+    "https://api.github.com/user",
+    headers=headers
+)
+
+st.write("Auth Test Status:", response.status_code)
+st.write(response.text)
 
 
 
