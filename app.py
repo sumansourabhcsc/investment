@@ -232,8 +232,8 @@ import time
 # -----------------------------
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 
-OWNER = "YOUR_GITHUB_USERNAME"
-REPO = "YOUR_REPO_NAME"
+#OWNER = "YOUR_GITHUB_USERNAME"
+#REPO = "YOUR_REPO_NAME"
 BRANCH = "main"
 
 # -----------------------------
@@ -241,7 +241,7 @@ BRANCH = "main"
 # -----------------------------
 def trigger_workflow(workflow_file):
 
-    url = f"https://api.github.com/repos/{OWNER}/{REPO}/actions/workflows/{workflow_file}/dispatches"
+    url = f"https://api.github.com/repos/sumansourabhcsc/investment/actions/workflows/{workflow_file}/dispatches"
 
     headers = {
         "Authorization": f"Bearer {GITHUB_TOKEN}",
