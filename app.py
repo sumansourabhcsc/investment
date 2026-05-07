@@ -236,7 +236,10 @@ response = requests.get(
 st.write("Auth Test Status:", response.status_code)
 st.write(response.text)
 
+token = st.secrets["GITHUB_TOKEN"]
 
+st.write(repr(token))
+st.write(len(token))
 
 
 ########################################################
