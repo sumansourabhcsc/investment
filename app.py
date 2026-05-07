@@ -225,23 +225,16 @@ if __name__ == "__main__":
 
 import streamlit as st
 import requests
-import time
 
-# -----------------------------
-# GitHub Configuration
-# -----------------------------
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 
-#OWNER = "YOUR_GITHUB_USERNAME"
-#REPO = "YOUR_REPO_NAME"
+OWNER = "sumansourabhcsc"
+REPO = "investment"
 BRANCH = "main"
 
-# -----------------------------
-# Trigger Workflow Function
-# -----------------------------
 def trigger_workflow(workflow_file):
 
-    url = f"https://api.github.com/repos/sumansourabhcsc/investment/actions/workflows/{workflow_file}/dispatches"
+    url = f"https://api.github.com/repos/{OWNER}/{REPO}/actions/workflows/{workflow_file}/dispatches"
 
     headers = {
         "Authorization": f"Bearer {GITHUB_TOKEN}",
@@ -258,32 +251,25 @@ def trigger_workflow(workflow_file):
         json=payload
     )
 
-    return response.status_code
+    return response
 
 
-# -----------------------------
-# Streamlit UI
-# -----------------------------
-st.title("GitHub Workflow Runner")
+workflows = [
+    "fetch_nav_daily.yml",
+    "update_fund_snapshots.yml",
+    "update_fetch_nav_daily.yml"
+]
 
-if st.button("Run All Workflows"):
+for wf in workflows:
 
-    workflows = [
-        "fetch_nav_daily.yml",
-        "update_fund_snapshots.yml",
-        "update_fetch_nav_daily.yml"
-    ]
+    st.write(f"Triggering: {wf}")
 
-    for workflow in workflows:
+    response = trigger_workflow(wf)
 
-        st.write(f"Triggering: {workflow}")
+    st.write("Status Code:", response.status_code)
+    st.write("Response:", response.text)
 
-        status = trigger_workflow(workflow)
-
-        if status == 204:
-            st.success(f"{workflow} triggered successfully")
-        else:
-            st.error(f"Failed to trigger {workflow}")
-
-        # small delay between triggers
-        time.sleep(2)
+    if response.status_code == 204:
+        st.success(f"{wf} triggered successfully")
+    else:
+        st.error(f"Failed to trigger {wf}")
