@@ -250,14 +250,12 @@ WORKFLOWS = [
     },
 ]
 
+DELAY_SECONDS = 10  # ← Change this number to adjust delay
+
 # ─────────────────────────────────────────────
 # Helper: Trigger a single workflow via API
 # ─────────────────────────────────────────────
 def trigger_workflow(workflow_filename: str) -> dict:
-    """
-    Triggers a GitHub Actions workflow using the workflow_dispatch event.
-    Returns a dict with 'success' (bool) and 'message' (str).
-    """
     url = (
         f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}"
         f"/actions/workflows/{workflow_filename}/dispatches"
@@ -267,7 +265,7 @@ def trigger_workflow(workflow_filename: str) -> dict:
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
     }
-    payload = {"ref": "main"}  # ← Change "main" to your branch name if different
+    payload = {"ref": "main"}  # ← Change to your branch name if not "main"
 
     response = requests.post(url, headers=headers, json=payload)
 
@@ -279,38 +277,16 @@ def trigger_workflow(workflow_filename: str) -> dict:
             "message": f"Error {response.status_code}: {response.text}"
         }
 
-
-
-##############################
-
-# ── TEMPORARY DEBUG BLOCK — remove after testing ──
-import streamlit as st
-
-token = st.secrets["GITHUB_TOKEN"]
-st.write("Token length:", len(token))
-st.write("Token starts with:", token[:6])   # should print  ghp_xx
-st.write("Token ends with:", token[-4:])    # last 4 chars
-st.write("Any spaces?", " " in token)       # should be False
-# ── END DEBUG BLOCK ──
-
-
-####################################
-
-
-
 # ─────────────────────────────────────────────
 # UI Section
 # ─────────────────────────────────────────────
 st.title("🚀 Investment Data Pipeline")
 st.markdown("---")
 st.subheader("⚙️ Run Data Workflows")
-st.markdown(
-    "Click the button below to trigger all three GitHub Actions workflows "
-    "**sequentially** (one after another)."
-)
+st.markdown("Triggers all 3 workflows **one by one** with a 10 second gap between each.")
 
-# Show the workflow order
-with st.expander("📋 View Workflow Execution Order", expanded=True):
+# Show workflow order
+with st.expander("📋 Workflow Execution Order", expanded=True):
     for wf in WORKFLOWS:
         st.markdown(f"**{wf['name']}** — {wf['description']}")
 
@@ -323,37 +299,37 @@ if st.button("▶️ Run All Workflows", type="primary", use_container_width=Tru
     overall_success = True
 
     for i, wf in enumerate(WORKFLOWS):
-        col1, col2 = st.columns([3, 1])
 
-        with col1:
-            with st.spinner(f"Triggering: {wf['name']} ..."):
-                result = trigger_workflow(wf["file"])
+        # ── Trigger the workflow ──
+        with st.spinner(f"Triggering {wf['name']} ..."):
+            result = trigger_workflow(wf["file"])
 
-        with col2:
-            if result["success"]:
-                st.success("Done")
-            else:
-                st.error("Failed")
-                overall_success = False
-
-        st.markdown(f"**{wf['name']}** → {result['message']}")
-
-        # Wait between triggers to avoid race conditions on GitHub
-        if i < len(WORKFLOWS) - 1 and result["success"]:
-            with st.spinner("⏱️ Waiting 5 seconds before next workflow..."):
-                time.sleep(5)
-        elif not result["success"]:
-            st.error(f"⛔ Stopping pipeline due to failure in: {wf['name']}")
+        # ── Show result ──
+        if result["success"]:
+            st.success(f"**{wf['name']}** → {result['message']}")
+        else:
+            st.error(f"**{wf['name']}** → {result['message']}")
+            overall_success = False
+            st.error(f"⛔ Pipeline stopped at: {wf['name']}")
             break
 
+        # ── Wait 10 seconds before next workflow (skip after last one) ──
+        if i < len(WORKFLOWS) - 1:
+            countdown_placeholder = st.empty()
+            for remaining in range(DELAY_SECONDS, 0, -1):
+                countdown_placeholder.info(
+                    f"⏱️ Next workflow starts in **{remaining}** second{'s' if remaining > 1 else ''}..."
+                )
+                time.sleep(1)
+            countdown_placeholder.empty()  # Clear the countdown after it finishes
+
+    # ── Final Summary ──
     st.markdown("---")
     if overall_success:
-        st.success(
-            "✅ All 3 workflows have been triggered! "
-            "Check GitHub Actions for live progress."
-        )
+        st.success("✅ All 3 workflows triggered successfully!")
         st.markdown(
-            f"🔗 [View GitHub Actions runs](https://github.com/{GITHUB_OWNER}/{GITHUB_REPO}/actions)"
+            f"🔗 [Monitor live runs on GitHub Actions]"
+            f"(https://github.com/{GITHUB_OWNER}/{GITHUB_REPO}/actions)"
         )
     else:
-        st.warning("⚠️ Pipeline stopped early due to an error. Check the log above.")
+        st.warning("⚠️ Pipeline stopped early. Check errors above.")
