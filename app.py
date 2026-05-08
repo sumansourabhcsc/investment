@@ -218,4 +218,123 @@ if __name__ == "__main__":
 #     )
 #########################################
 ##########################################
+import streamlit as st
+import requests
+import time
 
+# ─────────────────────────────────────────────
+# GitHub Config (loaded from Streamlit secrets)
+# ─────────────────────────────────────────────
+GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
+GITHUB_OWNER = st.secrets["GITHUB_OWNER"]
+GITHUB_REPO  = st.secrets["GITHUB_REPO"]
+
+# ─────────────────────────────────────────────
+# List of workflows to trigger (in order)
+# ─────────────────────────────────────────────
+WORKFLOWS = [
+    {
+        "name": "1️⃣  Fetch NAV Daily",
+        "file": "fetch_nav_daily.yml",
+        "description": "Fetches latest NAV data for all funds"
+    },
+    {
+        "name": "2️⃣  Update Fund Snapshots",
+        "file": "update_fund_snapshots.yml",
+        "description": "Updates fund snapshot records"
+    },
+    {
+        "name": "3️⃣  Update Portfolio Daily",
+        "file": "update_portfolio_daily.yml",
+        "description": "Recalculates and updates portfolio values"
+    },
+]
+
+# ─────────────────────────────────────────────
+# Helper: Trigger a single workflow via API
+# ─────────────────────────────────────────────
+def trigger_workflow(workflow_filename: str) -> dict:
+    """
+    Triggers a GitHub Actions workflow using the workflow_dispatch event.
+    Returns a dict with 'success' (bool) and 'message' (str).
+    """
+    url = (
+        f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}"
+        f"/actions/workflows/{workflow_filename}/dispatches"
+    )
+    headers = {
+        "Authorization": f"Bearer {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    payload = {"ref": "main"}  # ← Change "main" to your branch name if different
+
+    response = requests.post(url, headers=headers, json=payload)
+
+    if response.status_code == 204:
+        return {"success": True, "message": "Triggered successfully ✅"}
+    else:
+        return {
+            "success": False,
+            "message": f"Error {response.status_code}: {response.text}"
+        }
+
+# ─────────────────────────────────────────────
+# UI Section
+# ─────────────────────────────────────────────
+st.title("🚀 Investment Data Pipeline")
+st.markdown("---")
+st.subheader("⚙️ Run Data Workflows")
+st.markdown(
+    "Click the button below to trigger all three GitHub Actions workflows "
+    "**sequentially** (one after another)."
+)
+
+# Show the workflow order
+with st.expander("📋 View Workflow Execution Order", expanded=True):
+    for wf in WORKFLOWS:
+        st.markdown(f"**{wf['name']}** — {wf['description']}")
+
+st.markdown("")
+
+# ─── Main Trigger Button ───
+if st.button("▶️ Run All Workflows", type="primary", use_container_width=True):
+
+    st.markdown("### ⏳ Execution Log")
+    overall_success = True
+
+    for i, wf in enumerate(WORKFLOWS):
+        col1, col2 = st.columns([3, 1])
+
+        with col1:
+            with st.spinner(f"Triggering: {wf['name']} ..."):
+                result = trigger_workflow(wf["file"])
+
+        with col2:
+            if result["success"]:
+                st.success("Done")
+            else:
+                st.error("Failed")
+                overall_success = False
+
+        st.markdown(f"**{wf['name']}** → {result['message']}")
+
+        # Wait between triggers to avoid race conditions on GitHub
+        if i < len(WORKFLOWS) - 1 and result["success"]:
+            with st.spinner("⏱️ Waiting 5 seconds before next workflow..."):
+                time.sleep(5)
+        elif not result["success"]:
+            st.error(f"⛔ Stopping pipeline due to failure in: {wf['name']}")
+            break
+
+    st.markdown("---")
+    if overall_success:
+        st.success(
+            "✅ All 3 workflows have been triggered! "
+            "Check GitHub Actions for live progress."
+        )
+        st.markdown(
+            f"🔗 [View GitHub Actions runs](https://github.com/{GITHUB_OWNER}/{GITHUB_REPO}/actions)"
+        )
+    else:
+        st.warning("⚠️ Pipeline stopped early due to an error. Check the log above.")
