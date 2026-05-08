@@ -258,11 +258,11 @@ def trigger_workflow(workflow_filename: str) -> dict:
 # st.markdown("Triggers all 3 workflows **one by one** with a 1 minute gap between each.")
 
 # Show workflow order
-with st.expander("📋 Workflow Execution Order", expanded=True):
-    for wf in WORKFLOWS:
-        st.markdown(f"**{wf['name']}** — {wf['description']}")
+# with st.expander("📋 Workflow Execution Order", expanded=True):
+#     for wf in WORKFLOWS:
+#         st.markdown(f"**{wf['name']}** — {wf['description']}")
 
-st.markdown("")
+# st.markdown("")
 
 # ─── Main Trigger Button ───
 if st.button("▶️ Run All Workflows", type="primary", use_container_width=True):
