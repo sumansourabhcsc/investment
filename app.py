@@ -265,7 +265,7 @@ def trigger_workflow(workflow_filename: str) -> dict:
 # st.markdown("")
 
 # ─── Main Trigger Button ───
-if st.button("▶️ Run All Workflows", type="primary", use_container_width=True):
+if st.button("▶️ Update Portfolio", type="primary", use_container_width=True):
 
     st.markdown("### ⏳ Execution Log")
     overall_success = True
