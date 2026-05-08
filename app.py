@@ -161,7 +161,7 @@ def pulser(
 
 # ── Demo / standalone run ─────────────────────────────────────────────────────
 if __name__ == "__main__":
-    st.set_page_config(page_title="Pulser Demo", layout="centered")
+    st.set_page_config(page_title="Taurus", layout="centered")
 
     st.markdown(
         """
@@ -173,21 +173,7 @@ if __name__ == "__main__":
         unsafe_allow_html=True,
     )
 
-   # st.title("🔴 Pulser Component")
-  #  st.markdown("A reusable animated radar / sonar pulser for Streamlit apps.")
-
-  #  st.divider()
-
-    # ── Sidebar controls ──────────────────────────────────────────────────────
-  #  with st.sidebar:
-   #     st.header("Customize")
-    #    color   = st.color_picker("Color",        "#00f5d4")
-     #   size    = st.slider("Core size (px)",      40, 160, 80, step=10)
-      #  rings   = st.slider("Ripple rings",        1, 6, 3)
-       # speed   = st.slider("Speed (seconds)",     0.5, 4.0, 1.8, step=0.1)
-        #label   = st.text_input("Label text",      "SCANNING")
-       # height  = st.slider("Container height",    120, 400, 220, step=20)
-
+  
     # ── Render ────────────────────────────────────────────────────────────────
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -201,26 +187,7 @@ if __name__ == "__main__":
         )
 
     st.divider()
-#    st.subheader("Usage in your own app")
-#     st.code(
-#         """
-# from pulser import pulser
 
-# # Minimal — just drop it anywhere in your Streamlit page
-# pulser()
-
-# # Customised
-# pulser(
-#     size=80,
-#     color="#ff6b6b",
-#     pulse_count=3,
-#     speed=1.8,
-#     label="LIVE",
-#     height=220,
-# )
-# """,
-#         language="python",
-#     )
 #########################################
 ##########################################
 import streamlit as st
