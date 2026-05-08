@@ -252,10 +252,10 @@ def trigger_workflow(workflow_filename: str) -> dict:
 # ─────────────────────────────────────────────
 # UI Section
 # ─────────────────────────────────────────────
-st.title("🚀 Investment Data Pipeline")
-st.markdown("---")
-st.subheader("⚙️ Run Data Workflows")
-st.markdown("Triggers all 3 workflows **one by one** with a 1 minute gap between each.")
+# st.title("🚀 Investment Data Pipeline")
+# st.markdown("---")
+# st.subheader("⚙️ Run Data Workflows")
+# st.markdown("Triggers all 3 workflows **one by one** with a 1 minute gap between each.")
 
 # Show workflow order
 with st.expander("📋 Workflow Execution Order", expanded=True):
