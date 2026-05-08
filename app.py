@@ -279,6 +279,25 @@ def trigger_workflow(workflow_filename: str) -> dict:
             "message": f"Error {response.status_code}: {response.text}"
         }
 
+
+
+##############################
+
+# ── TEMPORARY DEBUG BLOCK — remove after testing ──
+import streamlit as st
+
+token = st.secrets["GITHUB_TOKEN"]
+st.write("Token length:", len(token))
+st.write("Token starts with:", token[:6])   # should print  ghp_xx
+st.write("Token ends with:", token[-4:])    # last 4 chars
+st.write("Any spaces?", " " in token)       # should be False
+# ── END DEBUG BLOCK ──
+
+
+####################################
+
+
+
 # ─────────────────────────────────────────────
 # UI Section
 # ─────────────────────────────────────────────
