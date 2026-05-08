@@ -299,9 +299,9 @@ if st.button("▶️ Update Portfolio", type="primary", use_container_width=True
     st.markdown("---")
     if overall_success:
         st.success("✅ All 3 workflows triggered successfully!")
-        st.markdown(
-            f"🔗 [Monitor live runs on GitHub Actions]"
-            f"(https://github.com/{GITHUB_OWNER}/{GITHUB_REPO}/actions)"
-        )
+        # st.markdown(
+        #     f"🔗 [Monitor live runs on GitHub Actions]"
+        #     f"(https://github.com/{GITHUB_OWNER}/{GITHUB_REPO}/actions)"
+        # )
     else:
         st.warning("⚠️ Pipeline stopped early. Check errors above.")
