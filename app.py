@@ -250,7 +250,7 @@ WORKFLOWS = [
     },
 ]
 
-DELAY_SECONDS = 10  # ← Change this number to adjust delay
+DELAY_SECONDS = 60  # ← Change this number to adjust delay
 
 # ─────────────────────────────────────────────
 # Helper: Trigger a single workflow via API
