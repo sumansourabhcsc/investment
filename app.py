@@ -1,4 +1,9 @@
 import streamlit as st
+st.set_page_config(
+    page_title="Taurus",
+    page_icon="🐂",
+    layout="wide"
+)
 
 st.set_page_config(page_title="MF Tracker", layout="wide")
 
@@ -8,7 +13,7 @@ st.write("Use sidebar to navigate")
 
 #########################
 
-import streamlit as st
+
 import streamlit.components.v1 as components
 
 def pulser(
