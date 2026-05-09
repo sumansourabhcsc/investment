@@ -207,12 +207,19 @@ hr {
 # ─────────────────────────────────────────────
 # PLOTLY THEME HELPER
 # ─────────────────────────────────────────────
-# Base layout — safe for ALL chart types (no xaxis/yaxis)
-PLOT_LAYOUT = dict(
+# Shared base — only keys valid for every chart type
+_BASE = dict(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     font=dict(family="DM Sans, sans-serif", color="#a09880", size=11),
     title_font=dict(family="Cormorant Garamond, serif", color="#f0ead8", size=17),
+    margin=dict(l=12, r=12, t=44, b=12),
+)
+
+# Cartesian layout (bar, line, scatter) — includes axes + colorway + legend
+PLOT_LAYOUT = dict(
+    **_BASE,
+    colorway=["#c8a550", "#4caf82", "#7ecfe0", "#e2c278", "#e05c5c", "#a78bfa"],
     legend=dict(
         bgcolor="rgba(0,0,0,0)",
         font=dict(color="#a09880"),
@@ -220,12 +227,6 @@ PLOT_LAYOUT = dict(
         yanchor="bottom", y=-0.3,
         xanchor="center", x=0.5,
     ),
-    margin=dict(l=12, r=12, t=44, b=12),
-    colorway=["#c8a550", "#4caf82", "#7ecfe0", "#e2c278", "#e05c5c", "#a78bfa"],
-)
-
-# Extra axis styling — only for cartesian (bar, line, scatter, treemap) charts
-AXIS_STYLE = dict(
     xaxis=dict(
         gridcolor="rgba(255,255,255,0.04)",
         linecolor="rgba(255,255,255,0.08)",
@@ -238,6 +239,18 @@ AXIS_STYLE = dict(
         tickcolor="rgba(255,255,255,0.08)",
         zerolinecolor="rgba(255,255,255,0.06)",
     ),
+)
+
+# Pie / donut layout — NO colorway, NO xaxis/yaxis
+PIE_LAYOUT = dict(
+    **_BASE,
+    showlegend=False,
+)
+
+# Treemap layout — NO xaxis/yaxis
+TREEMAP_LAYOUT = dict(
+    **_BASE,
+    coloraxis_showscale=False,
 )
 
 
@@ -368,10 +381,8 @@ with col_chart:
         ),
     )
     fig_donut.update_layout(
-        **PLOT_LAYOUT,
-        title_font_size=14,
+        **PIE_LAYOUT,
         margin=dict(l=8, r=8, t=36, b=8),
-        showlegend=False,
         annotations=[dict(
             text=f"<b>₹{total_current/1e5:.1f}L</b>",
             x=0.5, y=0.5, showarrow=False,
@@ -393,7 +404,7 @@ fig_tree.update_traces(
     textfont=dict(family="DM Sans, sans-serif", size=13),
     marker=dict(line=dict(color="#0d0f12", width=2)),
 )
-fig_tree.update_layout(**PLOT_LAYOUT, **AXIS_STYLE, coloraxis_showscale=False)
+fig_tree.update_layout(**TREEMAP_LAYOUT)
 st.plotly_chart(fig_tree, use_container_width=True, key="treemap")
 
 
@@ -451,7 +462,6 @@ fig_perf.add_trace(
 )
 fig_perf.update_layout(
     **PLOT_LAYOUT,
-    **AXIS_STYLE,
     title="Portfolio Performance",
     hovermode="x unified",
 )
