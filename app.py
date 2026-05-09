@@ -243,6 +243,59 @@ def trigger_workflow(workflow_filename: str) -> dict:
 # st.markdown("---")
 
 # ── Pulser animation ──
+# col1, col2, col3 = st.columns([1, 2, 1])
+# with col2:
+#     pulser(
+#         size=40,
+#         color="#00f5d4",
+#         pulse_count=6,
+#         speed=1.5,
+#         label="",
+#         height=300,
+#     )
+
+# st.divider()
+
+# # ── Workflow Trigger Button ──
+# if st.button("▶️ Update Portfolio", type="primary", use_container_width=True):
+
+#     st.markdown("### ⏳ Execution Log")
+#     overall_success = True
+
+#     for i, wf in enumerate(WORKFLOWS):
+#         with st.spinner(f"Triggering {wf['name']} ..."):
+#             result = trigger_workflow(wf["file"])
+
+#         if result["success"]:
+#             st.success(f"**{wf['name']}** → {result['message']}")
+#         else:
+#             st.error(f"**{wf['name']}** → {result['message']}")
+#             overall_success = False
+#             st.error(f"⛔ Pipeline stopped at: {wf['name']}")
+#             break
+
+#         if i < len(WORKFLOWS) - 1:
+#             countdown_placeholder = st.empty()
+#             for remaining in range(DELAY_SECONDS, 0, -1):
+#                 countdown_placeholder.info(
+#                     f"⏱️ Next workflow starts in **{remaining}** second{'s' if remaining > 1 else ''}..."
+#                 )
+#                 time.sleep(1)
+#             countdown_placeholder.empty()
+
+#     st.markdown("---")
+#     if overall_success:
+#         st.success("✅ All 3 workflows triggered successfully!")
+#     else:
+#         st.warning("⚠️ Pipeline stopped early. Check errors above.")
+
+
+
+# ─────────────────────────────────────────────
+# UI Layout
+# ─────────────────────────────────────────────
+
+# ── Pulser animation — centered ──
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
     pulser(
@@ -254,11 +307,18 @@ with col2:
         height=300,
     )
 
-st.divider()
+# ── Push button to bottom-left using empty space ──
+st.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
 
-# ── Workflow Trigger Button ──
-if st.button("▶️ Update Portfolio", type="primary", use_container_width=True):
+# ── Bottom row: button on left, empty space on right ──
+col_btn, col_empty = st.columns([1, 4])
 
+with col_btn:
+    clicked = st.button("▶️ Update Portfolio", type="primary")
+
+# ── Execution Log — shown below after click ──
+if clicked:
+    st.divider()
     st.markdown("### ⏳ Execution Log")
     overall_success = True
 
