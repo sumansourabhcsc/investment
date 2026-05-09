@@ -69,7 +69,7 @@ def get_base64_image(image_path):
     return data
 
 # Use this if image is local:
-  img_base64 = get_base64_image("taurus.png")
+img_base64 = get_base64_image("taurus.png")
 
 # OR paste the base64 string directly:
 #img_base64 = "/9j/4AAQSkZJRgABAQAAAQABAAD..."  # your full base64 here
