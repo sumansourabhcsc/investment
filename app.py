@@ -15,47 +15,105 @@ st.set_page_config(
 # ─────────────────────────────────────────────
 # Background Image (Full Page)
 # ─────────────────────────────────────────────
+# st.markdown(
+#     """
+#     <style>
+#     /* Full page background */
+#     .stApp {
+#         background-image: url("https://raw.githubusercontent.com/sumansourabhcsc/investment/main/taurus.png");
+#         background-size: cover;
+#         background-position: center;
+#         background-repeat: no-repeat;
+#         background-attachment: fixed;
+#     }
+
+#     /* Dark overlay so text stays readable */
+#     .stApp::before {
+#         content: "";
+#         position: fixed;
+#         top: 0; left: 0;
+#         width: 100%; height: 100%;
+#         background: rgba(0, 0, 0, 0.55);  /* ← adjust 0.55 to make darker/lighter */
+#         z-index: 0;
+#     }
+
+#     /* Make all content sit above the overlay */
+#     .stApp > * {
+#         position: relative;
+#         z-index: 1;
+#     }
+
+#     /* Make sidebar semi-transparent */
+#     [data-testid="stSidebar"] {
+#         background: rgba(0, 0, 0, 0.6) !important;
+#     }
+
+#     /* Make text white for visibility */
+#     html, body, [class*="css"] {
+#         color: white;
+#     }
+#     </style>
+#     """,
+#     unsafe_allow_html=True
+# )
+
+# ─────────────────────────────────────────────
+# Background Image — embedded as base64
+# (no external URL needed, always works)
+# ─────────────────────────────────────────────
+import base64
+
+def get_base64_image(image_path):
+    with open(image_path, "rb") as f:
+        data = base64.b64encode(f.read()).decode()
+    return data
+
+# Use this if image is local:
+ img_base64 = get_base64_image("taurus.png")
+
+# OR paste the base64 string directly:
+#img_base64 = "/9j/4AAQSkZJRgABAQAAAQABAAD..."  # your full base64 here
+
 st.markdown(
-    """
+    f"""
     <style>
-    /* Full page background */
-    .stApp {
-        background-image: url("https://raw.githubusercontent.com/sumansourabhcsc/investment/main/taurus.png");
+    .stApp {{
+        background-image: url("data:image/jpeg;base64,{img_base64}");
         background-size: cover;
-        background-position: center;
+        background-position: top center;
         background-repeat: no-repeat;
         background-attachment: fixed;
-    }
-
-    /* Dark overlay so text stays readable */
-    .stApp::before {
+    }}
+    header[data-testid="stHeader"] {{
+        background: transparent !important;
+    }}
+    .block-container {{
+        padding-top: 0rem !important;
+        margin-top: 0rem !important;
+    }}
+    .stApp::before {{
         content: "";
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.55);  /* ← adjust 0.55 to make darker/lighter */
+        background: rgba(0, 0, 0, 0.55);
         z-index: 0;
-    }
-
-    /* Make all content sit above the overlay */
-    .stApp > * {
+    }}
+    .stApp > * {{
         position: relative;
         z-index: 1;
-    }
-
-    /* Make sidebar semi-transparent */
-    [data-testid="stSidebar"] {
+    }}
+    [data-testid="stSidebar"] {{
         background: rgba(0, 0, 0, 0.6) !important;
-    }
-
-    /* Make text white for visibility */
-    html, body, [class*="css"] {
+    }}
+    html, body, [class*="css"] {{
         color: white;
-    }
+    }}
     </style>
     """,
     unsafe_allow_html=True
 )
+
 
 
 
