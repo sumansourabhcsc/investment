@@ -3,6 +3,8 @@ import streamlit.components.v1 as components
 import requests
 import time
 
+from utils.add_units import show_add_units
+
 # ─────────────────────────────────────────────
 # Page Config — MUST be first, only once
 # ─────────────────────────────────────────────
@@ -306,6 +308,9 @@ with col1:
         label="",
         height=300,
     )
+
+# ── Add Units button ──          ← ADD THIS
+show_add_units()
 
 # ── Push button to bottom-left using empty space ──
 st.markdown("<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
