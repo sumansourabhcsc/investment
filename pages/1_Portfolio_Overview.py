@@ -13,6 +13,42 @@ from utils.xirr_overall import compute_overall_xirr
 from utils.xirr_helper import compute_fund_xirr
 
 
+# ─────────────────────────────────────────────
+# DARK TABLE STYLER HELPER
+# ─────────────────────────────────────────────
+def dark_table(df, height=None):
+    styled = df.style.set_properties(**{
+        "background-color": "#191d24",
+        "color": "#f0ead8",
+        "border-color": "rgba(200,165,80,0.08)",
+        "font-family": "DM Sans, sans-serif",
+        "font-size": "0.85rem",
+    }).set_table_styles([
+        {"selector": "thead th", "props": [
+            ("background-color", "#0d0f12"),
+            ("color", "#c8a550"),
+            ("font-family", "DM Mono, monospace"),
+            ("font-size", "0.68rem"),
+            ("letter-spacing", "0.1em"),
+            ("text-transform", "uppercase"),
+            ("border-bottom", "1px solid rgba(200,165,80,0.2)"),
+            ("padding", "10px 12px"),
+        ]},
+        {"selector": "td", "props": [
+            ("border-color", "rgba(200,165,80,0.06)"),
+            ("padding", "8px 12px"),
+        ]},
+        {"selector": "tbody tr:nth-child(even) td", "props": [
+            ("background-color", "#13161b"),
+        ]},
+    ])
+    kwargs = {"use_container_width": True}
+    if height:
+        kwargs["height"] = height
+    return styled, kwargs
+
+
+
 # ✅ MUST BE FIRST Streamlit command
 st.set_page_config(page_title="Portfolio", layout="wide", initial_sidebar_state="collapsed")
 
@@ -318,7 +354,8 @@ df = pd.DataFrame(summary, columns=[
 col_table, col_chart = st.columns([7, 3])
 
 with col_table:
-    st.dataframe(df, use_container_width=True, height=len(df) * 42 + 40)
+    styled, kw = dark_table(df, height=len(df) * 42 + 40)
+    st.dataframe(styled, **kw)
 
 with col_chart:
     # Donut — styled
@@ -390,7 +427,8 @@ daily_df["Date"] = pd.to_datetime(daily_df["Date"], format="%d-%m-%Y")
 daily_df = daily_df.sort_values("Date", ascending=False)
 daily_df["Date"] = daily_df["Date"].dt.strftime("%d-%m-%Y")
 
-st.dataframe(daily_df, use_container_width=True)
+styled_daily, kw_daily = dark_table(daily_df)
+st.dataframe(styled_daily, **kw_daily)
 
 # Dual-axis chart
 daily_df["Date"] = pd.to_datetime(daily_df["Date"], format="%d-%m-%Y")
@@ -534,6 +572,31 @@ if monthly_data:
     numeric_cols = final_df.select_dtypes(include="number").columns
     st.dataframe(
         final_df.style
+            .set_properties(**{
+                "background-color": "#191d24",
+                "color": "#f0ead8",
+                "font-family": "DM Sans, sans-serif",
+                "font-size": "0.85rem",
+            })
+            .set_table_styles([
+                {"selector": "thead th", "props": [
+                    ("background-color", "#0d0f12"),
+                    ("color", "#c8a550"),
+                    ("font-family", "DM Mono, monospace"),
+                    ("font-size", "0.68rem"),
+                    ("letter-spacing", "0.1em"),
+                    ("text-transform", "uppercase"),
+                    ("border-bottom", "1px solid rgba(200,165,80,0.2)"),
+                    ("padding", "10px 12px"),
+                ]},
+                {"selector": "tbody tr:nth-child(even) td", "props": [
+                    ("background-color", "#13161b"),
+                ]},
+                {"selector": "td", "props": [
+                    ("border-color", "rgba(200,165,80,0.06)"),
+                    ("padding", "8px 12px"),
+                ]},
+            ])
             .apply(highlight_total_row, axis=1)
             .apply(highlight_total_column, axis=0)
             .format({col: "{:,.0f}" for col in numeric_cols}),
@@ -599,7 +662,8 @@ df_daily_out = pd.DataFrame(daily_rows, columns=[
     "Change in Value", "% Change in NAV", "Indicator",
 ])
 
-st.dataframe(df_daily_out, use_container_width=True)
+styled_dc, kw_dc = dark_table(df_daily_out)
+st.dataframe(styled_dc, **kw_dc)
 
 total_change = df_daily_out["Change in Value"].sum()
 change_color = "positive" if total_change >= 0 else "negative"
