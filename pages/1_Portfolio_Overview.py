@@ -110,38 +110,36 @@ st.markdown("""
 # =========================================================
 def metric_card(col, title, value, color):
 
-    card_html = f"""
-    <div style="
-        background:#111827;
-        padding:20px;
-        border-radius:18px;
-        border:1px solid #1F2937;
-        box-shadow:0 4px 18px rgba(0,0,0,0.25);
-        text-align:center;
-        min-height:120px;
-    ">
-
+    col.markdown(
+        f"""
         <div style="
-            color:#94A3B8;
-            font-size:15px;
-            font-weight:600;
-            margin-bottom:12px;
+            background:#111827;
+            padding:20px;
+            border-radius:18px;
+            border:1px solid #1F2937;
+            box-shadow:0 4px 18px rgba(0,0,0,0.25);
+            text-align:center;
         ">
-            {title}
+            <div style="
+                color:#94A3B8;
+                font-size:15px;
+                font-weight:600;
+                margin-bottom:12px;
+            ">
+                {title}
+            </div>
+
+            <div style="
+                color:{color};
+                font-size:30px;
+                font-weight:700;
+            ">
+                {value}
+            </div>
         </div>
-
-        <div style="
-            color:{color};
-            font-size:30px;
-            font-weight:700;
-        ">
-            {value}
-        </div>
-
-    </div>
-    """
-
-    col.markdown(card_html, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True
+    )
 
 # =========================================================
 # LOAD NAV
@@ -226,35 +224,35 @@ metric_card(
     col1,
     "💰 Total Invested",
     f"₹{total_invested:,.0f}",
-    PRIMARY
+    "#7C3AED"
 )
 
 metric_card(
     col2,
     "📈 Current Value",
     f"₹{total_current:,.0f}",
-    SUCCESS
+    "#10B981"
 )
 
 metric_card(
     col3,
     "📊 Total P&L",
     f"₹{total_current-total_invested:,.0f}",
-    SUCCESS if total_current >= total_invested else DANGER
+    "#06B6D4"
 )
 
 metric_card(
     col4,
     "📉 Absolute Return",
     f"{absolute_return_overall:.2f}%",
-    SECONDARY
+    "#F59E0B"
 )
 
 metric_card(
     col5,
     "📌 Overall XIRR",
     f"{overall_xirr*100:.2f}%",
-    WARNING
+    "#EF4444"
 )
 
 st.divider()
