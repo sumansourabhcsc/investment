@@ -13,6 +13,53 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
+# Background Image (Full Page)
+# ─────────────────────────────────────────────
+st.markdown(
+    """
+    <style>
+    /* Full page background */
+    .stApp {
+        background-image: url("https://raw.githubusercontent.com/sumansourabhcsc/investment/main/taurus.png");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
+    /* Dark overlay so text stays readable */
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.55);  /* ← adjust 0.55 to make darker/lighter */
+        z-index: 0;
+    }
+
+    /* Make all content sit above the overlay */
+    .stApp > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Make sidebar semi-transparent */
+    [data-testid="stSidebar"] {
+        background: rgba(0, 0, 0, 0.6) !important;
+    }
+
+    /* Make text white for visibility */
+    html, body, [class*="css"] {
+        color: white;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
+
+# ─────────────────────────────────────────────
 # GitHub Config
 # ─────────────────────────────────────────────
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
@@ -182,14 +229,14 @@ def trigger_workflow(workflow_filename: str) -> dict:
 # ─────────────────────────────────────────────
 
 # ── Taurus Image — centered in middle of page ──
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.image(
-        "taurus.png",          # ← rename to whatever your image file is called
-        use_container_width=True
-    )
+# col1, col2, col3 = st.columns([1, 2, 1])
+# with col2:
+#     st.image(
+#         "taurus.png",          # ← rename to whatever your image file is called
+#         use_container_width=True
+#     )
 
-st.markdown("---")
+# st.markdown("---")
 
 # ── Pulser animation ──
 col1, col2, col3 = st.columns([1, 2, 1])
