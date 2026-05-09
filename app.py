@@ -15,16 +15,72 @@ st.set_page_config(
 # ─────────────────────────────────────────────
 # Background Image (Full Page)
 # ─────────────────────────────────────────────
+# st.markdown(
+#     """
+#     <style>
+#     /* Full page background */
+#     .stApp {
+#         background-image: url("https://raw.githubusercontent.com/sumansourabhcsc/investment/main/taurus.png");
+#         background-size: cover;
+#         background-position: center;
+#         background-repeat: no-repeat;
+#         background-attachment: fixed;
+#     }
+
+#     /* Dark overlay so text stays readable */
+#     .stApp::before {
+#         content: "";
+#         position: fixed;
+#         top: 0; left: 0;
+#         width: 100%; height: 100%;
+#         background: rgba(0, 0, 0, 0.55);  /* ← adjust 0.55 to make darker/lighter */
+#         z-index: 0;
+#     }
+
+#     /* Make all content sit above the overlay */
+#     .stApp > * {
+#         position: relative;
+#         z-index: 1;
+#     }
+
+#     /* Make sidebar semi-transparent */
+#     [data-testid="stSidebar"] {
+#         background: rgba(0, 0, 0, 0.6) !important;
+#     }
+
+#     /* Make text white for visibility */
+#     html, body, [class*="css"] {
+#         color: white;
+#     }
+#     </style>
+#     """,
+#     unsafe_allow_html=True
+# )
+
 st.markdown(
     """
     <style>
-    /* Full page background */
+    /* Remove default Streamlit top padding */
     .stApp {
         background-image: url("https://raw.githubusercontent.com/sumansourabhcsc/investment/main/taurus.png");
         background-size: cover;
-        background-position: center;
+        background-position: top center;   /* ← shows image from very top */
         background-repeat: no-repeat;
         background-attachment: fixed;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* Hide Streamlit's top header bar so image isn't hidden behind it */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        background-color: transparent !important;
+    }
+
+    /* Remove top block padding */
+    .block-container {
+        padding-top: 0rem !important;
+        margin-top: 0rem !important;
     }
 
     /* Dark overlay so text stays readable */
@@ -33,7 +89,7 @@ st.markdown(
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.55);  /* ← adjust 0.55 to make darker/lighter */
+        background: rgba(0, 0, 0, 0.55);
         z-index: 0;
     }
 
@@ -56,8 +112,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-
 
 # ─────────────────────────────────────────────
 # GitHub Config
