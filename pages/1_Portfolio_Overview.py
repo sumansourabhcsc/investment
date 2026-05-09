@@ -110,36 +110,47 @@ st.markdown("""
 # =========================================================
 def metric_card(col, title, value, color):
 
-    col.markdown(
-        f"""
-        <div style="
-            background:#111827;
-            padding:20px;
-            border-radius:18px;
-            border:1px solid #1F2937;
-            box-shadow:0 4px 18px rgba(0,0,0,0.25);
-            text-align:center;
-        ">
-            <div style="
-                color:#94A3B8;
-                font-size:15px;
-                font-weight:600;
-                margin-bottom:12px;
-            ">
-                {title}
-            </div>
+    card_html = f"""
+    <div style="
+        background:#111827;
+        padding:22px;
+        border-radius:18px;
+        border:1px solid #1E293B;
+        box-shadow:0 4px 18px rgba(0,0,0,0.25);
+        text-align:center;
+        min-height:120px;
+    ">
 
-            <div style="
-                color:{color};
-                font-size:30px;
-                font-weight:700;
-            ">
-                {value}
-            </div>
+        <div style="
+            color:#94A3B8;
+            font-size:15px;
+            font-weight:600;
+            margin-bottom:14px;
+        ">
+            {title}
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div style="
+            color:{color};
+            font-size:32px;
+            font-weight:800;
+            line-height:1.2;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        ">
+            {value}
+        </div>
+
+    </div>
+    """
+
+    # IMPORTANT:
+    # use st.markdown INSIDE column context
+    with col:
+        st.markdown(card_html, unsafe_allow_html=True)
+
+
 
 # =========================================================
 # LOAD NAV
@@ -223,21 +234,21 @@ col1, col2, col3, col4, col5 = st.columns(5)
 metric_card(
     col1,
     "💰 Total Invested",
-    f"₹{total_invested:,.0f}",
-    "#7C3AED"
+    f"₹ {total_invested:,.0f}",
+    "#8B5CF6"
 )
 
 metric_card(
     col2,
     "📈 Current Value",
-    f"₹{total_current:,.0f}",
+    f"₹ {total_current:,.0f}",
     "#10B981"
 )
 
 metric_card(
     col3,
     "📊 Total P&L",
-    f"₹{total_current-total_invested:,.0f}",
+    f"₹ {total_current-total_invested:,.0f}",
     "#06B6D4"
 )
 
@@ -254,7 +265,6 @@ metric_card(
     f"{overall_xirr*100:.2f}%",
     "#EF4444"
 )
-
 st.divider()
 
 # =========================================================
