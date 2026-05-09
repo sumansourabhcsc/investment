@@ -207,6 +207,7 @@ hr {
 # ─────────────────────────────────────────────
 # PLOTLY THEME HELPER
 # ─────────────────────────────────────────────
+# Base layout — safe for ALL chart types (no xaxis/yaxis)
 PLOT_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
@@ -221,6 +222,10 @@ PLOT_LAYOUT = dict(
     ),
     margin=dict(l=12, r=12, t=44, b=12),
     colorway=["#c8a550", "#4caf82", "#7ecfe0", "#e2c278", "#e05c5c", "#a78bfa"],
+)
+
+# Extra axis styling — only for cartesian (bar, line, scatter, treemap) charts
+AXIS_STYLE = dict(
     xaxis=dict(
         gridcolor="rgba(255,255,255,0.04)",
         linecolor="rgba(255,255,255,0.08)",
@@ -388,7 +393,7 @@ fig_tree.update_traces(
     textfont=dict(family="DM Sans, sans-serif", size=13),
     marker=dict(line=dict(color="#0d0f12", width=2)),
 )
-fig_tree.update_layout(**PLOT_LAYOUT, coloraxis_showscale=False)
+fig_tree.update_layout(**PLOT_LAYOUT, **AXIS_STYLE, coloraxis_showscale=False)
 st.plotly_chart(fig_tree, use_container_width=True, key="treemap")
 
 
@@ -446,6 +451,7 @@ fig_perf.add_trace(
 )
 fig_perf.update_layout(
     **PLOT_LAYOUT,
+    **AXIS_STYLE,
     title="Portfolio Performance",
     hovermode="x unified",
 )
