@@ -13,7 +13,6 @@ from utils.load_funds import load_all_funds
 from utils.xirr_overall import compute_overall_xirr
 from utils.xirr_helper import compute_fund_xirr
 
-
 # =========================================================
 # PAGE CONFIG
 # =========================================================
@@ -23,7 +22,7 @@ st.set_page_config(
 )
 
 # =========================================================
-# 🎨 PROFESSIONAL THEME
+# COLORS
 # =========================================================
 PRIMARY = "#7C3AED"
 SECONDARY = "#06B6D4"
@@ -36,15 +35,13 @@ BG_MAIN = "#0F172A"
 TEXT = "#F8FAFC"
 MUTED = "#94A3B8"
 
-
 # =========================================================
 # GLOBAL CSS
 # =========================================================
-st.markdown(
-    """
+st.markdown("""
 <style>
 
-html, body, [class*="css"] {
+html, body, [class*="css"]  {
     font-family: 'Segoe UI', sans-serif;
 }
 
@@ -97,60 +94,54 @@ hr {
 }
 
 </style>
-""",
-    unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
 # =========================================================
 # TITLE
 # =========================================================
-st.markdown(
-    """
-    <h1 style='text-align:center; margin-bottom:25px;'>
-        📊 Mutual Fund Portfolio Dashboard
-    </h1>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<h1 style='text-align:center; margin-bottom:30px;'>
+📊 Mutual Fund Portfolio Dashboard
+</h1>
+""", unsafe_allow_html=True)
 
 # =========================================================
 # METRIC CARD
 # =========================================================
 def metric_card(col, title, value, color):
 
-    col.markdown(
-        f"""
+    card_html = f"""
+    <div style="
+        background:#111827;
+        padding:20px;
+        border-radius:18px;
+        border:1px solid #1F2937;
+        box-shadow:0 4px 18px rgba(0,0,0,0.25);
+        text-align:center;
+        min-height:120px;
+    ">
+
         <div style="
-            background:{CARD_BG};
-            padding:18px;
-            border-radius:18px;
-            border:1px solid #1F2937;
-            box-shadow:0 4px 18px rgba(0,0,0,0.25);
-            margin-bottom:10px;
+            color:#94A3B8;
+            font-size:15px;
+            font-weight:600;
+            margin-bottom:12px;
         ">
-
-            <div style="
-                color:{MUTED};
-                font-size:0.95rem;
-                margin-bottom:10px;
-                font-weight:600;
-            ">
-                {title}
-            </div>
-
-            <div style="
-                color:{color};
-                font-size:1.8rem;
-                font-weight:700;
-            ">
-                {value}
-            </div>
-
+            {title}
         </div>
-        """,
-        unsafe_allow_html=True
-    )
 
+        <div style="
+            color:{color};
+            font-size:30px;
+            font-weight:700;
+        ">
+            {value}
+        </div>
+
+    </div>
+    """
+
+    col.markdown(card_html, unsafe_allow_html=True)
 
 # =========================================================
 # LOAD NAV
@@ -163,11 +154,12 @@ total_invested = 0
 total_current = 0
 
 # =========================================================
-# FUND LOOP
+# PROCESS FUNDS
 # =========================================================
 for fund_name, meta in mutual_funds.items():
 
     try:
+
         code = meta["code"]
         folder = meta["folder"]
 
@@ -185,9 +177,16 @@ for fund_name, meta in mutual_funds.items():
         latest_date = latest_row["Date"].date()
 
         invested = calculate_invested_amount(fund_df)
-        current = calculate_current_value(fund_df, latest_nav)
 
-        fund_xirr = compute_fund_xirr(fund_df, latest_nav)
+        current = calculate_current_value(
+            fund_df,
+            latest_nav
+        )
+
+        fund_xirr = compute_fund_xirr(
+            fund_df,
+            latest_nav
+        )
 
         total_invested += invested
         total_current += current
@@ -207,7 +206,7 @@ for fund_name, meta in mutual_funds.items():
         st.error(f"{fund_name} error: {e}")
 
 # =========================================================
-# OVERALL STATS
+# OVERALL VALUES
 # =========================================================
 absolute_return_overall = (
     ((total_current - total_invested) / total_invested) * 100
@@ -283,21 +282,28 @@ col1, col2 = st.columns([7, 2])
 # =========================================================
 with col1:
 
-    styled_df = (
-        df.style
-        .background_gradient(subset=["P&L"], cmap="RdYlGn")
-        .format({
-            "Invested": "₹{:,.0f}",
-            "Current": "₹{:,.0f}",
-            "P&L": "₹{:,.0f}",
-            "Latest NAV": "{:.2f}"
-        })
+    display_df = df.copy()
+
+    display_df["Invested"] = display_df["Invested"].map(
+        lambda x: f"₹{x:,.0f}"
+    )
+
+    display_df["Current"] = display_df["Current"].map(
+        lambda x: f"₹{x:,.0f}"
+    )
+
+    display_df["P&L"] = display_df["P&L"].map(
+        lambda x: f"₹{x:,.0f}"
+    )
+
+    display_df["Latest NAV"] = display_df["Latest NAV"].map(
+        lambda x: f"{x:.2f}"
     )
 
     st.dataframe(
-        styled_df,
+        display_df,
         use_container_width=True,
-        height=min((len(df) + 1) * 42, 500)
+        height=min((len(display_df) + 1) * 42, 500)
     )
 
 # =========================================================
@@ -339,8 +345,7 @@ with col2:
 
     st.plotly_chart(
         fig,
-        use_container_width=True,
-        key="allocation_donut"
+        use_container_width=True
     )
 
 # =========================================================
@@ -367,8 +372,7 @@ fig_tree.update_traces(
 
 st.plotly_chart(
     fig_tree,
-    use_container_width=True,
-    key="treemap"
+    use_container_width=True
 )
 
 st.divider()
@@ -392,17 +396,17 @@ daily_df = daily_df.sort_values(
     ascending=False
 )
 
-display_df = daily_df.copy()
+display_daily = daily_df.copy()
 
-display_df["Date"] = display_df["Date"].dt.strftime("%d-%m-%Y")
+display_daily["Date"] = display_daily["Date"].dt.strftime("%d-%m-%Y")
 
 st.dataframe(
-    display_df,
+    display_daily,
     use_container_width=True
 )
 
 # =========================================================
-# PERFORMANCE GRAPH
+# PERFORMANCE CHART
 # =========================================================
 daily_df = daily_df.sort_values("Date")
 
@@ -416,7 +420,7 @@ fig = make_subplots(
     specs=[[{"secondary_y": True}]]
 )
 
-# BAR
+# BAR CHART
 fig.add_trace(
     go.Bar(
         x=daily_df["Date"],
@@ -431,7 +435,7 @@ fig.add_trace(
     secondary_y=False
 )
 
-# LINE
+# LINE CHART
 fig.add_trace(
     go.Scatter(
         x=daily_df["Date"],
@@ -483,6 +487,7 @@ monthly_data = []
 for fund_name, meta in mutual_funds.items():
 
     try:
+
         folder = meta["folder"]
         code = meta["code"]
 
@@ -588,7 +593,9 @@ if monthly_data:
     total_values = ["", "TOTAL"]
 
     for m in month_cols:
-        total_values.append(pivot_df[m].sum())
+        total_values.append(
+            pivot_df[m].sum()
+        )
 
     total_values.append(
         pivot_df["Total"].sum()
@@ -606,42 +613,17 @@ if monthly_data:
 
     st.markdown(f"### Year {selected_year}")
 
-    def highlight_total_row(row):
-
-        if row["Fund"] == "TOTAL":
-
-            return [
-                "background-color:#5B21B6; color:white; font-weight:bold"
-            ] * len(row)
-
-        return [""] * len(row)
-
-    def highlight_total_column(col):
-
-        if col.name == "Total":
-
-            return [
-                "background-color:#5B21B6; color:white; font-weight:bold"
-            ] * len(col)
-
-        return [""] * len(col)
-
     numeric_cols = final_df.select_dtypes(
         include="number"
     ).columns
 
-    styled_monthly = (
-        final_df.style
-        .apply(highlight_total_row, axis=1)
-        .apply(highlight_total_column, axis=0)
-        .format({
-            col: "{:,.0f}"
-            for col in numeric_cols
-        })
-    )
+    for col in numeric_cols:
+        final_df[col] = final_df[col].map(
+            lambda x: f"{x:,.0f}"
+        )
 
     st.dataframe(
-        styled_monthly,
+        final_df,
         use_container_width=True
     )
 
@@ -713,6 +695,7 @@ for fund_name, meta in mutual_funds.items():
     )
 
     nav_today = float(row_today["nav"])
+
     nav_prev = float(row_prev["nav"])
 
     pct_change_nav = (
@@ -744,19 +727,14 @@ df_daily_change = pd.DataFrame(daily_rows, columns=[
     "Indicator"
 ])
 
-styled_daily_change = (
-    df_daily_change.style
-    .background_gradient(
-        subset=["Change in Value"],
-        cmap="RdYlGn"
-    )
-)
-
 st.dataframe(
-    styled_daily_change,
+    df_daily_change,
     use_container_width=True
 )
 
+# =========================================================
+# TOTAL DAILY CHANGE
+# =========================================================
 total_change = df_daily_change[
     "Change in Value"
 ].sum()
