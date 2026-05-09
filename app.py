@@ -1,209 +1,24 @@
 import streamlit as st
+import streamlit.components.v1 as components
+import requests
+import time
+
+# ─────────────────────────────────────────────
+# Page Config — MUST be first, only once
+# ─────────────────────────────────────────────
 st.set_page_config(
     page_title="Taurus",
     page_icon="🐂",
     layout="wide"
 )
 
-st.set_page_config(page_title="MF Tracker", layout="wide")
-
-st.title("📊 Mutual Fund Portfolio Tracker")
-
-st.write("Use sidebar to navigate")
-
-#########################
-
-
-import streamlit.components.v1 as components
-
-def pulser(
-    size: int = 80,
-    color: str = "#00f5d4",
-    pulse_count: int = 3,
-    speed: float = 1.8,
-    label: str = "",
-    height: int = 200,
-):
-    """
-    Render an animated pulser component inside a Streamlit app.
-
-    Parameters
-    ----------
-    size        : diameter of the core circle in px
-    color       : primary color (hex or CSS value)
-    pulse_count : number of ripple rings
-    speed       : animation cycle duration in seconds
-    label       : optional text displayed below the pulser
-    height      : height of the iframe container in px
-    """
-
-    delays = " ".join(
-        f".ring:nth-child({i + 1}) {{ animation-delay: {i * (speed / pulse_count):.2f}s; }}"
-        for i in range(pulse_count)
-    )
-
-    rings_html = "\n".join(f'<div class="ring"></div>' for _ in range(pulse_count))
-
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <meta charset="utf-8"/>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
-
-      *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
-
-      body {{
-        background: transparent;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: {height}px;
-        font-family: 'Space Mono', monospace;
-        overflow: hidden;
-      }}
-
-      .pulser-wrapper {{
-        position: relative;
-        width: {size * 4}px;
-        height: {size * 4}px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }}
-
-      /* ripple rings */
-      .ring {{
-        position: absolute;
-        width: {size}px;
-        height: {size}px;
-        border-radius: 50%;
-        border: 2px solid {color};
-        opacity: 0;
-        animation: ripple {speed}s ease-out infinite;
-      }}
-
-      {delays}
-
-      @keyframes ripple {{
-        0%   {{ transform: scale(1);   opacity: 0.8; }}
-        100% {{ transform: scale({pulse_count + 1}.5); opacity: 0; }}
-      }}
-
-      /* core dot */
-      .core {{
-        position: relative;
-        width: {size}px;
-        height: {size}px;
-        border-radius: 50%;
-        background: radial-gradient(circle at 35% 35%, {color}cc, {color}44);
-        box-shadow:
-          0 0 {size // 4}px {color}99,
-          0 0 {size // 2}px {color}44,
-          inset 0 0 {size // 6}px {color}66;
-        animation: throb {speed * 0.6:.2f}s ease-in-out infinite alternate;
-        z-index: 10;
-      }}
-
-      @keyframes throb {{
-        from {{ box-shadow: 0 0 {size // 4}px {color}99, 0 0 {size // 2}px {color}44, inset 0 0 {size // 6}px {color}66; }}
-        to   {{ box-shadow: 0 0 {size // 2}px {color}dd, 0 0 {size}px     {color}66, inset 0 0 {size // 4}px {color}aa; }}
-      }}
-
-      /* inner crosshair lines */
-      .core::before, .core::after {{
-        content: '';
-        position: absolute;
-        background: {color}55;
-        border-radius: 1px;
-      }}
-      .core::before {{
-        width: 1px; height: 60%;
-        top: 20%; left: 50%;
-        transform: translateX(-50%);
-      }}
-      .core::after {{
-        height: 1px; width: 60%;
-        left: 20%; top: 50%;
-        transform: translateY(-50%);
-      }}
-
-      /* label */
-      .label {{
-        margin-top: 12px;
-        color: {color}cc;
-        font-size: 11px;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        animation: blink 1.4s step-start infinite;
-      }}
-
-      @keyframes blink {{
-        0%, 100% {{ opacity: 1; }}
-        50%       {{ opacity: 0.2; }}
-      }}
-    </style>
-    </head>
-    <body>
-      <div class="pulser-wrapper">
-        {rings_html}
-        <div class="core"></div>
-      </div>
-      {"<div class='label'>" + label + "</div>" if label else ""}
-    </body>
-    </html>
-    """
-
-    components.html(html, height=height, scrolling=False)
-
-
-# ── Demo / standalone run ─────────────────────────────────────────────────────
-if __name__ == "__main__":
-    st.set_page_config(page_title="Taurus", layout="centered")
-
-    st.markdown(
-        """
-        <style>
-        body { background: #0d0d0d; }
-        .block-container { padding-top: 2rem; }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-  
-    # ── Render ────────────────────────────────────────────────────────────────
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        pulser(
-            size=40,
-            color="#00f5d4",
-            pulse_count=6,
-            speed=1.5,
-            label="",
-            height=400,
-        )
-
-    st.divider()
-
-#########################################
-##########################################
-import streamlit as st
-import requests
-import time
-
 # ─────────────────────────────────────────────
-# GitHub Config (loaded from Streamlit secrets)
+# GitHub Config
 # ─────────────────────────────────────────────
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 GITHUB_OWNER = st.secrets["GITHUB_OWNER"]
 GITHUB_REPO  = st.secrets["GITHUB_REPO"]
 
-# ─────────────────────────────────────────────
-# List of workflows to trigger (in order)
-# ─────────────────────────────────────────────
 WORKFLOWS = [
     {
         "name": "1️⃣  Fetch NAV Daily",
@@ -222,10 +37,126 @@ WORKFLOWS = [
     },
 ]
 
-DELAY_SECONDS = 60  # ← Change this number to adjust delay
+DELAY_SECONDS = 60
 
 # ─────────────────────────────────────────────
-# Helper: Trigger a single workflow via API
+# Pulser Component
+# ─────────────────────────────────────────────
+def pulser(
+    size: int = 80,
+    color: str = "#00f5d4",
+    pulse_count: int = 3,
+    speed: float = 1.8,
+    label: str = "",
+    height: int = 200,
+):
+    delays = " ".join(
+        f".ring:nth-child({i + 1}) {{ animation-delay: {i * (speed / pulse_count):.2f}s; }}"
+        for i in range(pulse_count)
+    )
+    rings_html = "\n".join(f'<div class="ring"></div>' for _ in range(pulse_count))
+
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="utf-8"/>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+      *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
+      body {{
+        background: transparent;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: {height}px;
+        font-family: 'Space Mono', monospace;
+        overflow: hidden;
+      }}
+      .pulser-wrapper {{
+        position: relative;
+        width: {size * 4}px;
+        height: {size * 4}px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }}
+      .ring {{
+        position: absolute;
+        width: {size}px;
+        height: {size}px;
+        border-radius: 50%;
+        border: 2px solid {color};
+        opacity: 0;
+        animation: ripple {speed}s ease-out infinite;
+      }}
+      {delays}
+      @keyframes ripple {{
+        0%   {{ transform: scale(1);   opacity: 0.8; }}
+        100% {{ transform: scale({pulse_count + 1}.5); opacity: 0; }}
+      }}
+      .core {{
+        position: relative;
+        width: {size}px;
+        height: {size}px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, {color}cc, {color}44);
+        box-shadow:
+          0 0 {size // 4}px {color}99,
+          0 0 {size // 2}px {color}44,
+          inset 0 0 {size // 6}px {color}66;
+        animation: throb {speed * 0.6:.2f}s ease-in-out infinite alternate;
+        z-index: 10;
+      }}
+      @keyframes throb {{
+        from {{ box-shadow: 0 0 {size // 4}px {color}99, 0 0 {size // 2}px {color}44, inset 0 0 {size // 6}px {color}66; }}
+        to   {{ box-shadow: 0 0 {size // 2}px {color}dd, 0 0 {size}px     {color}66, inset 0 0 {size // 4}px {color}aa; }}
+      }}
+      .core::before, .core::after {{
+        content: '';
+        position: absolute;
+        background: {color}55;
+        border-radius: 1px;
+      }}
+      .core::before {{
+        width: 1px; height: 60%;
+        top: 20%; left: 50%;
+        transform: translateX(-50%);
+      }}
+      .core::after {{
+        height: 1px; width: 60%;
+        left: 20%; top: 50%;
+        transform: translateY(-50%);
+      }}
+      .label {{
+        margin-top: 12px;
+        color: {color}cc;
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        animation: blink 1.4s step-start infinite;
+      }}
+      @keyframes blink {{
+        0%, 100% {{ opacity: 1; }}
+        50%       {{ opacity: 0.2; }}
+      }}
+    </style>
+    </head>
+    <body>
+      <div class="pulser-wrapper">
+        {rings_html}
+        <div class="core"></div>
+      </div>
+      {"<div class='label'>" + label + "</div>" if label else ""}
+    </body>
+    </html>
+    """
+    components.html(html, height=height, scrolling=False)
+
+
+# ─────────────────────────────────────────────
+# Trigger Workflow Helper
 # ─────────────────────────────────────────────
 def trigger_workflow(workflow_filename: str) -> dict:
     url = (
@@ -237,46 +168,53 @@ def trigger_workflow(workflow_filename: str) -> dict:
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
     }
-    payload = {"ref": "main"}  # ← Change to your branch name if not "main"
-
+    payload = {"ref": "main"}
     response = requests.post(url, headers=headers, json=payload)
 
     if response.status_code == 204:
         return {"success": True, "message": "Triggered successfully ✅"}
     else:
-        return {
-            "success": False,
-            "message": f"Error {response.status_code}: {response.text}"
-        }
+        return {"success": False, "message": f"Error {response.status_code}: {response.text}"}
+
 
 # ─────────────────────────────────────────────
-# UI Section
+# UI Layout
 # ─────────────────────────────────────────────
-# st.title("🚀 Investment Data Pipeline")
-# st.markdown("---")
-# st.subheader("⚙️ Run Data Workflows")
-# st.markdown("Triggers all 3 workflows **one by one** with a 1 minute gap between each.")
 
-# Show workflow order
-# with st.expander("📋 Workflow Execution Order", expanded=True):
-#     for wf in WORKFLOWS:
-#         st.markdown(f"**{wf['name']}** — {wf['description']}")
+# ── Taurus Image — centered in middle of page ──
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.image(
+        "taurus.png",          # ← rename to whatever your image file is called
+        use_container_width=True
+    )
 
-# st.markdown("")
+st.markdown("---")
 
-# ─── Main Trigger Button ───
+# ── Pulser animation ──
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    pulser(
+        size=40,
+        color="#00f5d4",
+        pulse_count=6,
+        speed=1.5,
+        label="",
+        height=300,
+    )
+
+st.divider()
+
+# ── Workflow Trigger Button ──
 if st.button("▶️ Update Portfolio", type="primary", use_container_width=True):
 
     st.markdown("### ⏳ Execution Log")
     overall_success = True
 
     for i, wf in enumerate(WORKFLOWS):
-
-        # ── Trigger the workflow ──
         with st.spinner(f"Triggering {wf['name']} ..."):
             result = trigger_workflow(wf["file"])
 
-        # ── Show result ──
         if result["success"]:
             st.success(f"**{wf['name']}** → {result['message']}")
         else:
@@ -285,7 +223,6 @@ if st.button("▶️ Update Portfolio", type="primary", use_container_width=True
             st.error(f"⛔ Pipeline stopped at: {wf['name']}")
             break
 
-        # ── Wait 10 seconds before next workflow (skip after last one) ──
         if i < len(WORKFLOWS) - 1:
             countdown_placeholder = st.empty()
             for remaining in range(DELAY_SECONDS, 0, -1):
@@ -293,15 +230,10 @@ if st.button("▶️ Update Portfolio", type="primary", use_container_width=True
                     f"⏱️ Next workflow starts in **{remaining}** second{'s' if remaining > 1 else ''}..."
                 )
                 time.sleep(1)
-            countdown_placeholder.empty()  # Clear the countdown after it finishes
+            countdown_placeholder.empty()
 
-    # ── Final Summary ──
     st.markdown("---")
     if overall_success:
         st.success("✅ All 3 workflows triggered successfully!")
-        # st.markdown(
-        #     f"🔗 [Monitor live runs on GitHub Actions]"
-        #     f"(https://github.com/{GITHUB_OWNER}/{GITHUB_REPO}/actions)"
-        # )
     else:
         st.warning("⚠️ Pipeline stopped early. Check errors above.")
