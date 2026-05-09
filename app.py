@@ -296,8 +296,8 @@ def trigger_workflow(workflow_filename: str) -> dict:
 # ─────────────────────────────────────────────
 
 # ── Pulser animation — centered ──
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
+col1, col2 = st.columns([1, 3])
+with col1:
     pulser(
         size=40,
         color="#00f5d4",
