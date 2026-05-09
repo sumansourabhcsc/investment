@@ -313,7 +313,7 @@ with col1:
 show_add_units()
 
 # ── Push button to bottom-left using empty space ──
-st.markdown("<br><br><br><br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+st.markdown("<br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
 
 # ── Bottom row: button on left, empty space on right ──
 col_btn, col_empty = st.columns([1, 4])
