@@ -108,6 +108,11 @@ st.markdown("""
 # =========================================================
 # METRIC CARD
 # =========================================================
+import streamlit.components.v1 as components
+
+# =========================================================
+# METRIC CARD
+# =========================================================
 def metric_card(col, title, value, color):
 
     card_html = f"""
@@ -118,7 +123,7 @@ def metric_card(col, title, value, color):
         border:1px solid #1E293B;
         box-shadow:0 4px 18px rgba(0,0,0,0.25);
         text-align:center;
-        min-height:120px;
+        height:120px;
     ">
 
         <div style="
@@ -135,9 +140,6 @@ def metric_card(col, title, value, color):
             font-size:32px;
             font-weight:800;
             line-height:1.2;
-            white-space:nowrap;
-            overflow:hidden;
-            text-overflow:ellipsis;
         ">
             {value}
         </div>
@@ -145,11 +147,8 @@ def metric_card(col, title, value, color):
     </div>
     """
 
-    # IMPORTANT:
-    # use st.markdown INSIDE column context
     with col:
-        st.markdown(card_html, unsafe_allow_html=True)
-
+        components.html(card_html, height=140)
 
 
 # =========================================================
