@@ -5,6 +5,7 @@ import time
 
 from utils.add_units import show_add_units
 
+st.divider()
 # ─────────────────────────────────────────────
 # Page Config — MUST be first, only once
 # ─────────────────────────────────────────────
@@ -515,6 +516,7 @@ if clicked:
     else:
         st.warning("⚠️  Pipeline stopped early — check errors above.")
 
+st.divider()
 from utils.footer import show_footer
 
 # ... all your page content ...
