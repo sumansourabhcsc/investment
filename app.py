@@ -357,21 +357,35 @@ components.html("""
 </body></html>
 """, height=130, scrolling=False)
 
-# ── Workflow pipeline cards ──
+# ── Handle card navigation via query param ──
+# Cards set ?nav=PageKey in the URL → Python catches it on rerun → st.switch_page()
+PAGE_MAP = {
+    "Portfolio_Overview": "pages/1_Portfolio_Overview.py",
+    "Fund_Details":       "pages/2_Fund_Details.py",
+}
+
+nav_target = st.query_params.get("nav", None)
+if nav_target and nav_target in PAGE_MAP:
+    st.query_params.clear()
+    st.switch_page(PAGE_MAP[nav_target])
+
+# ── Pipeline cards iframe ──
 def render_pipeline_cards(workflows):
     cards_html = ""
     for wf in workflows:
+        page_key = wf["link"].rstrip("/").split("/")[-1]
         cards_html += f"""
-        <a class="card" href="{wf['link']}" target="_self"
-           onmouseenter="this.classList.add('hovered')"
-           onmouseleave="this.classList.remove('hovered')">
+        <div class="card" data-page="{page_key}"
+             onmouseenter="this.classList.add('hovered')"
+             onmouseleave="this.classList.remove('hovered')"
+             onclick="navigate('{page_key}')">
             <div class="card-top-bar"></div>
             <div class="card-dot"><span class="dot-inner"></span></div>
             <div class="card-num">{wf['num']}</div>
             <div class="card-name">{wf['name']}</div>
             <div class="card-desc">{wf['description']}</div>
             <div class="card-link">{wf['link_label']} &rarr;</div>
-        </a>
+        </div>
         """
 
     html = f"""
@@ -387,7 +401,7 @@ def render_pipeline_cards(workflows):
         border-radius:12px;
         padding:1.3rem 1.3rem 1.1rem 1.3rem;
         position:relative;overflow:hidden;
-        cursor:pointer;text-decoration:none;display:block;
+        cursor:pointer;display:block;
         transition:background 0.3s,border-color 0.3s,transform 0.25s;
       }}
       .card.hovered{{
@@ -421,6 +435,12 @@ def render_pipeline_cards(workflows):
       }}
       .card.hovered .card-link{{color:rgba(0,245,212,0.8);transform:translateX(0);}}
     </style>
+    <script>
+      function navigate(pageKey) {{
+        // Set query param on parent window → triggers Streamlit rerun → st.switch_page
+        window.parent.location.href = window.parent.location.pathname + "?nav=" + pageKey;
+      }}
+    </script>
     </head><body>
     <div class="grid">{cards_html}</div>
     </body></html>
