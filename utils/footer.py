@@ -162,7 +162,7 @@ body {
 
 <div class="tf-bottom">
   <div class="tf-copy">
-    &copy; 2025 <span>Suman Sourabh PMS Pvt. Ltd.</span> &nbsp;&middot;&nbsp; All rights reserved
+    &copy; 2026 <span>Suman Sourabh PMS Pvt. Ltd.</span> &nbsp;&middot;&nbsp; All rights reserved
   </div>
   <div class="tf-legal">
     <a href="#">Privacy</a>
