@@ -264,7 +264,7 @@ with col_donut:
     ))
     fig_donut.update_layout(
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="white", family="Outfit"), showlegend=True,
+        font=dict(color="white", family="Outfit"), showlegend=False,
         legend=dict(font=dict(size=11, color="rgba(255,255,255,0.6)"),
                     bgcolor="rgba(0,0,0,0)", x=0, y=-0.15, orientation="h"),
         margin=dict(t=10, b=10, l=10, r=10),
