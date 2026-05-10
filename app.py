@@ -5,7 +5,6 @@ import time
 
 from utils.add_units import show_add_units
 
-st.divider()
 # ─────────────────────────────────────────────
 # Page Config — MUST be first, only once
 # ─────────────────────────────────────────────
@@ -22,13 +21,11 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
 
-/* ── Reset & Base ── */
 html, body, [class*="css"] {
     font-family: 'DM Mono', monospace;
     color: #e8e2d5;
 }
 
-/* ── Full-page background ── */
 .stApp {
     background: #080b0f;
     background-image:
@@ -52,118 +49,21 @@ html, body, [class*="css"] {
 
 .stApp > * { position: relative; z-index: 1; }
 
-/* ── Sidebar ── */
 [data-testid="stSidebar"] {
     background: rgba(8, 11, 15, 0.85) !important;
     border-right: 1px solid rgba(0, 245, 212, 0.1) !important;
     backdrop-filter: blur(12px);
 }
 
-/* ── Hide Streamlit chrome ── */
 #MainMenu, footer, header { visibility: hidden; }
 [data-testid="stToolbar"] { display: none; }
 
-/* ── Page layout ── */
 .block-container {
     padding-top: 2rem !important;
     padding-bottom: 3rem !important;
     max-width: 1100px !important;
 }
 
-/* ── Taurus header word-mark ── */
-.taurus-wordmark {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(3rem, 8vw, 6.5rem);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    background: linear-gradient(135deg, #00f5d4 0%, #00c9ff 55%, #a78bfa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin: 0;
-    padding: 0;
-}
-
-.taurus-sub {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    font-weight: 300;
-    letter-spacing: 0.3em;
-    color: rgba(0, 245, 212, 0.55);
-    text-transform: uppercase;
-    margin-top: 0.4rem;
-    padding-bottom: 0.2rem;
-}
-
-.taurus-divider {
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, rgba(0,245,212,0.4) 0%, rgba(0,201,255,0.2) 50%, transparent 100%);
-    margin: 1.2rem 0 2rem 0;
-}
-
-/* ── Workflow status cards ── */
-.wf-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin-bottom: 2rem;
-}
-
-.wf-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(0, 245, 212, 0.12);
-    border-radius: 10px;
-    padding: 1.1rem 1.2rem;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.3s;
-}
-
-.wf-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #00f5d4, #00c9ff);
-    opacity: 0.5;
-    border-radius: 10px 10px 0 0;
-}
-
-.wf-num {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: rgba(0, 245, 212, 0.25);
-    line-height: 1;
-    margin-bottom: 0.5rem;
-}
-
-.wf-name {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #c8e6e2;
-    margin-bottom: 0.3rem;
-}
-
-.wf-desc {
-    font-size: 0.68rem;
-    color: rgba(200,230,226,0.45);
-    letter-spacing: 0.02em;
-}
-
-.wf-dot {
-    position: absolute;
-    top: 1rem; right: 1rem;
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: rgba(0,245,212,0.25);
-    box-shadow: 0 0 6px rgba(0,245,212,0.3);
-}
-
-/* ── Update button override ── */
 .stButton > button[kind="primary"] {
     font-family: 'Syne', sans-serif !important;
     font-weight: 700 !important;
@@ -186,34 +86,25 @@ html, body, [class*="css"] {
     transform: translateY(-1px) !important;
 }
 
-/* ── Log section ── */
 .stSuccess > div, .stError > div, .stInfo > div, .stSpinner > div {
     font-family: 'DM Mono', monospace !important;
     font-size: 0.8rem !important;
 }
 
-/* ── Divider ── */
-hr {
-    border-color: rgba(0, 245, 212, 0.1) !important;
-}
+hr { border-color: rgba(0, 245, 212, 0.1) !important; }
 
-/* ── Countdown info box ── */
 .stInfo {
     background: rgba(0,201,255,0.06) !important;
     border-left-color: #00c9ff !important;
 }
 
-/* ── Success / Error accents ── */
 .stSuccess {
     background: rgba(0,245,212,0.07) !important;
     border-left-color: #00f5d4 !important;
 }
 
-.stError {
-    background: rgba(255,70,70,0.07) !important;
-}
+.stError { background: rgba(255,70,70,0.07) !important; }
 
-/* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0,245,212,0.2); border-radius: 4px; }
@@ -250,8 +141,6 @@ WORKFLOWS = [
 DELAY_SECONDS = 60
 
 
-
-
 # ─────────────────────────────────────────────
 # Trigger Workflow Helper
 # ─────────────────────────────────────────────
@@ -275,73 +164,130 @@ def trigger_workflow(workflow_filename: str) -> dict:
 
 
 # ─────────────────────────────────────────────
-# UI Layout
+# Header — fully responsive via clamp + vw
 # ─────────────────────────────────────────────
-
-# ── Header: Wordmark + compact pulser in one iframe ──
 components.html("""
 <!DOCTYPE html><html><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Mono:wght@300;400&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:transparent;font-family:'DM Mono',monospace;padding:1.4rem 0 0 0;}
-  .header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;}
-  .wordmark-block{flex:1;min-width:0;}
-  h1{
-    font-family:'Syne',sans-serif;
-    font-size:4.2rem;
-    font-weight:800;
-    letter-spacing:-0.03em;
-    line-height:1;
-    white-space:nowrap;
-    background:linear-gradient(135deg,#00f5d4 0%,#00c9ff 55%,#a78bfa 100%);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    background-clip:text;
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    padding: 1.2rem 0 0 0;
+    overflow: hidden;
   }
-  .sub{
-    font-size:0.68rem;font-weight:300;letter-spacing:0.28em;
-    color:rgba(0,245,212,0.5);text-transform:uppercase;margin-top:0.45rem;
+
+  .header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
   }
-  .divider{
-    width:100%;height:1px;
-    background:linear-gradient(90deg,rgba(0,245,212,0.4) 0%,rgba(0,201,255,0.2) 50%,transparent 100%);
-    margin:1.1rem 0 0 0;
+
+  .wordmark-block { flex: 1; min-width: 0; }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    white-space: nowrap;
+    /* Fully fluid: shrinks on mobile, caps on desktop */
+    font-size: clamp(1.8rem, 10vw, 5rem);
+    background: linear-gradient(135deg, #00f5d4 0%, #00c9ff 55%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
-  /* compact pulser */
-  .pulser-wrap{
-    flex-shrink:0;width:80px;height:80px;
-    display:flex;align-items:center;justify-content:center;
-    position:relative;margin-top:4px;
+
+  .sub {
+    font-size: clamp(0.5rem, 1.8vw, 0.68rem);
+    font-weight: 300;
+    letter-spacing: clamp(0.1em, 1vw, 0.28em);
+    color: rgba(0, 245, 212, 0.5);
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .ring{
-    position:absolute;width:34px;height:34px;border-radius:50%;
-    border:1px solid #00f5d4;opacity:0;
-    animation:ripple 1.5s ease-out infinite;
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(0,245,212,0.4) 0%, rgba(0,201,255,0.2) 50%, transparent 100%);
+    margin: 1rem 0 0 0;
   }
-  .ring:nth-child(1){animation-delay:0s;}
-  .ring:nth-child(2){animation-delay:0.25s;}
-  .ring:nth-child(3){animation-delay:0.5s;}
-  .ring:nth-child(4){animation-delay:0.75s;}
-  @keyframes ripple{0%{transform:scale(1);opacity:0.65;}100%{transform:scale(3.4);opacity:0;}}
-  .core{
-    position:relative;width:22px;height:22px;border-radius:50%;z-index:10;
-    background:radial-gradient(circle at 35% 35%,#00f5d4cc,#00f5d444);
-    animation:throb 0.9s ease-in-out infinite alternate;
+
+  /* Pulser — scales with viewport */
+  .pulser-wrap {
+    flex-shrink: 0;
+    width: clamp(50px, 8vw, 80px);
+    height: clamp(50px, 8vw, 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-top: 4px;
   }
-  @keyframes throb{
-    from{box-shadow:0 0 5px #00f5d499,0 0 10px #00f5d444;}
-    to{box-shadow:0 0 10px #00f5d4dd,0 0 20px #00f5d466;}
+
+  .ring {
+    position: absolute;
+    width: clamp(22px, 3.5vw, 34px);
+    height: clamp(22px, 3.5vw, 34px);
+    border-radius: 50%;
+    border: 1px solid #00f5d4;
+    opacity: 0;
+    animation: ripple 1.5s ease-out infinite;
   }
-  .live-label{
-    position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);
-    font-size:9px;letter-spacing:0.22em;color:rgba(0,245,212,0.5);
-    text-transform:uppercase;white-space:nowrap;
-    animation:blink 1.4s step-start infinite;
+  .ring:nth-child(1) { animation-delay: 0s; }
+  .ring:nth-child(2) { animation-delay: 0.25s; }
+  .ring:nth-child(3) { animation-delay: 0.5s; }
+  .ring:nth-child(4) { animation-delay: 0.75s; }
+
+  @keyframes ripple {
+    0%   { transform: scale(1); opacity: 0.65; }
+    100% { transform: scale(3.4); opacity: 0; }
   }
-  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.15;}}
+
+  .core {
+    position: relative;
+    width: clamp(14px, 2.2vw, 22px);
+    height: clamp(14px, 2.2vw, 22px);
+    border-radius: 50%;
+    z-index: 10;
+    background: radial-gradient(circle at 35% 35%, #00f5d4cc, #00f5d444);
+    animation: throb 0.9s ease-in-out infinite alternate;
+  }
+
+  @keyframes throb {
+    from { box-shadow: 0 0 5px #00f5d499, 0 0 10px #00f5d444; }
+    to   { box-shadow: 0 0 10px #00f5d4dd, 0 0 20px #00f5d466; }
+  }
+
+  .live-label {
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(7px, 1.2vw, 9px);
+    letter-spacing: 0.22em;
+    color: rgba(0, 245, 212, 0.5);
+    text-transform: uppercase;
+    white-space: nowrap;
+    animation: blink 1.4s step-start infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.15; }
+  }
 </style>
-</head><body>
+</head>
+<body>
 <div class="header-row">
   <div class="wordmark-block">
     <h1>TAURUS</h1>
@@ -349,14 +295,17 @@ components.html("""
     <div class="divider"></div>
   </div>
   <div class="pulser-wrap">
-    <div class="ring"></div><div class="ring"></div>
-    <div class="ring"></div><div class="ring"></div>
+    <div class="ring"></div>
+    <div class="ring"></div>
+    <div class="ring"></div>
+    <div class="ring"></div>
     <div class="core"></div>
     <span class="live-label">live</span>
   </div>
 </div>
 </body></html>
 """, height=130, scrolling=False)
+
 
 # ── Pipeline navigation ──
 PAGE_MAP = {
@@ -366,7 +315,6 @@ PAGE_MAP = {
 
 st.markdown("""
 <style>
-/* Invisible overlay button that sits on top of the card markdown */
 .nav-btn-wrap { position: relative; margin-bottom: 0.5rem; }
 .nav-btn-wrap .card-visual {
     background: rgba(8,14,20,0.78);
@@ -384,12 +332,10 @@ st.markdown("""
     transform: translateY(-3px);
 }
 .nav-btn-wrap:hover .card-topbar { opacity: 1 !important; }
-.nav-btn-wrap:hover .card-num { color: rgba(0,245,212,0.55) !important; }
-.nav-btn-wrap:hover .card-name { color: #fff !important; }
-.nav-btn-wrap:hover .card-desc { color: rgba(210,240,235,0.88) !important; }
-.nav-btn-wrap:hover .card-link { color: rgba(0,245,212,0.85) !important; transform: translateX(0) !important; }
+.nav-btn-wrap:hover .card-num    { color: rgba(0,245,212,0.55) !important; }
+.nav-btn-wrap:hover .card-name   { color: #fff !important; }
+.nav-btn-wrap:hover .card-desc   { color: rgba(210,240,235,0.88) !important; }
 
-/* The actual button — transparent, sits over card */
 .nav-btn-wrap div[data-testid="stButton"] {
     position: absolute !important;
     inset: 0 !important;
@@ -449,13 +395,13 @@ for col, wf in zip([col_c1, col_c2], WORKFLOWS):
                 color:rgba(210,240,235,0.62);letter-spacing:0.03em;line-height:1.5;
                 text-shadow:0 1px 8px rgba(0,0,0,1);
                 transition:color 0.3s;">{wf['description']}</div>
-            <div class="card-link" style="
+            <div style="
                 font-family:'DM Mono',monospace;font-size:0.8rem;
                 color:rgba(0,245,212,0.7);letter-spacing:0.05em;
                 margin-top:0.85rem;display:flex;align-items:center;gap:2px;">
-              <span class="ch ch1" style="display:inline-block;animation:chevron-slide 1.1s ease-in-out infinite;">›</span>
-              <span class="ch ch2" style="display:inline-block;animation:chevron-slide 1.1s ease-in-out 0.18s infinite;">›</span>
-              <span class="ch ch3" style="display:inline-block;animation:chevron-slide 1.1s ease-in-out 0.36s infinite;">›</span>
+              <span style="display:inline-block;animation:chevron-slide 1.1s ease-in-out infinite;">›</span>
+              <span style="display:inline-block;animation:chevron-slide 1.1s ease-in-out 0.18s infinite;">›</span>
+              <span style="display:inline-block;animation:chevron-slide 1.1s ease-in-out 0.36s infinite;">›</span>
             </div>
           </div>
         """, unsafe_allow_html=True)
@@ -463,8 +409,7 @@ for col, wf in zip([col_c1, col_c2], WORKFLOWS):
         if st.button("›› ", key=f"nav_{page_key}"):
             st.switch_page(PAGE_MAP[page_key])
 
-        st.markdown("</div>", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
 
 # ── Add Units section ──
 show_add_units()
@@ -504,9 +449,7 @@ if clicked:
         if i < len(WORKFLOWS) - 1:
             countdown_placeholder = st.empty()
             for remaining in range(DELAY_SECONDS, 0, -1):
-                countdown_placeholder.info(
-                    f"⏱  Next step in **{remaining}s** ..."
-                )
+                countdown_placeholder.info(f"⏱  Next step in **{remaining}s** ...")
                 time.sleep(1)
             countdown_placeholder.empty()
 
@@ -517,8 +460,6 @@ if clicked:
         st.warning("⚠️  Pipeline stopped early — check errors above.")
 
 st.divider()
+
 from utils.footer import show_footer
-
-# ... all your page content ...
-
 show_footer()
