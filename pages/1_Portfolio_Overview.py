@@ -284,8 +284,9 @@ with col_donut:
 sec_header("🌳", "Portfolio Allocation")
 
 fig_tree = px.treemap(
-    df, path=["Fund"], values="Current", color="P&L",
-    color_continuous_scale=[[0,"#E24B4A"],[0.5,"#1E293B"],[1,"#1D9E75"]],
+    df, path=["Fund"], values="Current",
+    color="Fund",
+    color_discrete_sequence=PALETTE[:len(df)],
     hover_data={"Invested": True, "XIRR": True}
 )
 fig_tree.update_layout(
