@@ -397,13 +397,19 @@ def trigger_workflow(workflow_filename: str) -> dict:
 col_title, col_pulse = st.columns([3, 1])
 
 with col_title:
-    st.markdown("""
-        <div style="padding-top: 1.5rem;">
-            <h1 class="taurus-wordmark">TAURUS</h1>
-            <p class="taurus-sub">Portfolio Intelligence System</p>
-        </div>
-        <div class="taurus-divider"></div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        '<div style="padding-top:1.5rem;">'
+        '<h1 style="font-family:Syne,sans-serif;font-size:clamp(3rem,8vw,6.5rem);font-weight:800;'
+        'letter-spacing:-0.03em;line-height:1;background:linear-gradient(135deg,#00f5d4 0%,#00c9ff 55%,#a78bfa 100%);'
+        '-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0;padding:0;">'
+        'TAURUS</h1>'
+        '<p style="font-family:\'DM Mono\',monospace;font-size:0.72rem;font-weight:300;letter-spacing:0.3em;'
+        'color:rgba(0,245,212,0.55);text-transform:uppercase;margin-top:0.4rem;">Portfolio Intelligence System</p>'
+        '</div>'
+        '<div style="width:100%;height:1px;background:linear-gradient(90deg,rgba(0,245,212,0.4) 0%,'
+        'rgba(0,201,255,0.2) 50%,transparent 100%);margin:1.2rem 0 1.6rem 0;"></div>',
+        unsafe_allow_html=True
+    )
 
 with col_pulse:
     pulser(
@@ -415,19 +421,135 @@ with col_pulse:
         height=160,
     )
 
-# ── Workflow pipeline cards ──
-st.markdown("""
-<div class="wf-grid">
-""" + "".join([f"""
-    <div class="wf-card">
-        <div class="wf-dot"></div>
-        <div class="wf-num">{wf['num']}</div>
-        <div class="wf-name">{wf['name']}</div>
-        <div class="wf-desc">{wf['description']}</div>
-    </div>
-""" for wf in WORKFLOWS]) + """
-</div>
-""", unsafe_allow_html=True)
+# ── Workflow pipeline cards (self-contained iframe component) ──
+def render_pipeline_cards(workflows):
+    cards_html = ""
+    for wf in workflows:
+        cards_html += f"""
+        <div class="card" onmouseenter="this.classList.add('hovered')" onmouseleave="this.classList.remove('hovered')">
+            <div class="card-top-bar"></div>
+            <div class="card-dot">
+                <span class="dot-inner"></span>
+            </div>
+            <div class="card-num">{wf['num']}</div>
+            <div class="card-name">{wf['name']}</div>
+            <div class="card-desc">{wf['description']}</div>
+            <div class="card-arrow">→</div>
+        </div>
+        """
+
+    html = f"""
+    <!DOCTYPE html><html><head><meta charset="utf-8"/>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@300;400&display=swap');
+      * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+      body {{
+        background: transparent;
+        padding: 4px 2px 12px 2px;
+        font-family: 'DM Mono', monospace;
+      }}
+      .grid {{
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }}
+      .card {{
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(0,245,212,0.13);
+        border-radius: 12px;
+        padding: 1.2rem 1.2rem 1rem 1.2rem;
+        position: relative;
+        overflow: hidden;
+        cursor: default;
+        transition: background 0.3s, border-color 0.3s, transform 0.25s;
+      }}
+      .card.hovered {{
+        background: rgba(0,245,212,0.06);
+        border-color: rgba(0,245,212,0.45);
+        transform: translateY(-3px);
+      }}
+      .card-top-bar {{
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, #00f5d4, #00c9ff);
+        opacity: 0.4;
+        border-radius: 12px 12px 0 0;
+        transition: opacity 0.3s;
+      }}
+      .card.hovered .card-top-bar {{ opacity: 1; }}
+      .card-dot {{
+        position: absolute;
+        top: 1rem; right: 1rem;
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+      }}
+      .dot-inner {{
+        display: block;
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: rgba(0,245,212,0.3);
+        box-shadow: 0 0 0 0 rgba(0,245,212,0.4);
+        animation: pulse-dot 2.2s ease-in-out infinite;
+      }}
+      .card.hovered .dot-inner {{
+        background: #00f5d4;
+        box-shadow: 0 0 8px rgba(0,245,212,0.7);
+        animation: none;
+      }}
+      @keyframes pulse-dot {{
+        0%   {{ box-shadow: 0 0 0 0 rgba(0,245,212,0.5); }}
+        60%  {{ box-shadow: 0 0 0 5px rgba(0,245,212,0); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(0,245,212,0); }}
+      }}
+      .card-num {{
+        font-family: 'Syne', sans-serif;
+        font-size: 2rem;
+        font-weight: 800;
+        color: rgba(0,245,212,0.18);
+        line-height: 1;
+        margin-bottom: 0.55rem;
+        transition: color 0.3s;
+      }}
+      .card.hovered .card-num {{ color: rgba(0,245,212,0.45); }}
+      .card-name {{
+        font-family: 'Syne', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #b8d8d4;
+        margin-bottom: 0.35rem;
+        letter-spacing: 0.01em;
+        transition: color 0.3s;
+      }}
+      .card.hovered .card-name {{ color: #e0f5f2; }}
+      .card-desc {{
+        font-size: 0.66rem;
+        color: rgba(180,215,210,0.4);
+        letter-spacing: 0.03em;
+        line-height: 1.5;
+        transition: color 0.3s;
+      }}
+      .card.hovered .card-desc {{ color: rgba(180,215,210,0.7); }}
+      .card-arrow {{
+        font-size: 0.85rem;
+        color: rgba(0,245,212,0);
+        margin-top: 0.7rem;
+        transition: color 0.3s, transform 0.3s;
+        transform: translateX(-6px);
+        font-family: 'DM Mono', monospace;
+      }}
+      .card.hovered .card-arrow {{
+        color: rgba(0,245,212,0.7);
+        transform: translateX(0);
+      }}
+    </style>
+    </head><body>
+    <div class="grid">{cards_html}</div>
+    </body></html>
+    """
+    components.html(html, height=190, scrolling=False)
+
+render_pipeline_cards(WORKFLOWS)
 
 # ── Add Units section ──
 show_add_units()
@@ -444,12 +566,11 @@ with col_btn:
 if clicked:
     st.divider()
 
-    st.markdown("""
-        <p style="font-family:'DM Mono',monospace; font-size:0.72rem; letter-spacing:0.2em;
-                  color:rgba(0,245,212,0.6); text-transform:uppercase; margin-bottom:0.8rem;">
-            ⬡ execution log
-        </p>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        '<p style="font-family:\'DM Mono\',monospace;font-size:0.72rem;letter-spacing:0.2em;'
+        'color:rgba(0,245,212,0.6);text-transform:uppercase;margin-bottom:0.8rem;">⬡ execution log</p>',
+        unsafe_allow_html=True
+    )
 
     overall_success = True
 
