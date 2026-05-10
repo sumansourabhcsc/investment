@@ -15,54 +15,209 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-# Background Image (Full Page)
+# Full Redesign — Styles
 # ─────────────────────────────────────────────
-st.markdown(
-    """
-    <style>
-    /* Full page background */
-    .stApp {
-        background-image: url("https://raw.githubusercontent.com/sumansourabhcsc/investment/main/taurus.png");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
 
-    /* Dark overlay so text stays readable */
-    .stApp::before {
-        content: "";
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.55);  /* ← adjust 0.55 to make darker/lighter */
-        z-index: 0;
-    }
+/* ── Reset & Base ── */
+html, body, [class*="css"] {
+    font-family: 'DM Mono', monospace;
+    color: #e8e2d5;
+}
 
-    /* Make all content sit above the overlay */
-    .stApp > * {
-        position: relative;
-        z-index: 1;
-    }
+/* ── Full-page background ── */
+.stApp {
+    background: #080b0f;
+    background-image:
+        radial-gradient(ellipse 80% 50% at 10% 20%, rgba(0, 245, 212, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 85% 70%, rgba(0, 140, 255, 0.05) 0%, transparent 55%),
+        url("https://raw.githubusercontent.com/sumansourabhcsc/investment/main/taurus.png");
+    background-size: cover, cover, cover;
+    background-position: center, center, center;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-attachment: fixed, fixed, fixed;
+}
 
-    /* Make sidebar semi-transparent */
-    [data-testid="stSidebar"] {
-        background: rgba(0, 0, 0, 0.6) !important;
-    }
+.stApp::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(8,11,15,0.82) 0%, rgba(8,11,15,0.65) 40%, rgba(8,11,15,0.88) 100%);
+    z-index: 0;
+}
 
-    /* Make text white for visibility */
-    html, body, [class*="css"] {
-        color: white;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+.stApp > * { position: relative; z-index: 1; }
 
+/* ── Sidebar ── */
+[data-testid="stSidebar"] {
+    background: rgba(8, 11, 15, 0.85) !important;
+    border-right: 1px solid rgba(0, 245, 212, 0.1) !important;
+    backdrop-filter: blur(12px);
+}
 
+/* ── Hide Streamlit chrome ── */
+#MainMenu, footer, header { visibility: hidden; }
+[data-testid="stToolbar"] { display: none; }
 
+/* ── Page layout ── */
+.block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 3rem !important;
+    max-width: 1100px !important;
+}
 
+/* ── Taurus header word-mark ── */
+.taurus-wordmark {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    background: linear-gradient(135deg, #00f5d4 0%, #00c9ff 55%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    padding: 0;
+}
 
+.taurus-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    color: rgba(0, 245, 212, 0.55);
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+    padding-bottom: 0.2rem;
+}
+
+.taurus-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(0,245,212,0.4) 0%, rgba(0,201,255,0.2) 50%, transparent 100%);
+    margin: 1.2rem 0 2rem 0;
+}
+
+/* ── Workflow status cards ── */
+.wf-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 2rem;
+}
+
+.wf-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(0, 245, 212, 0.12);
+    border-radius: 10px;
+    padding: 1.1rem 1.2rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+}
+
+.wf-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #00f5d4, #00c9ff);
+    opacity: 0.5;
+    border-radius: 10px 10px 0 0;
+}
+
+.wf-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: rgba(0, 245, 212, 0.25);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.wf-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #c8e6e2;
+    margin-bottom: 0.3rem;
+}
+
+.wf-desc {
+    font-size: 0.68rem;
+    color: rgba(200,230,226,0.45);
+    letter-spacing: 0.02em;
+}
+
+.wf-dot {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(0,245,212,0.25);
+    box-shadow: 0 0 6px rgba(0,245,212,0.3);
+}
+
+/* ── Update button override ── */
+.stButton > button[kind="primary"] {
+    font-family: 'Syne', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    background: linear-gradient(135deg, rgba(0,245,212,0.12), rgba(0,201,255,0.08)) !important;
+    color: #00f5d4 !important;
+    border: 1px solid rgba(0,245,212,0.4) !important;
+    border-radius: 8px !important;
+    padding: 0.65rem 1.8rem !important;
+    transition: all 0.25s !important;
+    box-shadow: 0 0 20px rgba(0,245,212,0.07) !important;
+}
+
+.stButton > button[kind="primary"]:hover {
+    background: linear-gradient(135deg, rgba(0,245,212,0.22), rgba(0,201,255,0.15)) !important;
+    border-color: rgba(0,245,212,0.7) !important;
+    box-shadow: 0 0 30px rgba(0,245,212,0.18), 0 0 60px rgba(0,245,212,0.06) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Log section ── */
+.stSuccess > div, .stError > div, .stInfo > div, .stSpinner > div {
+    font-family: 'DM Mono', monospace !important;
+    font-size: 0.8rem !important;
+}
+
+/* ── Divider ── */
+hr {
+    border-color: rgba(0, 245, 212, 0.1) !important;
+}
+
+/* ── Countdown info box ── */
+.stInfo {
+    background: rgba(0,201,255,0.06) !important;
+    border-left-color: #00c9ff !important;
+}
+
+/* ── Success / Error accents ── */
+.stSuccess {
+    background: rgba(0,245,212,0.07) !important;
+    border-left-color: #00f5d4 !important;
+}
+
+.stError {
+    background: rgba(255,70,70,0.07) !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,245,212,0.2); border-radius: 4px; }
+</style>
+""", unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────
@@ -74,23 +229,27 @@ GITHUB_REPO  = st.secrets["GITHUB_REPO"]
 
 WORKFLOWS = [
     {
-        "name": "1️⃣  Fetch NAV Daily",
+        "name": "Fetch NAV Daily",
         "file": "fetch_nav_daily.yml",
-        "description": "Fetches latest NAV data for all funds"
+        "description": "Fetches latest NAV data for all funds",
+        "num": "01"
     },
     {
-        "name": "2️⃣  Update Fund Snapshots",
+        "name": "Update Fund Snapshots",
         "file": "update_fund_snapshots.yml",
-        "description": "Updates fund snapshot records"
+        "description": "Updates fund snapshot records",
+        "num": "02"
     },
     {
-        "name": "3️⃣  Update Portfolio Daily",
+        "name": "Update Portfolio Daily",
         "file": "update_portfolio_daily.yml",
-        "description": "Recalculates and updates portfolio values"
+        "description": "Recalculates and updates portfolio values",
+        "num": "03"
     },
 ]
 
 DELAY_SECONDS = 60
+
 
 # ─────────────────────────────────────────────
 # Pulser Component
@@ -115,7 +274,7 @@ def pulser(
     <head>
     <meta charset="utf-8"/>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&display=swap');
       *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
       body {{
         background: transparent;
@@ -124,7 +283,7 @@ def pulser(
         align-items: center;
         justify-content: center;
         height: {height}px;
-        font-family: 'Space Mono', monospace;
+        font-family: 'DM Mono', monospace;
         overflow: hidden;
       }}
       .pulser-wrapper {{
@@ -140,13 +299,13 @@ def pulser(
         width: {size}px;
         height: {size}px;
         border-radius: 50%;
-        border: 2px solid {color};
+        border: 1.5px solid {color};
         opacity: 0;
         animation: ripple {speed}s ease-out infinite;
       }}
       {delays}
       @keyframes ripple {{
-        0%   {{ transform: scale(1);   opacity: 0.8; }}
+        0%   {{ transform: scale(1);   opacity: 0.7; }}
         100% {{ transform: scale({pulse_count + 1}.5); opacity: 0; }}
       }}
       .core {{
@@ -164,7 +323,7 @@ def pulser(
       }}
       @keyframes throb {{
         from {{ box-shadow: 0 0 {size // 4}px {color}99, 0 0 {size // 2}px {color}44, inset 0 0 {size // 6}px {color}66; }}
-        to   {{ box-shadow: 0 0 {size // 2}px {color}dd, 0 0 {size}px     {color}66, inset 0 0 {size // 4}px {color}aa; }}
+        to   {{ box-shadow: 0 0 {size // 2}px {color}dd, 0 0 {size}px {color}66, inset 0 0 {size // 4}px {color}aa; }}
       }}
       .core::before, .core::after {{
         content: '';
@@ -185,14 +344,14 @@ def pulser(
       .label {{
         margin-top: 12px;
         color: {color}cc;
-        font-size: 11px;
-        letter-spacing: 0.2em;
+        font-size: 10px;
+        letter-spacing: 0.25em;
         text-transform: uppercase;
         animation: blink 1.4s step-start infinite;
       }}
       @keyframes blink {{
         0%, 100% {{ opacity: 1; }}
-        50%       {{ opacity: 0.2; }}
+        50%       {{ opacity: 0.15; }}
       }}
     </style>
     </head>
@@ -234,122 +393,89 @@ def trigger_workflow(workflow_filename: str) -> dict:
 # UI Layout
 # ─────────────────────────────────────────────
 
-# ── Taurus Image — centered in middle of page ──
-# col1, col2, col3 = st.columns([1, 2, 1])
-# with col2:
-#     st.image(
-#         "taurus.png",          # ← rename to whatever your image file is called
-#         use_container_width=True
-#     )
+# ── Header row: Wordmark + Pulser ──
+col_title, col_pulse = st.columns([3, 1])
 
-# st.markdown("---")
+with col_title:
+    st.markdown("""
+        <div style="padding-top: 1.5rem;">
+            <h1 class="taurus-wordmark">TAURUS</h1>
+            <p class="taurus-sub">Portfolio Intelligence System</p>
+        </div>
+        <div class="taurus-divider"></div>
+    """, unsafe_allow_html=True)
 
-# ── Pulser animation ──
-# col1, col2, col3 = st.columns([1, 2, 1])
-# with col2:
-#     pulser(
-#         size=40,
-#         color="#00f5d4",
-#         pulse_count=6,
-#         speed=1.5,
-#         label="",
-#         height=300,
-#     )
-
-# st.divider()
-
-# # ── Workflow Trigger Button ──
-# if st.button("▶️ Update Portfolio", type="primary", use_container_width=True):
-
-#     st.markdown("### ⏳ Execution Log")
-#     overall_success = True
-
-#     for i, wf in enumerate(WORKFLOWS):
-#         with st.spinner(f"Triggering {wf['name']} ..."):
-#             result = trigger_workflow(wf["file"])
-
-#         if result["success"]:
-#             st.success(f"**{wf['name']}** → {result['message']}")
-#         else:
-#             st.error(f"**{wf['name']}** → {result['message']}")
-#             overall_success = False
-#             st.error(f"⛔ Pipeline stopped at: {wf['name']}")
-#             break
-
-#         if i < len(WORKFLOWS) - 1:
-#             countdown_placeholder = st.empty()
-#             for remaining in range(DELAY_SECONDS, 0, -1):
-#                 countdown_placeholder.info(
-#                     f"⏱️ Next workflow starts in **{remaining}** second{'s' if remaining > 1 else ''}..."
-#                 )
-#                 time.sleep(1)
-#             countdown_placeholder.empty()
-
-#     st.markdown("---")
-#     if overall_success:
-#         st.success("✅ All 3 workflows triggered successfully!")
-#     else:
-#         st.warning("⚠️ Pipeline stopped early. Check errors above.")
-
-
-
-# ─────────────────────────────────────────────
-# UI Layout
-# ─────────────────────────────────────────────
-
-# ── Pulser animation — centered ──
-col1, col2 = st.columns([1, 3])
-with col1:
+with col_pulse:
     pulser(
         size=40,
         color="#00f5d4",
         pulse_count=6,
         speed=1.5,
-        label="",
-        height=300,
+        label="live",
+        height=160,
     )
 
-# ── Add Units button ──          ← ADD THIS
+# ── Workflow pipeline cards ──
+st.markdown("""
+<div class="wf-grid">
+""" + "".join([f"""
+    <div class="wf-card">
+        <div class="wf-dot"></div>
+        <div class="wf-num">{wf['num']}</div>
+        <div class="wf-name">{wf['name']}</div>
+        <div class="wf-desc">{wf['description']}</div>
+    </div>
+""" for wf in WORKFLOWS]) + """
+</div>
+""", unsafe_allow_html=True)
+
+# ── Add Units section ──
 show_add_units()
 
-# ── Push button to bottom-left using empty space ──
-st.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
-# ── Bottom row: button on left, empty space on right ──
-col_btn, col_empty = st.columns([1, 4])
+# ── Update Portfolio Button ──
+col_btn, col_spacer = st.columns([1, 4])
 
 with col_btn:
-    clicked = st.button("▶️ Update Portfolio", type="primary")
+    clicked = st.button("▶  Run Pipeline", type="primary", use_container_width=True)
 
-# ── Execution Log — shown below after click ──
+# ── Execution Log ──
 if clicked:
     st.divider()
-    st.markdown("### ⏳ Execution Log")
+
+    st.markdown("""
+        <p style="font-family:'DM Mono',monospace; font-size:0.72rem; letter-spacing:0.2em;
+                  color:rgba(0,245,212,0.6); text-transform:uppercase; margin-bottom:0.8rem;">
+            ⬡ execution log
+        </p>
+    """, unsafe_allow_html=True)
+
     overall_success = True
 
     for i, wf in enumerate(WORKFLOWS):
-        with st.spinner(f"Triggering {wf['name']} ..."):
+        with st.spinner(f"[ {wf['num']} ] Triggering {wf['name']} ..."):
             result = trigger_workflow(wf["file"])
 
         if result["success"]:
-            st.success(f"**{wf['name']}** → {result['message']}")
+            st.success(f"**{wf['num']} · {wf['name']}** → {result['message']}")
         else:
-            st.error(f"**{wf['name']}** → {result['message']}")
+            st.error(f"**{wf['num']} · {wf['name']}** → {result['message']}")
             overall_success = False
-            st.error(f"⛔ Pipeline stopped at: {wf['name']}")
+            st.error(f"⛔ Pipeline halted at step {wf['num']}")
             break
 
         if i < len(WORKFLOWS) - 1:
             countdown_placeholder = st.empty()
             for remaining in range(DELAY_SECONDS, 0, -1):
                 countdown_placeholder.info(
-                    f"⏱️ Next workflow starts in **{remaining}** second{'s' if remaining > 1 else ''}..."
+                    f"⏱  Next step in **{remaining}s** ..."
                 )
                 time.sleep(1)
             countdown_placeholder.empty()
 
-    st.markdown("---")
+    st.divider()
     if overall_success:
-        st.success("✅ All 3 workflows triggered successfully!")
+        st.success("✅  All 3 pipeline steps completed successfully.")
     else:
-        st.warning("⚠️ Pipeline stopped early. Check errors above.")
+        st.warning("⚠️  Pipeline stopped early — check errors above.")
