@@ -358,7 +358,7 @@ else:
     default_end   = date.today()
 
 # ── Date pickers (only active when Custom is selected) ──
-col_d1, col_d2 = st.columns([1, 1])
+col_d1, col_d2, col_spacer = st.columns([1, 1, 3])
 with col_d1:
     start_date = st.date_input(
         "Start Date",
