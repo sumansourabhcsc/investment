@@ -19,9 +19,9 @@ st.divider()
 # PAGE CONFIG
 # =========================================================
 st.set_page_config(
-    page_title="Portfolio Dashboard | Taurus",
+    page_title="Taurus | Dashboard",
     layout="wide",
-    page_icon="📊"
+    page_icon="🐂"
 )
 
 SUCCESS = "#1D9E75"
