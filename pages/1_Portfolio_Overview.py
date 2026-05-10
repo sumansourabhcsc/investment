@@ -15,6 +15,11 @@ from utils.xirr_overall import compute_overall_xirr
 from utils.xirr_helper import compute_fund_xirr
 
 st.divider()
+from utils.music import play_background_music
+play_background_music(
+    "https://raw.githubusercontent.com/sumansourabhcsc/investment/main/music.mp3",
+    volume=0.2
+)
 # =========================================================
 # PAGE CONFIG
 # =========================================================
