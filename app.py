@@ -7,7 +7,7 @@ from utils.add_units import show_add_units
 
 from utils.music import play_background_music
 play_background_music(
-    "https://cdn.pixabay.com/audio/2023/10/30/audio_9dd1d5dcb9.mp3",
+    ""https://raw.githubusercontent.com/sumansourabhcsc/investment/main/music.mp3"",
     volume=0.2
 )
 
