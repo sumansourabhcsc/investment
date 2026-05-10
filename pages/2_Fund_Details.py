@@ -1,206 +1,376 @@
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
+import requests
+from datetime import date, timedelta
 
 from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
 from utils.xirr_helper import compute_fund_xirr
 
 
-
-
 # =========================
 # PAGE CONFIG
 # =========================
-st.set_page_config(page_title="Fund Details", layout="wide")
+st.set_page_config(page_title="Fund Details | Taurus", layout="wide", page_icon="📁")
 
-st.title("📁 Fund Details")
 
+# =========================
+# GLOBAL STYLES
+# =========================
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap');
+
+/* ── Base ── */
+html, body, [class*="css"] {
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* ── Page title ── */
+.page-title {
+    font-size: 26px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.4px;
+    margin-bottom: 2px;
+}
+.page-subtitle {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 1.5rem;
+}
+
+/* ── NAV badge ── */
+.nav-badge {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 14px 22px;
+    display: inline-block;
+    text-align: right;
+}
+.nav-badge .nav-val {
+    font-size: 28px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    color: #ffffff;
+    line-height: 1.1;
+}
+.nav-badge .nav-date {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 3px;
+    font-family: 'DM Mono', monospace;
+}
+
+/* ── Metric cards ── */
+.metric-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+.metric-card {
+    flex: 1;
+    min-width: 120px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+}
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    border-radius: 3px 0 0 3px;
+}
+.metric-card.c-blue::before   { background: #4F8BF9; }
+.metric-card.c-green::before  { background: #1D9E75; }
+.metric-card.c-red::before    { background: #E24B4A; }
+.metric-card.c-amber::before  { background: #EF9F27; }
+.metric-card.c-purple::before { background: #7F77DD; }
+.metric-card.c-pink::before   { background: #D4537E; }
+.metric-card.c-teal::before   { background: #00f5d4; }
+
+.metric-label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+.metric-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #ffffff;
+    font-family: 'DM Mono', monospace;
+    line-height: 1.2;
+}
+.metric-value.pos { color: #1D9E75; }
+.metric-value.neg { color: #E24B4A; }
+
+/* ── Section headers ── */
+.section-header {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.section-header span {
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    display: inline-block;
+}
+
+/* ── Stat pills ── */
+.stat-pill-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+.stat-pill {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+}
+.stat-pill .pill-val {
+    font-size: 16px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    color: #ffffff;
+    display: block;
+    margin-top: 2px;
+}
+.stat-pill .pill-val.pos { color: #1D9E75; }
+.stat-pill .pill-val.neg { color: #E24B4A; }
+
+/* ── Dataframe tweaks ── */
+[data-testid="stDataFrame"] {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* ── Divider ── */
+hr { border-color: rgba(255,255,255,0.07) !important; }
+
+/* ── Selectbox label ── */
+[data-testid="stSelectbox"] label {
+    font-size: 12px !important;
+    color: rgba(255,255,255,0.45) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+# =========================
+# HELPERS
+# =========================
+def inr(val):
+    """Format a number as Indian Rupees with commas."""
+    return f"₹{val:,.2f}"
+
+def pct(val, decimals=2):
+    """Format a float as a percentage string with sign."""
+    sign = "+" if val >= 0 else ""
+    return f"{sign}{val:.{decimals}f}%"
+
+def metric_card(label, value_str, color_class, extra_class=""):
+    st.markdown(f"""
+    <div class="metric-card {color_class}">
+        <div class="metric-label">{label}</div>
+        <div class="metric-value {extra_class}">{value_str}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+def section_header(title):
+    st.markdown(f"""
+    <div class="section-header">{title} <span></span></div>
+    """, unsafe_allow_html=True)
+
+
+# =========================
+# DATA LOADING
+# =========================
 nav_df = load_nav()
 
-# =========================
-# FUND SELECTION (SAFE)
-# =========================
 fund_options = list(mutual_funds.keys())
-#st.title(fund_options )
 selected_fund = st.selectbox("Select Fund", fund_options)
-#st.title(selected_fund)
+
 scheme_code = mutual_funds[selected_fund]["code"]
-#st.title(scheme_code)
-folder = mutual_funds[selected_fund]["folder"]
-#st.title(folder)
+folder      = mutual_funds[selected_fund]["folder"]
+fund_df     = load_fund(folder)
 
-# =========================
-# LOAD DATA
-# =========================
-fund_df = load_fund(folder)
-
-
-# =========================
-# LOAD DAILY SNAPSHOT
-# =========================
-daily_path = f"mutualfund/{folder}/daily_{scheme_code}.csv"
-#st.write("Selected Fund:", selected_fund)
-#st.write("Folder:", folder)
-#st.write("Daily Path:", daily_path)
-
+daily_path  = f"mutualfund/{folder}/daily_{scheme_code}.csv"
 try:
     daily_df = pd.read_csv(daily_path)
-
-    # Convert date
     daily_df["Date"] = pd.to_datetime(daily_df["date"], format="%d-%m-%Y")
-
-    # Sort latest first
     daily_df = daily_df.sort_values("Date", ascending=False).reset_index(drop=True)
-
 except FileNotFoundError:
     daily_df = pd.DataFrame()
 
-
-
-# =========================
-# GET LATEST NAV (BY CODE)
-# =========================
 match = nav_df[nav_df["SchemeCode"] == str(scheme_code)]
-#st.title(match)
 if match.empty:
-    st.error("No NAV data found for this fund")
+    st.error("No NAV data found for this fund.")
     st.stop()
 
-latest_row = match.sort_values("Date", ascending=False).iloc[0]
-
-latest_nav = float(latest_row["NAV"])
+latest_row  = match.sort_values("Date", ascending=False).iloc[0]
+latest_nav  = float(latest_row["NAV"])
 latest_date = latest_row["Date"].date()
 
-# =========================
-# SUMMARY METRICS
-# =========================
-total_units = fund_df["Units"].sum()
-invested = fund_df["Amount"].sum()
-current_value = total_units * latest_nav
-profit = current_value - invested
 
 # =========================
-# SUMMARY METRICS
+# COMPUTED METRICS
 # =========================
-total_units = fund_df["Units"].sum()
-invested = fund_df["Amount"].sum()
-current_value = total_units * latest_nav
-profit = current_value - invested
-avg_buy_nav = invested / total_units if total_units > 0 else 0
-absolute_return = ((current_value - invested) / invested) * 100 if invested > 0 else 0
-fund_xirr = compute_fund_xirr(fund_df, latest_nav)
+total_units     = fund_df["Units"].sum()
+invested        = fund_df["Amount"].sum()
+current_value   = total_units * latest_nav
+profit          = current_value - invested
+avg_buy_nav     = invested / total_units if total_units > 0 else 0
+absolute_return = ((current_value - invested) / invested * 100) if invested > 0 else 0
+fund_xirr       = compute_fund_xirr(fund_df, latest_nav)
+xirr_pct        = fund_xirr * 100
 
 
+# =========================
+# HEADER — Fund name + NAV badge
+# =========================
+col_title, col_nav = st.columns([3, 1])
 
-#st.caption(f"Last NAV Date: {latest_date}")
-st.caption(f"📅 **Latest NAV:** ₹{latest_nav:.2f}  (as of {latest_date})")
+with col_title:
+    st.markdown(f"""
+    <div class="page-title">📁 {selected_fund}</div>
+    <div class="page-subtitle">Scheme Code: {scheme_code} &nbsp;·&nbsp; Direct Growth</div>
+    """, unsafe_allow_html=True)
 
-#st.caption(f"📅 Latest NAV", ₹{latest_nav:.2f})
-col1, col2, col3, col4, col5, col6,col7 = st.columns(7)
+with col_nav:
+    st.markdown(f"""
+    <div class="nav-badge">
+        <div class="nav-val">{inr(latest_nav)}</div>
+        <div class="nav-date">as of {latest_date}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-def metric_normal(col, label, value):
-    col.markdown(
-        f"""
-        <div style='padding:8px 0;'>
-            <span style='font-weight:600;'>{label}</span><br>
-            <span style='font-size:1.1rem;'>{value}</span>
+
+# =========================
+# METRIC CARDS — 7 KPIs in a row
+# =========================
+pnl_color  = "pos" if profit >= 0 else "neg"
+pnl_accent = "c-green" if profit >= 0 else "c-red"
+ret_color  = "pos" if absolute_return >= 0 else "neg"
+xirr_color = "pos" if xirr_pct >= 0 else "neg"
+
+st.markdown('<div class="metric-row">', unsafe_allow_html=True)
+
+cards = [
+    ("💰 Invested",        inr(invested),              "c-blue",   ""),
+    ("📈 Current Value",   inr(current_value),          "c-green",  "pos"),
+    ("📊 P&L",             ("+" if profit>=0 else "")+inr(profit), pnl_accent, pnl_color),
+    ("📉 Abs. Return",     pct(absolute_return),        "c-amber",  ret_color),
+    ("🧮 Avg Buy NAV",     inr(avg_buy_nav),            "c-purple", ""),
+    ("📦 Total Units",     f"{total_units:,.2f}",       "c-pink",   ""),
+    ("📌 XIRR",            pct(xirr_pct, 1),           "c-teal",   xirr_color),
+]
+
+cols = st.columns(7)
+for col, (label, value, accent, extra) in zip(cols, cards):
+    with col:
+        st.markdown(f"""
+        <div class="metric-card {accent}">
+            <div class="metric-label">{label}</div>
+            <div class="metric-value {extra}">{value}</div>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        """, unsafe_allow_html=True)
 
-metric_normal(col1, "💰 Invested", f"₹{invested:,.2f}")
-metric_normal(col2, "📈 Current Value", f"₹{current_value:,.2f}")
-metric_normal(col3, "📊 P&L", f"₹{profit:,.2f}")
-metric_normal(col4, "📉 Absolute Return", f"{absolute_return:.2f}%")
-metric_normal(col5, "🧮 Avg Buy NAV", f"₹{avg_buy_nav:,.2f}")
-metric_normal(col6, "📦 Total Units", f"{total_units:,.2f}")
-#metric_normal(col7, "📅 Latest NAV", f"₹{latest_nav:.2f}")
-
-
-metric_normal(col7,"📌 XIRR (as of today)", f"{fund_xirr*100:.2f}%")
-
-
-
-
-
-
-
-#st.caption(f"Last NAV Date: {latest_date}")
-
+st.markdown('</div>', unsafe_allow_html=True)
 st.divider()
 
+
 # =========================
-# SIP HISTORY TABLE
+# SIP HISTORY + DAILY NAV — side by side
 # =========================
-#st.subheader("📋 SIP History (Latest → Oldest)")
+col_sip, col_daily = st.columns(2)
 
-#fund_df_sorted = fund_df.sort_values(by="Date", ascending=False).reset_index(drop=True)
-#fund_df_sorted["Date"] = fund_df_sorted["Date"].dt.date
-
-#st.dataframe(fund_df_sorted, use_container_width=True)
-
-
-#st.divider()
-
-col1, col2 = st.columns(2)
-
-with col1:
-    # =========================
-    # SIP HISTORY TABLE
-    # =========================
-    st.subheader("📋 SIP History (Latest → Oldest)")
+with col_sip:
+    section_header("📋 SIP History")
     fund_df_sorted = fund_df.sort_values(by="Date", ascending=False).reset_index(drop=True)
     fund_df_sorted["Date"] = fund_df_sorted["Date"].dt.date
-    st.dataframe(fund_df_sorted, use_container_width=True)
+    st.dataframe(fund_df_sorted, use_container_width=True, height=280)
 
-with col2:
-    # =========================
-    # DAILY SNAPSHOT TABLE
-    # =========================
-    st.subheader("📅 Daily NAV Movement")
+with col_daily:
+    section_header("📅 Daily NAV Movement")
     if daily_df.empty:
-        st.info("No daily snapshot data available for this fund")
+        st.info("No daily snapshot data available for this fund.")
     else:
         df_display = daily_df.copy()
         df_display["Date"] = df_display["Date"].dt.date
         if "NAV" in df_display.columns:
-            df_display["Daily Change %"] = df_display["NAV"].pct_change(-1) * 100
-        st.dataframe(df_display, use_container_width=True)
+            df_display["Daily Change %"] = (
+                df_display["NAV"].pct_change(-1) * 100
+            ).round(2)
+        st.dataframe(df_display, use_container_width=True, height=280)
 
 st.divider()
 
-########################
-
-import requests
-from datetime import date, timedelta
-import plotly.express as px
-
-st.divider()
 
 # =========================
-# NAV HISTORY SECTION
+# NAV HISTORY — range picker + chart
 # =========================
-st.subheader("📈 NAV History")
+section_header("📈 NAV History")
 
-# Date range selector - default last 1 year
-col_d1, col_d2 = st.columns(2)
+# ── Date pickers + quick-range tabs ──
+col_d1, col_d2, col_tab = st.columns([1, 1, 2])
+
 with col_d1:
     start_date = st.date_input(
         "Start Date",
         value=date.today() - timedelta(days=365),
-        max_value=date.today()
+        max_value=date.today(),
+        key="start_date"
     )
 with col_d2:
     end_date = st.date_input(
         "End Date",
         value=date.today(),
         min_value=start_date,
-        max_value=date.today()
+        max_value=date.today(),
+        key="end_date"
     )
+with col_tab:
+    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+    range_choice = st.radio(
+        "Quick Range",
+        options=["1M", "3M", "1Y", "3Y", "All"],
+        index=2,
+        horizontal=True,
+        label_visibility="collapsed"
+    )
+    range_map = {"1M": 30, "3M": 90, "1Y": 365, "3Y": 1095, "All": 3650}
+    if range_choice:
+        start_date = date.today() - timedelta(days=range_map[range_choice])
+        end_date   = date.today()
 
-# Fetch ALL NAV history (no date params — API ignores them)
+
+# ── Fetch NAV history ──
 @st.cache_data(ttl=3600)
 def fetch_nav_history(fund_code):
     url = f"https://api.mfapi.in/mf/{fund_code}"
@@ -211,8 +381,8 @@ def fetch_nav_history(fund_code):
         if "data" in data and data["data"]:
             df = pd.DataFrame(data["data"])
             df["date"] = pd.to_datetime(df["date"], format="%d-%m-%Y")
-            df["nav"] = pd.to_numeric(df["nav"], errors="coerce")
-            df = df.sort_values("date", ascending=True).reset_index(drop=True)
+            df["nav"]  = pd.to_numeric(df["nav"], errors="coerce")
+            df = df.sort_values("date").reset_index(drop=True)
             df.rename(columns={"date": "Date", "nav": "NAV"}, inplace=True)
             return df
         return pd.DataFrame()
@@ -220,115 +390,151 @@ def fetch_nav_history(fund_code):
         st.error(f"Failed to fetch NAV history: {e}")
         return pd.DataFrame()
 
-# Fetch once and cache, then filter by selected dates
 nav_df_full = fetch_nav_history(scheme_code)
 
-
-
-
-
-# Filter based on selected date range (done outside cache so it reacts to date changes)
 if not nav_df_full.empty:
-    nav_df = nav_df_full[
+    nav_filtered = nav_df_full[
         (nav_df_full["Date"].dt.date >= start_date) &
         (nav_df_full["Date"].dt.date <= end_date)
     ].reset_index(drop=True)
 else:
-    nav_df = pd.DataFrame()
+    nav_filtered = pd.DataFrame()
 
-if nav_df.empty:
-    st.warning("No NAV history data available for the selected date range.")
+if nav_filtered.empty:
+    st.warning("No NAV data for the selected date range.")
 else:
+    max_row = nav_filtered.loc[nav_filtered["NAV"].idxmax()]
+    min_row = nav_filtered.loc[nav_filtered["NAV"].idxmin()]
+    nav_start = nav_filtered["NAV"].iloc[0]
+    nav_end   = nav_filtered["NAV"].iloc[-1]
+    range_chg = (nav_end - nav_start) / nav_start * 100
 
-    # =========================
-    # NAV STATS (HIGH / LOW)
-    # =========================
-    max_row = nav_df.loc[nav_df["NAV"].idxmax()]
-    min_row = nav_df.loc[nav_df["NAV"].idxmin()]
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.metric(
-            label="🔼 Highest NAV",
-            value=round(max_row["NAV"], 4),
-            delta=f"on {max_row['Date'].date()}"
-        )
-    
-    with col2:
-        st.metric(
-            label="🔽 Lowest NAV",
-            value=round(min_row["NAV"], 4),
-            delta=f"on {min_row['Date'].date()}"
-        )
-    
-    col_table, col_chart = st.columns([1, 2])
+    # ── Stat pills ──
+    chg_class = "pos" if range_chg >= 0 else "neg"
+    chg_sign  = "+" if range_chg >= 0 else ""
+    st.markdown(f"""
+    <div class="stat-pill-row">
+        <div class="stat-pill">
+            Highest NAV
+            <span class="pill-val">₹{max_row['NAV']:.4f}</span>
+            <span style="font-size:10px;color:rgba(255,255,255,0.3)">on {max_row['Date'].date()}</span>
+        </div>
+        <div class="stat-pill">
+            Lowest NAV
+            <span class="pill-val">₹{min_row['NAV']:.4f}</span>
+            <span style="font-size:10px;color:rgba(255,255,255,0.3)">on {min_row['Date'].date()}</span>
+        </div>
+        <div class="stat-pill">
+            Range Change
+            <span class="pill-val {chg_class}">{chg_sign}{range_chg:.2f}%</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
+    # ── Two-column: table + chart ──
+    col_tbl, col_cht = st.columns([1, 2])
 
-
-    with col_table:
-        st.markdown("**NAV Table**")
-        display_df = nav_df.copy()
-        display_df = display_df.sort_values("Date", ascending=False).reset_index(drop=True)  # ← add this
+    with col_tbl:
+        display_df = nav_filtered.copy()
+        display_df = display_df.sort_values("Date", ascending=False).reset_index(drop=True)
         display_df["Date"] = display_df["Date"].dt.date
-        display_df["NAV"] = display_df["NAV"].round(4)
-        st.dataframe(display_df, use_container_width=True, height=400)
+        display_df["NAV"]  = display_df["NAV"].round(4)
+        st.dataframe(display_df, use_container_width=True, height=360)
 
-    with col_chart:
-        st.markdown("**NAV Trend**")
-        fig = px.line(
-            nav_df,
-            x="Date",
-            y="NAV",
-            title="NAV Movement Over Time",
-            labels={"NAV": "NAV (₹)", "Date": "Date"},
-            template="plotly_white"
-        )
-        fig.update_traces(line_color="#4F8BF9", line_width=2)
+    with col_cht:
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=nav_filtered["Date"],
+            y=nav_filtered["NAV"],
+            mode="lines",
+            name="NAV",
+            line=dict(color="#4F8BF9", width=2),
+            fill="tozeroy",
+            fillcolor="rgba(79,139,249,0.08)",
+            hovertemplate="<b>%{x|%d %b %Y}</b><br>NAV: ₹%{y:.4f}<extra></extra>"
+        ))
         fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Outfit, sans-serif", color="rgba(255,255,255,0.6)"),
+            margin=dict(l=10, r=10, t=20, b=10),
+            height=360,
             hovermode="x unified",
-            margin=dict(l=10, r=10, t=40, b=10),
-            height=400
+            showlegend=False,
+            xaxis=dict(showgrid=False, zeroline=False),
+            yaxis=dict(
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.06)",
+                zeroline=False,
+                tickprefix="₹"
+            ),
         )
         st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
 
 
-
-################################
-
-
-
-
 # =========================
-# 📈 CURRENT VALUE TREND
+# PORTFOLIO VALUE TREND
 # =========================
-st.subheader("📈 Portfolio Value Trend")
+section_header("📊 Portfolio Value Trend")
 
 if daily_df.empty:
-    st.info("No data available to plot")
+    st.info("No daily snapshot data available to plot.")
 else:
     chart_df = daily_df.copy()
-
-    # ✅ Convert to datetime (IMPORTANT)
     chart_df["date"] = pd.to_datetime(chart_df["date"], format="%d-%m-%Y")
-
-    # Ensure sorted oldest → latest for proper graph
     chart_df = chart_df.sort_values("date")
 
-    fig = px.line(
-        chart_df,
-        x="date",
-        y="current_value",
-        markers=True,
-        title="Portfolio Value Over Time"
+    fig2 = go.Figure()
+
+    # Current portfolio value line
+    fig2.add_trace(go.Scatter(
+        x=chart_df["date"],
+        y=chart_df["current_value"],
+        mode="lines+markers",
+        name="Portfolio Value",
+        line=dict(color="#1D9E75", width=2.5),
+        marker=dict(size=5, color="#1D9E75"),
+        fill="tozeroy",
+        fillcolor="rgba(29,158,117,0.07)",
+        hovertemplate="<b>%{x|%d %b %Y}</b><br>Value: ₹%{y:,.2f}<extra></extra>"
+    ))
+
+    # Invested amount line (if column exists)
+    if "invested" in chart_df.columns:
+        fig2.add_trace(go.Scatter(
+            x=chart_df["date"],
+            y=chart_df["invested"],
+            mode="lines",
+            name="Invested",
+            line=dict(color="#4F8BF9", width=1.5, dash="dot"),
+            hovertemplate="<b>%{x|%d %b %Y}</b><br>Invested: ₹%{y:,.2f}<extra></extra>"
+        ))
+
+    fig2.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Outfit, sans-serif", color="rgba(255,255,255,0.6)"),
+        margin=dict(l=10, r=10, t=20, b=10),
+        height=380,
+        hovermode="x unified",
+        legend=dict(
+            orientation="h",
+            yanchor="bottom", y=1.02,
+            xanchor="left", x=0,
+            font=dict(size=12),
+        ),
+        xaxis=dict(showgrid=False, zeroline=False, title="Date"),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor="rgba(255,255,255,0.06)",
+            zeroline=False,
+            title="Value (₹)",
+            tickprefix="₹"
+        ),
     )
 
-    fig.update_layout(
-        xaxis_title="Date",
-        yaxis_title="Current Value (₹)",
-        hovermode="x unified"
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig2, use_container_width=True)
