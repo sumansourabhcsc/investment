@@ -18,7 +18,7 @@ st.divider()
 from utils.music import play_background_music
 play_background_music(
     "https://raw.githubusercontent.com/sumansourabhcsc/investment/main/music.mp3",
-    volume=0.2
+    volume=0.02
 )
 # =========================================================
 # PAGE CONFIG
