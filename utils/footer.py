@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit.components.v1 as components
 
 
 def show_footer():
@@ -9,17 +9,30 @@ def show_footer():
         from utils.footer import show_footer
         show_footer()
     """
-    st.markdown("""
+    components.html("""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
 <style>
-/* ── Footer wrapper ── */
-.taurus-footer {
-    margin-top: 4rem;
-    border-top: 1px solid rgba(0, 245, 212, 0.12);
-    padding: 2.8rem 0 1.4rem 0;
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: transparent;
     font-family: 'DM Mono', monospace;
+    color: #e8e2d5;
+    padding: 2.8rem 0 1.4rem 0;
 }
 
-/* ── Column grid ── */
+.tf-top-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(0,245,212,0.4) 0%, rgba(0,201,255,0.2) 50%, transparent 100%);
+    margin-bottom: 2.4rem;
+}
+
 .tf-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -27,11 +40,6 @@ def show_footer():
     margin-bottom: 2.2rem;
 }
 
-@media (max-width: 700px) {
-    .tf-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-/* ── Column heading ── */
 .tf-heading {
     font-family: 'Syne', sans-serif;
     font-size: 0.78rem;
@@ -53,9 +61,7 @@ def show_footer():
     background: #00f5d4;
 }
 
-/* ── Links ── */
 .tf-links { list-style: none; padding: 0; margin: 0; }
-
 .tf-links li { margin-bottom: 0.48rem; }
 
 .tf-links a {
@@ -63,31 +69,11 @@ def show_footer():
     letter-spacing: 0.04em;
     color: rgba(200, 230, 226, 0.5);
     text-decoration: none;
-    transition: color 0.2s, letter-spacing 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+    transition: color 0.2s;
 }
 
-.tf-links a::before {
-    content: '›';
-    color: rgba(0, 245, 212, 0);
-    transition: color 0.2s, transform 0.2s;
-    font-size: 0.85rem;
-    transform: translateX(-4px);
-}
+.tf-links a:hover { color: rgba(0, 245, 212, 0.85); }
 
-.tf-links a:hover {
-    color: rgba(0, 245, 212, 0.85);
-    letter-spacing: 0.07em;
-}
-
-.tf-links a:hover::before {
-    color: rgba(0, 245, 212, 0.85);
-    transform: translateX(0);
-}
-
-/* ── Bottom bar ── */
 .tf-bottom {
     border-top: 1px solid rgba(0, 245, 212, 0.08);
     padding-top: 1.2rem;
@@ -104,14 +90,9 @@ def show_footer():
     color: rgba(200, 230, 226, 0.3);
 }
 
-.tf-copy span {
-    color: rgba(0, 245, 212, 0.45);
-}
+.tf-copy span { color: rgba(0, 245, 212, 0.55); }
 
-.tf-legal {
-    display: flex;
-    gap: 1.2rem;
-}
+.tf-legal { display: flex; gap: 1.2rem; }
 
 .tf-legal a {
     font-size: 0.62rem;
@@ -130,70 +111,67 @@ def show_footer():
     color: rgba(200, 230, 226, 0.28);
 }
 </style>
+</head>
+<body>
 
-<div class="taurus-footer">
+<div class="tf-top-line"></div>
 
-  <!-- ── 4-column link grid ── -->
-  <div class="tf-grid">
+<div class="tf-grid">
 
-    <!-- Col 1 -->
-    <div>
-      <div class="tf-heading">Get to Know Us</div>
-      <ul class="tf-links">
-        <li><a href="#">About Taurus</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Press</a></li>
-        <li><a href="#">Research</a></li>
-      </ul>
-    </div>
-
-    <!-- Col 2 -->
-    <div>
-      <div class="tf-heading">Connect with Us</div>
-      <ul class="tf-links">
-        <li><a href="#">GitHub</a></li>
-        <li><a href="#">Twitter / X</a></li>
-        <li><a href="#">LinkedIn</a></li>
-        <li><a href="#">Discord</a></li>
-      </ul>
-    </div>
-
-    <!-- Col 3 -->
-    <div>
-      <div class="tf-heading">Tools &amp; Data</div>
-      <ul class="tf-links">
-        <li><a href="#">Portfolio Overview</a></li>
-        <li><a href="#">Fund Details</a></li>
-        <li><a href="#">Run Pipeline</a></li>
-        <li><a href="#">API Docs</a></li>
-      </ul>
-    </div>
-
-    <!-- Col 4 -->
-    <div>
-      <div class="tf-heading">Let Us Help You</div>
-      <ul class="tf-links">
-        <li><a href="#">Your Account</a></li>
-        <li><a href="#">Documentation</a></li>
-        <li><a href="#">Support</a></li>
-        <li><a href="#">System Status</a></li>
-      </ul>
-    </div>
-
+  <div>
+    <div class="tf-heading">Get to Know Us</div>
+    <ul class="tf-links">
+      <li><a href="#">About Taurus</a></li>
+      <li><a href="#">Careers</a></li>
+      <li><a href="#">Press</a></li>
+      <li><a href="#">Research</a></li>
+    </ul>
   </div>
 
-  <!-- ── Bottom bar ── -->
-  <div class="tf-bottom">
-    <div class="tf-copy">
-      © 2025 <span>Suman Sourabh PMS Pvt. Ltd.</span> · All rights reserved
-    </div>
-    <div class="tf-legal">
-      <a href="#">Privacy</a>
-      <a href="#">Terms</a>
-      <a href="#">Cookies</a>
-    </div>
-    <div class="tf-locale">Language: English &nbsp;|&nbsp; Country: India</div>
+  <div>
+    <div class="tf-heading">Connect with Us</div>
+    <ul class="tf-links">
+      <li><a href="#">GitHub</a></li>
+      <li><a href="#">Twitter / X</a></li>
+      <li><a href="#">LinkedIn</a></li>
+      <li><a href="#">Discord</a></li>
+    </ul>
+  </div>
+
+  <div>
+    <div class="tf-heading">Tools &amp; Data</div>
+    <ul class="tf-links">
+      <li><a href="#">Portfolio Overview</a></li>
+      <li><a href="#">Fund Details</a></li>
+      <li><a href="#">Run Pipeline</a></li>
+      <li><a href="#">API Docs</a></li>
+    </ul>
+  </div>
+
+  <div>
+    <div class="tf-heading">Let Us Help You</div>
+    <ul class="tf-links">
+      <li><a href="#">Your Account</a></li>
+      <li><a href="#">Documentation</a></li>
+      <li><a href="#">Support</a></li>
+      <li><a href="#">System Status</a></li>
+    </ul>
   </div>
 
 </div>
-""", unsafe_allow_html=True)
+
+<div class="tf-bottom">
+  <div class="tf-copy">
+    &copy; 2025 <span>Suman Sourabh PMS Pvt. Ltd.</span> &nbsp;&middot;&nbsp; All rights reserved
+  </div>
+  <div class="tf-legal">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Cookies</a>
+  </div>
+  <div class="tf-locale">Language: English &nbsp;|&nbsp; Country: India</div>
+</div>
+
+</body>
+</html>
+""", height=320, scrolling=False)
