@@ -538,3 +538,11 @@ else:
     )
 
     st.plotly_chart(fig2, use_container_width=True)
+
+
+
+from utils.footer import show_footer
+
+# ... all your page content ...
+
+show_footer()
