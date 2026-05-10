@@ -29,8 +29,21 @@ DANGER  = "#E24B4A"
 BG_MAIN = "#0A0F1E"
 CARD_BG = "#0F1629"
 
-PALETTE = ["#7C3AED","#1D9E75","#06B6D4","#EF9F27","#E24B4A",
-           "#D4537E","#4F8BF9","#00f5d4","#F59E0B","#8B5CF6"]
+# PALETTE = ["#7C3AED","#1D9E75","#06B6D4","#EF9F27","#E24B4A",
+#            "#D4537E","#4F8BF9","#00f5d4","#F59E0B","#8B5CF6"]
+
+PALETTE = [
+    "#4E9AF1",  # soft blue
+    "#A78BFA",  # muted violet
+    "#34D399",  # emerald green
+    "#F472B6",  # dusty rose
+    "#FB923C",  # warm amber
+    "#38BDF8",  # sky blue
+    "#E879F9",  # soft magenta
+    "#A3E635",  # lime
+    "#F87171",  # muted coral
+    "#2DD4BF",  # teal
+]
 
 
 # =========================================================
