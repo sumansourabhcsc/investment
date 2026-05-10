@@ -340,14 +340,14 @@ section_header("📈 NAV History")
 # ── Quick-range tabs first ──
 range_choice = st.radio(
     "Quick Range",
-    options=["Custom", "1M", "3M", "1Y", "3Y", "All"],
-    index=3,
+    options=["Custom", "1M", "3M", "6M", "1Y", "3Y", "All"],
+    index=4,
     horizontal=True,
     label_visibility="collapsed",
     key="nav_range_choice"
 )
 
-range_map = {"1M": 30, "3M": 90, "1Y": 365, "3Y": 1095, "All": 9999}
+range_map = {"1M": 30, "3M": 90, "6M": 180, "1Y": 365, "3Y": 1095, "All": 9999}
 
 if range_choice != "Custom":
     days = range_map[range_choice]
@@ -357,30 +357,64 @@ else:
     default_start = date.today() - timedelta(days=365)
     default_end   = date.today()
 
-# ── Date pickers (only active when Custom is selected) ──
+# ── Date pickers or range label ──
 col_d1, col_d2, col_spacer = st.columns([1, 1, 3])
-with col_d1:
-    start_date = st.date_input(
-        "Start Date",
-        value=default_start,
-        max_value=date.today(),
-        key="start_date",
-        disabled=(range_choice != "Custom")
-    )
-with col_d2:
-    end_date = st.date_input(
-        "End Date",
-        value=default_end,
-        min_value=start_date if range_choice == "Custom" else default_start,
-        max_value=date.today(),
-        key="end_date",
-        disabled=(range_choice != "Custom")
-    )
 
-# Override with quick range values
-if range_choice != "Custom":
+if range_choice == "Custom":
+    with col_d1:
+        start_date = st.date_input(
+            "Start Date",
+            value=default_start,
+            max_value=date.today(),
+            key="start_date"
+        )
+    with col_d2:
+        end_date = st.date_input(
+            "End Date",
+            value=default_end,
+            min_value=start_date,
+            max_value=date.today(),
+            key="end_date"
+        )
+else:
     start_date = default_start
     end_date   = default_end
+    with col_d1:
+        st.markdown(f"""
+        <div style="
+            background:rgba(255,255,255,0.04);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:8px;
+            padding:8px 14px;
+            font-size:12px;
+            color:rgba(255,255,255,0.45);
+            font-family:'Outfit',sans-serif;
+            line-height:1.6;
+        ">
+            Start Date<br>
+            <span style="font-size:14px;color:rgba(255,255,255,0.85);font-family:'DM Mono',monospace;">
+                {start_date.strftime("%d %b %Y")}
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_d2:
+        st.markdown(f"""
+        <div style="
+            background:rgba(255,255,255,0.04);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:8px;
+            padding:8px 14px;
+            font-size:12px;
+            color:rgba(255,255,255,0.45);
+            font-family:'Outfit',sans-serif;
+            line-height:1.6;
+        ">
+            End Date<br>
+            <span style="font-size:14px;color:rgba(255,255,255,0.85);font-family:'DM Mono',monospace;">
+                {end_date.strftime("%d %b %Y")}
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ── Fetch NAV history ──
 @st.cache_data(ttl=3600)
