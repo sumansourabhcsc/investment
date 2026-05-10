@@ -357,97 +357,136 @@ components.html("""
 </body></html>
 """, height=130, scrolling=False)
 
-# ── Handle card navigation via query param ──
-# Cards set ?nav=PageKey in the URL → Python catches it on rerun → st.switch_page()
+# ── Pipeline navigation: invisible st.buttons overlaid on styled cards ──
 PAGE_MAP = {
     "Portfolio_Overview": "pages/1_Portfolio_Overview.py",
     "Fund_Details":       "pages/2_Fund_Details.py",
 }
 
-nav_target = st.query_params.get("nav", None)
-if nav_target and nav_target in PAGE_MAP:
-    st.query_params.clear()
-    st.switch_page(PAGE_MAP[nav_target])
+# Inject card styles + overlay button CSS
+st.markdown("""
+<style>
+/* Card wrapper */
+.nav-card-wrap {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.25s;
+}
+.nav-card-wrap:hover { transform: translateY(-3px); }
 
-# ── Pipeline cards iframe ──
-def render_pipeline_cards(workflows):
-    cards_html = ""
-    for wf in workflows:
-        page_key = wf["link"].rstrip("/").split("/")[-1]
-        cards_html += f"""
-        <div class="card" data-page="{page_key}"
-             onmouseenter="this.classList.add('hovered')"
-             onmouseleave="this.classList.remove('hovered')"
-             onclick="navigate('{page_key}')">
-            <div class="card-top-bar"></div>
-            <div class="card-dot"><span class="dot-inner"></span></div>
-            <div class="card-num">{wf['num']}</div>
-            <div class="card-name">{wf['name']}</div>
-            <div class="card-desc">{wf['description']}</div>
-            <div class="card-link">{wf['link_label']} &rarr;</div>
-        </div>
-        """
+/* Visual card face */
+.nav-card-face {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(0,245,212,0.13);
+    border-radius: 12px;
+    padding: 1.3rem 1.3rem 1.1rem 1.3rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s, border-color 0.3s;
+    pointer-events: none;
+}
+.nav-card-wrap:hover .nav-card-face {
+    background: rgba(0,245,212,0.06);
+    border-color: rgba(0,245,212,0.5);
+}
+.nav-card-topbar {
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, #00f5d4, #00c9ff);
+    opacity: 0.35; border-radius: 12px 12px 0 0;
+    transition: opacity 0.3s;
+}
+.nav-card-wrap:hover .nav-card-topbar { opacity: 1; }
+.nav-card-dot {
+    position: absolute; top: 1rem; right: 1rem;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(0,245,212,0.3);
+    animation: pulse-dot 2.2s ease-in-out infinite;
+}
+.nav-card-wrap:hover .nav-card-dot {
+    background: #00f5d4;
+    box-shadow: 0 0 8px rgba(0,245,212,0.8);
+    animation: none;
+}
+@keyframes pulse-dot {
+    0%   { box-shadow: 0 0 0 0   rgba(0,245,212,0.5); }
+    60%  { box-shadow: 0 0 0 6px rgba(0,245,212,0);   }
+    100% { box-shadow: 0 0 0 0   rgba(0,245,212,0);   }
+}
+.nav-card-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem; font-weight: 800;
+    color: rgba(0,245,212,0.18); line-height: 1;
+    margin-bottom: 0.55rem;
+    transition: color 0.3s;
+}
+.nav-card-wrap:hover .nav-card-num { color: rgba(0,245,212,0.5); }
+.nav-card-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem; font-weight: 700;
+    color: #b8d8d4; margin-bottom: 0.3rem;
+    transition: color 0.3s;
+}
+.nav-card-wrap:hover .nav-card-name { color: #e0f5f2; }
+.nav-card-desc {
+    font-size: 0.67rem; color: rgba(180,215,210,0.4);
+    letter-spacing: 0.03em; line-height: 1.5;
+    transition: color 0.3s;
+}
+.nav-card-wrap:hover .nav-card-desc { color: rgba(180,215,210,0.65); }
+.nav-card-link {
+    font-size: 0.68rem; font-family: 'DM Mono', monospace;
+    color: rgba(0,245,212,0); margin-top: 0.9rem;
+    letter-spacing: 0.08em;
+    transition: color 0.3s, transform 0.3s;
+    transform: translateX(-6px); display: inline-block;
+}
+.nav-card-wrap:hover .nav-card-link {
+    color: rgba(0,245,212,0.8);
+    transform: translateX(0);
+}
 
-    html = f"""
-    <!DOCTYPE html><html><head><meta charset="utf-8"/>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@300;400&display=swap');
-      *{{box-sizing:border-box;margin:0;padding:0;}}
-      body{{background:transparent;padding:4px 2px 12px 2px;font-family:'DM Mono',monospace;}}
-      .grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}}
-      .card{{
-        background:rgba(255,255,255,0.03);
-        border:1px solid rgba(0,245,212,0.13);
-        border-radius:12px;
-        padding:1.3rem 1.3rem 1.1rem 1.3rem;
-        position:relative;overflow:hidden;
-        cursor:pointer;display:block;
-        transition:background 0.3s,border-color 0.3s,transform 0.25s;
-      }}
-      .card.hovered{{
-        background:rgba(0,245,212,0.06);
-        border-color:rgba(0,245,212,0.5);
-        transform:translateY(-3px);
-      }}
-      .card-top-bar{{
-        position:absolute;top:0;left:0;right:0;height:2px;
-        background:linear-gradient(90deg,#00f5d4,#00c9ff);
-        opacity:0.35;border-radius:12px 12px 0 0;
-        transition:opacity 0.3s;
-      }}
-      .card.hovered .card-top-bar{{opacity:1;}}
-      .card-dot{{position:absolute;top:1rem;right:1rem;width:10px;height:10px;border-radius:50%;display:flex;align-items:center;justify-content:center;}}
-      .dot-inner{{display:block;width:6px;height:6px;border-radius:50%;background:rgba(0,245,212,0.3);animation:pulse-dot 2.2s ease-in-out infinite;}}
-      .card.hovered .dot-inner{{background:#00f5d4;box-shadow:0 0 8px rgba(0,245,212,0.8);animation:none;}}
-      @keyframes pulse-dot{{0%{{box-shadow:0 0 0 0 rgba(0,245,212,0.5);}}60%{{box-shadow:0 0 0 6px rgba(0,245,212,0);}}100%{{box-shadow:0 0 0 0 rgba(0,245,212,0);}}}}
-      .card-num{{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:rgba(0,245,212,0.18);line-height:1;margin-bottom:0.55rem;transition:color 0.3s;}}
-      .card.hovered .card-num{{color:rgba(0,245,212,0.5);}}
-      .card-name{{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:#b8d8d4;margin-bottom:0.3rem;letter-spacing:0.01em;transition:color 0.3s;}}
-      .card.hovered .card-name{{color:#e0f5f2;}}
-      .card-desc{{font-size:0.67rem;color:rgba(180,215,210,0.4);letter-spacing:0.03em;line-height:1.5;transition:color 0.3s;}}
-      .card.hovered .card-desc{{color:rgba(180,215,210,0.65);}}
-      .card-link{{
-        font-size:0.68rem;font-family:'DM Mono',monospace;
-        color:rgba(0,245,212,0);
-        margin-top:0.9rem;letter-spacing:0.08em;
-        transition:color 0.3s,transform 0.3s;
-        transform:translateX(-6px);display:inline-block;
-      }}
-      .card.hovered .card-link{{color:rgba(0,245,212,0.8);transform:translateX(0);}}
-    </style>
-    <script>
-      function navigate(pageKey) {{
-        // Set query param on parent window → triggers Streamlit rerun → st.switch_page
-        window.parent.location.href = window.parent.location.pathname + "?nav=" + pageKey;
-      }}
-    </script>
-    </head><body>
-    <div class="grid">{cards_html}</div>
-    </body></html>
-    """
-    components.html(html, height=195, scrolling=False)
+/* ── Invisible full-cover button overlay ── */
+.nav-card-wrap > div[data-testid="stButton"] {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 10 !important;
+}
+.nav-card-wrap > div[data-testid="stButton"] > button {
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0 !important;
+    cursor: pointer !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
-render_pipeline_cards(WORKFLOWS)
+# Render cards side by side
+col_c1, col_c2 = st.columns(2)
+
+for col, wf in zip([col_c1, col_c2], WORKFLOWS):
+    page_key = wf["link"].rstrip("/").split("/")[-1]
+    with col:
+        # Card visual (pointer-events: none so button intercepts clicks)
+        st.markdown(f"""
+        <div class="nav-card-wrap">
+          <div class="nav-card-face">
+            <div class="nav-card-topbar"></div>
+            <div class="nav-card-dot"></div>
+            <div class="nav-card-num">{wf['num']}</div>
+            <div class="nav-card-name">{wf['name']}</div>
+            <div class="nav-card-desc">{wf['description']}</div>
+            <div class="nav-card-link">{wf['link_label']} →</div>
+          </div>
+        """, unsafe_allow_html=True)
+        # Invisible button — covers the card, captures the click
+        if st.button(" ", key=f"nav_{page_key}"):
+            st.switch_page(PAGE_MAP[page_key])
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # ── Add Units section ──
 show_add_units()
