@@ -404,6 +404,11 @@ st.markdown("""
     cursor: pointer !important;
     padding: 0 !important;
 }
+@keyframes chevron-slide {
+    0%   { opacity: 0.15; transform: translateX(-4px); }
+    50%  { opacity: 1;    transform: translateX(2px);  }
+    100% { opacity: 0.15; transform: translateX(-4px); }
+}
 @keyframes pdot {
     0%   { box-shadow: 0 0 0 0   rgba(0,245,212,0.6); }
     60%  { box-shadow: 0 0 0 6px rgba(0,245,212,0);   }
@@ -444,14 +449,17 @@ for col, wf in zip([col_c1, col_c2], WORKFLOWS):
                 text-shadow:0 1px 8px rgba(0,0,0,1);
                 transition:color 0.3s;">{wf['description']}</div>
             <div class="card-link" style="
-                font-family:'DM Mono',monospace;font-size:0.67rem;
-                color:rgba(0,245,212,0.7);letter-spacing:0.1em;
-                margin-top:0.85rem;display:inline-block;
-                transform:translateX(-4px);transition:color 0.3s,transform 0.3s;">{wf['link_label']} →</div>
+                font-family:'DM Mono',monospace;font-size:0.8rem;
+                color:rgba(0,245,212,0.7);letter-spacing:0.05em;
+                margin-top:0.85rem;display:flex;align-items:center;gap:2px;">
+              <span class="ch ch1" style="display:inline-block;animation:chevron-slide 1.1s ease-in-out infinite;">›</span>
+              <span class="ch ch2" style="display:inline-block;animation:chevron-slide 1.1s ease-in-out 0.18s infinite;">›</span>
+              <span class="ch ch3" style="display:inline-block;animation:chevron-slide 1.1s ease-in-out 0.36s infinite;">›</span>
+            </div>
           </div>
         """, unsafe_allow_html=True)
 
-        if st.button("go", key=f"nav_{page_key}"):
+        if st.button("›› ", key=f"nav_{page_key}"):
             st.switch_page(PAGE_MAP[page_key])
 
         st.markdown("</div>", unsafe_allow_html=True)
