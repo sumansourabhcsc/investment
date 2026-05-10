@@ -33,16 +33,16 @@ CARD_BG = "#0F1629"
 #            "#D4537E","#4F8BF9","#00f5d4","#F59E0B","#8B5CF6"]
 
 PALETTE = [
-    "#4E9AF1",  # soft blue
-    "#A78BFA",  # muted violet
-    "#34D399",  # emerald green
-    "#F472B6",  # dusty rose
-    "#FB923C",  # warm amber
-    "#38BDF8",  # sky blue
-    "#E879F9",  # soft magenta
-    "#A3E635",  # lime
-    "#F87171",  # muted coral
-    "#2DD4BF",  # teal
+    "#2E7D8C",  # deep teal blue
+    "#E8573F",  # muted coral red
+    "#D4A96A",  # warm sand/tan
+    "#4A7C59",  # forest green
+    "#5B6FA6",  # slate blue
+    "#C4784A",  # burnt sienna
+    "#7DB5B0",  # soft seafoam
+    "#8B5E83",  # muted mauve
+    "#B5C85A",  # olive lime
+    "#3D5A80",  # navy blue
 ]
 
 
