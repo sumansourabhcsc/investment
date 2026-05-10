@@ -375,7 +375,7 @@ with col_tab:
 def fetch_nav_history(fund_code):
     url = f"https://api.mfapi.in/mf/{fund_code}"
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=30)
         response.raise_for_status()
         data = response.json()
         if "data" in data and data["data"]:
