@@ -357,136 +357,86 @@ components.html("""
 </body></html>
 """, height=130, scrolling=False)
 
-# ── Pipeline navigation: invisible st.buttons overlaid on styled cards ──
+# ── Pipeline navigation — buttons styled AS cards ──
 PAGE_MAP = {
     "Portfolio_Overview": "pages/1_Portfolio_Overview.py",
     "Fund_Details":       "pages/2_Fund_Details.py",
 }
 
-# Inject card styles + overlay button CSS
 st.markdown("""
 <style>
-/* Card wrapper */
-.nav-card-wrap {
-    position: relative;
+/* Make nav buttons look exactly like cards */
+.nav-btn-col div[data-testid="stButton"] > button {
+    all: unset;
+    display: block;
+    width: 100%;
+    background: rgba(8, 14, 20, 0.78);
+    border: 1px solid rgba(0,245,212,0.2);
     border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.25s;
-}
-.nav-card-wrap:hover { transform: translateY(-3px); }
-
-/* Visual card face */
-.nav-card-face {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(0,245,212,0.13);
-    border-radius: 12px;
-    padding: 1.3rem 1.3rem 1.1rem 1.3rem;
+    padding: 1.4rem 1.5rem 1.35rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.25s, border-color 0.25s, transform 0.22s;
+    box-sizing: border-box;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: inherit;
+    line-height: 1;
     position: relative;
-    overflow: hidden;
-    transition: background 0.3s, border-color 0.3s;
-    pointer-events: none;
 }
-.nav-card-wrap:hover .nav-card-face {
-    background: rgba(0,245,212,0.06);
-    border-color: rgba(0,245,212,0.5);
+.nav-btn-col div[data-testid="stButton"] > button:hover {
+    background: rgba(0,245,212,0.09);
+    border-color: rgba(0,245,212,0.65);
+    transform: translateY(-3px);
 }
-.nav-card-topbar {
-    position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, #00f5d4, #00c9ff);
-    opacity: 0.35; border-radius: 12px 12px 0 0;
-    transition: opacity 0.3s;
+.nav-btn-col div[data-testid="stButton"] > button:focus {
+    outline: none;
+    box-shadow: none;
 }
-.nav-card-wrap:hover .nav-card-topbar { opacity: 1; }
-.nav-card-dot {
-    position: absolute; top: 1rem; right: 1rem;
-    width: 6px; height: 6px; border-radius: 50%;
-    background: rgba(0,245,212,0.3);
-    animation: pulse-dot 2.2s ease-in-out infinite;
+.nav-btn-col div[data-testid="stButton"] > button:focus-visible {
+    box-shadow: 0 0 0 2px rgba(0,245,212,0.4);
 }
-.nav-card-wrap:hover .nav-card-dot {
-    background: #00f5d4;
-    box-shadow: 0 0 8px rgba(0,245,212,0.8);
-    animation: none;
-}
-@keyframes pulse-dot {
-    0%   { box-shadow: 0 0 0 0   rgba(0,245,212,0.5); }
-    60%  { box-shadow: 0 0 0 6px rgba(0,245,212,0);   }
-    100% { box-shadow: 0 0 0 0   rgba(0,245,212,0);   }
-}
-.nav-card-num {
-    font-family: 'Syne', sans-serif;
-    font-size: 2rem; font-weight: 800;
-    color: rgba(0,245,212,0.18); line-height: 1;
-    margin-bottom: 0.55rem;
-    transition: color 0.3s;
-}
-.nav-card-wrap:hover .nav-card-num { color: rgba(0,245,212,0.5); }
-.nav-card-name {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.9rem; font-weight: 700;
-    color: #b8d8d4; margin-bottom: 0.3rem;
-    transition: color 0.3s;
-}
-.nav-card-wrap:hover .nav-card-name { color: #e0f5f2; }
-.nav-card-desc {
-    font-size: 0.67rem; color: rgba(180,215,210,0.4);
-    letter-spacing: 0.03em; line-height: 1.5;
-    transition: color 0.3s;
-}
-.nav-card-wrap:hover .nav-card-desc { color: rgba(180,215,210,0.65); }
-.nav-card-link {
-    font-size: 0.68rem; font-family: 'DM Mono', monospace;
-    color: rgba(0,245,212,0); margin-top: 0.9rem;
-    letter-spacing: 0.08em;
-    transition: color 0.3s, transform 0.3s;
-    transform: translateX(-6px); display: inline-block;
-}
-.nav-card-wrap:hover .nav-card-link {
-    color: rgba(0,245,212,0.8);
-    transform: translateX(0);
-}
-
-/* ── Invisible full-cover button overlay ── */
-.nav-card-wrap > div[data-testid="stButton"] {
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 10 !important;
-}
-.nav-card-wrap > div[data-testid="stButton"] > button {
-    width: 100% !important;
-    height: 100% !important;
-    opacity: 0 !important;
-    cursor: pointer !important;
-    border: none !important;
-    background: transparent !important;
-    padding: 0 !important;
+/* Remove any default p margin inside button */
+.nav-btn-col div[data-testid="stButton"] > button p {
     margin: 0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Render cards side by side
 col_c1, col_c2 = st.columns(2)
+
+CARD_TEMPLATE = """<span style="
+    display:block;
+    font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;
+    color:rgba(0,245,212,0.28);line-height:1;margin-bottom:0.55rem;">{num}</span>
+<span style="
+    display:block;
+    font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;
+    color:#dff5f0;margin-bottom:0.3rem;
+    text-shadow:0 1px 10px rgba(0,0,0,1);">{name}</span>
+<span style="
+    display:block;
+    font-family:'DM Mono',monospace;font-size:0.68rem;
+    color:rgba(210,240,235,0.65);letter-spacing:0.03em;line-height:1.5;
+    text-shadow:0 1px 8px rgba(0,0,0,1);">{desc}</span>
+<span style="
+    display:block;margin-top:0.9rem;
+    font-family:'DM Mono',monospace;font-size:0.67rem;
+    color:rgba(0,245,212,0.7);letter-spacing:0.1em;">{link_label} →</span>"""
 
 for col, wf in zip([col_c1, col_c2], WORKFLOWS):
     page_key = wf["link"].rstrip("/").split("/")[-1]
+    label = CARD_TEMPLATE.format(
+        num=wf["num"],
+        name=wf["name"],
+        desc=wf["description"],
+        link_label=wf["link_label"]
+    )
     with col:
-        # Card visual (pointer-events: none so button intercepts clicks)
-        st.markdown(f"""
-        <div class="nav-card-wrap">
-          <div class="nav-card-face">
-            <div class="nav-card-topbar"></div>
-            <div class="nav-card-dot"></div>
-            <div class="nav-card-num">{wf['num']}</div>
-            <div class="nav-card-name">{wf['name']}</div>
-            <div class="nav-card-desc">{wf['description']}</div>
-            <div class="nav-card-link">{wf['link_label']} →</div>
-          </div>
-        """, unsafe_allow_html=True)
-        # Invisible button — covers the card, captures the click
-        if st.button(" ", key=f"nav_{page_key}"):
+        st.markdown('<div class="nav-btn-col">', unsafe_allow_html=True)
+        if st.button(label, key=f"nav_{page_key}", use_container_width=True):
             st.switch_page(PAGE_MAP[page_key])
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # ── Add Units section ──
 show_add_units()
