@@ -382,40 +382,84 @@ else:
     with col_d1:
         st.markdown(f"""
         <div style="
-            background:rgba(255,255,255,0.04);
-            border:1px solid rgba(255,255,255,0.08);
-            border-radius:8px;
-            padding:8px 14px;
-            font-size:12px;
-            color:rgba(255,255,255,0.45);
-            font-family:'Outfit',sans-serif;
-            line-height:1.6;
+            display:inline-flex; align-items:center; gap:8px;
+            background:rgba(255,255,255,0.05);
+            border:1px solid rgba(255,255,255,0.07);
+            border-radius:6px;
+            padding:5px 12px;
+            font-family:'DM Mono',monospace;
+            font-size:13px;
+            color:rgba(255,255,255,0.5);
         ">
-            Start Date<br>
-            <span style="font-size:14px;color:rgba(255,255,255,0.85);font-family:'DM Mono',monospace;">
-                {start_date.strftime("%d %b %Y")}
-            </span>
+            <span style="color:rgba(255,255,255,0.3);font-size:11px;">FROM</span>
+            <span style="color:rgba(255,255,255,0.85);">{start_date.strftime("%d %b %Y")}</span>
         </div>
         """, unsafe_allow_html=True)
     with col_d2:
         st.markdown(f"""
         <div style="
-            background:rgba(255,255,255,0.04);
-            border:1px solid rgba(255,255,255,0.08);
-            border-radius:8px;
-            padding:8px 14px;
-            font-size:12px;
-            color:rgba(255,255,255,0.45);
-            font-family:'Outfit',sans-serif;
-            line-height:1.6;
+            display:inline-flex; align-items:center; gap:8px;
+            background:rgba(255,255,255,0.05);
+            border:1px solid rgba(255,255,255,0.07);
+            border-radius:6px;
+            padding:5px 12px;
+            font-family:'DM Mono',monospace;
+            font-size:13px;
+            color:rgba(255,255,255,0.5);
         ">
-            End Date<br>
-            <span style="font-size:14px;color:rgba(255,255,255,0.85);font-family:'DM Mono',monospace;">
-                {end_date.strftime("%d %b %Y")}
-            </span>
+            <span style="color:rgba(255,255,255,0.3);font-size:11px;">TO</span>
+            <span style="color:rgba(255,255,255,0.85);">{end_date.strftime("%d %b %Y")}</span>
         </div>
         """, unsafe_allow_html=True)
+if not nav_filtered.empty:
+    max_row   = nav_filtered.loc[nav_filtered["NAV"].idxmax()]
+    min_row   = nav_filtered.loc[nav_filtered["NAV"].idxmin()]
+    nav_start = nav_filtered["NAV"].iloc[0]
+    nav_end   = nav_filtered["NAV"].iloc[-1]
+    range_chg = (nav_end - nav_start) / nav_start * 100
 
+    chg_color = "#1D9E75" if range_chg >= 0 else "#E24B4A"
+    chg_sign  = "+" if range_chg >= 0 else ""
+
+    st.markdown(f"""
+    <div style="display:flex; gap:10px; margin:14px 0 18px 0; flex-wrap:wrap;">
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+                    border-radius:8px;padding:10px 16px;min-width:130px;">
+            <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
+                        letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
+                Highest NAV
+            </div>
+            <div style="font-size:15px;color:#fff;font-family:'DM Mono';">₹{max_row['NAV']:.4f}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:'Outfit';margin-top:2px;">
+                {max_row['Date'].strftime("%d %b %Y")}
+            </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+                    border-radius:8px;padding:10px 16px;min-width:130px;">
+            <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
+                        letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
+                Lowest NAV
+            </div>
+            <div style="font-size:15px;color:#fff;font-family:'DM Mono';">₹{min_row['NAV']:.4f}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:'Outfit';margin-top:2px;">
+                {min_row['Date'].strftime("%d %b %Y")}
+            </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+                    border-radius:8px;padding:10px 16px;min-width:130px;">
+            <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
+                        letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
+                Range Change
+            </div>
+            <div style="font-size:15px;color:{chg_color};font-family:'DM Mono';">
+                {chg_sign}{range_chg:.2f}%
+            </div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:'Outfit';margin-top:2px;">
+                {start_date.strftime("%d %b")} → {end_date.strftime("%d %b %Y")}
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 # ── Fetch NAV history ──
 @st.cache_data(ttl=3600)
 def fetch_nav_history(fund_code):
