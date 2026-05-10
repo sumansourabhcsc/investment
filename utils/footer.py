@@ -64,11 +64,16 @@ body {
 .tf-links { list-style: none; padding: 0; margin: 0; }
 .tf-links li { margin-bottom: 0.48rem; }
 
-.tf-links span {
+.tf-links a {
     font-size: 0.72rem;
     letter-spacing: 0.04em;
     color: rgba(200, 230, 226, 0.5);
+    text-decoration: none;
+    cursor: default;
+    transition: color 0.2s;
 }
+
+.tf-links a:hover { color: rgba(0, 245, 212, 0.85); }
 
 .tf-bottom {
     border-top: 1px solid rgba(0, 245, 212, 0.08);
@@ -90,12 +95,17 @@ body {
 
 .tf-legal { display: flex; gap: 1.2rem; }
 
-.tf-legal span {
+.tf-legal a {
     font-size: 0.62rem;
     letter-spacing: 0.1em;
     color: rgba(200, 230, 226, 0.28);
+    text-decoration: none;
     text-transform: uppercase;
+    cursor: default;
+    transition: color 0.2s;
 }
+
+.tf-legal a:hover { color: rgba(0, 245, 212, 0.6); }
 
 .tf-locale {
     font-size: 0.62rem;
@@ -113,40 +123,40 @@ body {
   <div>
     <div class="tf-heading">Get to Know Us</div>
     <ul class="tf-links">
-      <li><span>About Taurus</span></li>
-      <li><span>Careers</span></li>
-      <li><span>Press</span></li>
-      <li><span>Research</span></li>
+      <li><a>About Taurus</a></li>
+      <li><a>Careers</a></li>
+      <li><a>Press</a></li>
+      <li><a>Research</a></li>
     </ul>
   </div>
 
   <div>
     <div class="tf-heading">Connect with Us</div>
     <ul class="tf-links">
-      <li><span>GitHub</span></li>
-      <li><span>Twitter / X</span></li>
-      <li><span>LinkedIn</span></li>
-      <li><span>Discord</span></li>
+      <li><a>GitHub</a></li>
+      <li><a>Twitter / X</a></li>
+      <li><a>LinkedIn</a></li>
+      <li><a>Discord</a></li>
     </ul>
   </div>
 
   <div>
     <div class="tf-heading">Tools &amp; Data</div>
     <ul class="tf-links">
-      <li><span>Portfolio Overview</span></li>
-      <li><span>Fund Details</span></li>
-      <li><span>Run Pipeline</span></li>
-      <li><span>API Docs</span></li>
+      <li><a>Portfolio Overview</a></li>
+      <li><a>Fund Details</a></li>
+      <li><a>Run Pipeline</a></li>
+      <li><a>API Docs</a></li>
     </ul>
   </div>
 
   <div>
     <div class="tf-heading">Let Us Help You</div>
     <ul class="tf-links">
-      <li><span>Your Account</span></li>
-      <li><span>Documentation</span></li>
-      <li><span>Support</span></li>
-      <li><span>System Status</span></li>
+      <li><a>Your Account</a></li>
+      <li><a>Documentation</a></li>
+      <li><a>Support</a></li>
+      <li><a>System Status</a></li>
     </ul>
   </div>
 
@@ -157,9 +167,9 @@ body {
     &copy; 2026 <span>Suman Sourabh PMS Pvt. Ltd.</span> &nbsp;&middot;&nbsp; All rights reserved
   </div>
   <div class="tf-legal">
-    <span>Privacy</span>
-    <span>Terms</span>
-    <span>Cookies</span>
+    <a>Privacy</a>
+    <a>Terms</a>
+    <a>Cookies</a>
   </div>
   <div class="tf-locale">Language: English &nbsp;|&nbsp; Country: India</div>
 </div>
