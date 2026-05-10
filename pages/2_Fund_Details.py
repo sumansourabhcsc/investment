@@ -331,7 +331,6 @@ with col_daily:
 
 st.divider()
 
-
 # =========================
 # NAV HISTORY — range picker + chart
 # =========================
@@ -350,7 +349,7 @@ range_choice = st.radio(
 range_map = {"1M": 30, "3M": 90, "6M": 180, "1Y": 365, "3Y": 1095, "All": 9999}
 
 if range_choice != "Custom":
-    days = range_map[range_choice]
+    days          = range_map[range_choice]
     default_start = date.today() - timedelta(days=days)
     default_end   = date.today()
 else:
@@ -381,37 +380,62 @@ else:
     end_date   = default_end
     with col_d1:
         st.markdown(f"""
-        <div style="
-            display:inline-flex; align-items:center; gap:8px;
-            background:rgba(255,255,255,0.05);
-            border:1px solid rgba(255,255,255,0.07);
-            border-radius:6px;
-            padding:5px 12px;
-            font-family:'DM Mono',monospace;
-            font-size:13px;
-            color:rgba(255,255,255,0.5);
-        ">
+        <div style="display:inline-flex;align-items:center;gap:8px;
+            background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
+            border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;
+            font-size:13px;color:rgba(255,255,255,0.5);">
             <span style="color:rgba(255,255,255,0.3);font-size:11px;">FROM</span>
             <span style="color:rgba(255,255,255,0.85);">{start_date.strftime("%d %b %Y")}</span>
         </div>
         """, unsafe_allow_html=True)
     with col_d2:
         st.markdown(f"""
-        <div style="
-            display:inline-flex; align-items:center; gap:8px;
-            background:rgba(255,255,255,0.05);
-            border:1px solid rgba(255,255,255,0.07);
-            border-radius:6px;
-            padding:5px 12px;
-            font-family:'DM Mono',monospace;
-            font-size:13px;
-            color:rgba(255,255,255,0.5);
-        ">
+        <div style="display:inline-flex;align-items:center;gap:8px;
+            background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
+            border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;
+            font-size:13px;color:rgba(255,255,255,0.5);">
             <span style="color:rgba(255,255,255,0.3);font-size:11px;">TO</span>
             <span style="color:rgba(255,255,255,0.85);">{end_date.strftime("%d %b %Y")}</span>
         </div>
         """, unsafe_allow_html=True)
-if not nav_filtered.empty:
+
+# ── Fetch NAV history ──
+@st.cache_data(ttl=3600)
+def fetch_nav_history(fund_code):
+    url = f"https://api.mfapi.in/mf/{fund_code}"
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        if "data" in data and data["data"]:
+            df = pd.DataFrame(data["data"])
+            df["date"] = pd.to_datetime(df["date"], format="%d-%m-%Y")
+            df["nav"]  = pd.to_numeric(df["nav"], errors="coerce")
+            df = df.sort_values("date").reset_index(drop=True)
+            df.rename(columns={"date": "Date", "nav": "NAV"}, inplace=True)
+            return df
+        return pd.DataFrame()
+    except Exception as e:
+        st.error(f"Failed to fetch NAV history: {e}")
+        return pd.DataFrame()
+
+nav_df_full = fetch_nav_history(scheme_code)
+
+# ── Filter using Timestamps (avoids dtype mismatch) ──
+if not nav_df_full.empty:
+    start_ts     = pd.Timestamp(start_date)
+    end_ts       = pd.Timestamp(end_date)
+    nav_filtered = nav_df_full[
+        (nav_df_full["Date"] >= start_ts) &
+        (nav_df_full["Date"] <= end_ts)
+    ].reset_index(drop=True)
+else:
+    nav_filtered = pd.DataFrame()
+
+# ── Stats + chart ──
+if nav_filtered.empty:
+    st.warning("No NAV data for the selected date range.")
+else:
     max_row   = nav_filtered.loc[nav_filtered["NAV"].idxmax()]
     min_row   = nav_filtered.loc[nav_filtered["NAV"].idxmin()]
     nav_start = nav_filtered["NAV"].iloc[0]
@@ -422,7 +446,7 @@ if not nav_filtered.empty:
     chg_sign  = "+" if range_chg >= 0 else ""
 
     st.markdown(f"""
-    <div style="display:flex; gap:10px; margin:14px 0 18px 0; flex-wrap:wrap;">
+    <div style="display:flex;gap:10px;margin:14px 0 18px 0;flex-wrap:wrap;">
         <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
                     border-radius:8px;padding:10px 16px;min-width:130px;">
             <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
@@ -460,6 +484,49 @@ if not nav_filtered.empty:
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+    # ── Two-column: table + chart ──
+    col_tbl, col_cht = st.columns([1, 2])
+
+    with col_tbl:
+        display_df = nav_filtered.copy()
+        display_df = display_df.sort_values("Date", ascending=False).reset_index(drop=True)
+        display_df["Date"] = display_df["Date"].dt.date
+        display_df["NAV"]  = display_df["NAV"].round(4)
+        st.dataframe(display_df, use_container_width=True, height=360)
+
+    with col_cht:
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=nav_filtered["Date"],
+            y=nav_filtered["NAV"],
+            mode="lines",
+            name="NAV",
+            line=dict(color="#4F8BF9", width=2),
+            fill="tozeroy",
+            fillcolor="rgba(79,139,249,0.08)",
+            hovertemplate="<b>%{x|%d %b %Y}</b><br>NAV: ₹%{y:.4f}<extra></extra>"
+        ))
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Outfit, sans-serif", color="rgba(255,255,255,0.6)"),
+            margin=dict(l=10, r=10, t=20, b=10),
+            height=360,
+            hovermode="x unified",
+            showlegend=False,
+            xaxis=dict(showgrid=False, zeroline=False),
+            yaxis=dict(
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.06)",
+                zeroline=False,
+                tickprefix="₹"
+            ),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+
 # ── Fetch NAV history ──
 @st.cache_data(ttl=3600)
 def fetch_nav_history(fund_code):
