@@ -14,7 +14,7 @@ from utils.load_funds import load_all_funds
 from utils.xirr_overall import compute_overall_xirr
 from utils.xirr_helper import compute_fund_xirr
 
-
+st.divider()
 # =========================================================
 # PAGE CONFIG
 # =========================================================
