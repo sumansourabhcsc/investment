@@ -12,7 +12,7 @@ st.divider()
 # =========================
 # PAGE CONFIG
 # =========================
-st.set_page_config(page_title="Fund Details | Taurus", layout="wide", page_icon="📁")
+st.set_page_config(page_title="Taurus | Fund Details", layout="wide", page_icon="🐂")
 
 
 # =========================
