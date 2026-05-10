@@ -514,3 +514,9 @@ if clicked:
         st.success("✅  All 2 pipeline steps completed successfully.")
     else:
         st.warning("⚠️  Pipeline stopped early — check errors above.")
+
+from utils.footer import show_footer
+
+# ... all your page content ...
+
+show_footer()
