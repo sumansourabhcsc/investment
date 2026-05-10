@@ -500,7 +500,7 @@ st.dataframe(df_daily_change, use_container_width=True)
 
 total_change = df_daily_change["Change in Value"].sum() if not df_daily_change.empty else 0
 change_summary_box(total_change)
-
+st.divider()
 from utils.footer import show_footer
 
 # ... all your page content ...
