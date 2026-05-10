@@ -475,7 +475,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 col_btn, col_spacer = st.columns([1, 4])
 
 with col_btn:
-    clicked = st.button("▶  Run Pipeline", type="primary", use_container_width=True)
+    clicked = st.button("▶  Update Portfolio", type="primary", use_container_width=True)
 
 # ── Execution Log ──
 if clicked:
