@@ -229,17 +229,17 @@ GITHUB_REPO  = st.secrets["GITHUB_REPO"]
 
 WORKFLOWS = [
     {
-        "name": "Fund Snapshots",
+        "name": "Portfolio Overview",
         "file": "update_fund_snapshots.yml",
-        "description": "Updates fund snapshot records",
+        "description": "Overall fund snapshot",
         "num": "01",
         "link": "https://taurus.streamlit.app/Portfolio_Overview",
         "link_label": "Portfolio Overview"
     },
     {
-        "name": "Portfolio Daily",
+        "name": "Individual Funds",
         "file": "update_portfolio_daily.yml",
-        "description": "Recalculates and updates portfolio values",
+        "description": "Individual Fund Details",
         "num": "02",
         "link": "https://taurus.streamlit.app/Fund_Details",
         "link_label": "Fund Details"
