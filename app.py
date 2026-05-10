@@ -357,7 +357,7 @@ components.html("""
 </body></html>
 """, height=130, scrolling=False)
 
-# ── Pipeline navigation — buttons styled AS cards ──
+# ── Pipeline navigation ──
 PAGE_MAP = {
     "Portfolio_Overview": "pages/1_Portfolio_Overview.py",
     "Fund_Details":       "pages/2_Fund_Details.py",
@@ -365,77 +365,96 @@ PAGE_MAP = {
 
 st.markdown("""
 <style>
-/* Make nav buttons look exactly like cards */
-.nav-btn-col div[data-testid="stButton"] > button {
-    all: unset;
-    display: block;
-    width: 100%;
-    background: rgba(8, 14, 20, 0.78);
+/* Invisible overlay button that sits on top of the card markdown */
+.nav-btn-wrap { position: relative; margin-bottom: 0.5rem; }
+.nav-btn-wrap .card-visual {
+    background: rgba(8,14,20,0.78);
     border: 1px solid rgba(0,245,212,0.2);
     border-radius: 12px;
     padding: 1.4rem 1.5rem 1.35rem;
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.25s, border-color 0.25s, transform 0.22s;
-    box-sizing: border-box;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    color: inherit;
-    line-height: 1;
-    position: relative;
+    pointer-events: none;
+    transition: background 0.25s, border-color 0.25s, transform 0.22s;
 }
-.nav-btn-col div[data-testid="stButton"] > button:hover {
+.nav-btn-wrap:hover .card-visual {
     background: rgba(0,245,212,0.09);
     border-color: rgba(0,245,212,0.65);
     transform: translateY(-3px);
 }
-.nav-btn-col div[data-testid="stButton"] > button:focus {
-    outline: none;
-    box-shadow: none;
+.nav-btn-wrap:hover .card-topbar { opacity: 1 !important; }
+.nav-btn-wrap:hover .card-num { color: rgba(0,245,212,0.55) !important; }
+.nav-btn-wrap:hover .card-name { color: #fff !important; }
+.nav-btn-wrap:hover .card-desc { color: rgba(210,240,235,0.88) !important; }
+.nav-btn-wrap:hover .card-link { color: rgba(0,245,212,0.85) !important; transform: translateX(0) !important; }
+
+/* The actual button — transparent, sits over card */
+.nav-btn-wrap div[data-testid="stButton"] {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 9 !important;
 }
-.nav-btn-col div[data-testid="stButton"] > button:focus-visible {
-    box-shadow: 0 0 0 2px rgba(0,245,212,0.4);
+.nav-btn-wrap div[data-testid="stButton"] button {
+    width: 100% !important;
+    height: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    opacity: 0 !important;
+    cursor: pointer !important;
+    padding: 0 !important;
 }
-/* Remove any default p margin inside button */
-.nav-btn-col div[data-testid="stButton"] > button p {
-    margin: 0 !important;
+@keyframes pdot {
+    0%   { box-shadow: 0 0 0 0   rgba(0,245,212,0.6); }
+    60%  { box-shadow: 0 0 0 6px rgba(0,245,212,0);   }
+    100% { box-shadow: 0 0 0 0   rgba(0,245,212,0);   }
 }
 </style>
 """, unsafe_allow_html=True)
 
 col_c1, col_c2 = st.columns(2)
 
-CARD_TEMPLATE = """<span style="
-    display:block;
-    font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;
-    color:rgba(0,245,212,0.28);line-height:1;margin-bottom:0.55rem;">{num}</span>
-<span style="
-    display:block;
-    font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;
-    color:#dff5f0;margin-bottom:0.3rem;
-    text-shadow:0 1px 10px rgba(0,0,0,1);">{name}</span>
-<span style="
-    display:block;
-    font-family:'DM Mono',monospace;font-size:0.68rem;
-    color:rgba(210,240,235,0.65);letter-spacing:0.03em;line-height:1.5;
-    text-shadow:0 1px 8px rgba(0,0,0,1);">{desc}</span>
-<span style="
-    display:block;margin-top:0.9rem;
-    font-family:'DM Mono',monospace;font-size:0.67rem;
-    color:rgba(0,245,212,0.7);letter-spacing:0.1em;">{link_label} →</span>"""
-
 for col, wf in zip([col_c1, col_c2], WORKFLOWS):
     page_key = wf["link"].rstrip("/").split("/")[-1]
-    label = CARD_TEMPLATE.format(
-        num=wf["num"],
-        name=wf["name"],
-        desc=wf["description"],
-        link_label=wf["link_label"]
-    )
     with col:
-        st.markdown('<div class="nav-btn-col">', unsafe_allow_html=True)
-        if st.button(label, key=f"nav_{page_key}", use_container_width=True):
+        st.markdown(f"""
+        <div class="nav-btn-wrap">
+          <div class="card-visual">
+            <div class="card-topbar" style="
+                position:absolute;top:0;left:0;right:0;height:2px;
+                background:linear-gradient(90deg,#00f5d4,#00c9ff);
+                opacity:0.4;border-radius:12px 12px 0 0;transition:opacity 0.3s;"></div>
+            <div style="
+                position:absolute;top:1rem;right:1rem;
+                width:7px;height:7px;border-radius:50%;
+                background:rgba(0,245,212,0.35);
+                animation:pdot 2.2s ease-in-out infinite;"></div>
+            <div class="card-num" style="
+                font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;
+                color:rgba(0,245,212,0.22);line-height:1;margin-bottom:0.55rem;
+                transition:color 0.3s;">{wf['num']}</div>
+            <div class="card-name" style="
+                font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;
+                color:#dff5f0;margin-bottom:0.3rem;
+                text-shadow:0 1px 10px rgba(0,0,0,1);
+                transition:color 0.3s;">{wf['name']}</div>
+            <div class="card-desc" style="
+                font-family:'DM Mono',monospace;font-size:0.68rem;
+                color:rgba(210,240,235,0.62);letter-spacing:0.03em;line-height:1.5;
+                text-shadow:0 1px 8px rgba(0,0,0,1);
+                transition:color 0.3s;">{wf['description']}</div>
+            <div class="card-link" style="
+                font-family:'DM Mono',monospace;font-size:0.67rem;
+                color:rgba(0,245,212,0.7);letter-spacing:0.1em;
+                margin-top:0.85rem;display:inline-block;
+                transform:translateX(-4px);transition:color 0.3s,transform 0.3s;">{wf['link_label']} →</div>
+          </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("go", key=f"nav_{page_key}"):
             st.switch_page(PAGE_MAP[page_key])
+
+        st.markdown("</div>", unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
 # ── Add Units section ──
