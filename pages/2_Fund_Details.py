@@ -337,38 +337,50 @@ st.divider()
 # =========================
 section_header("📈 NAV History")
 
-# ── Date pickers + quick-range tabs ──
-col_d1, col_d2, col_tab = st.columns([1, 1, 2])
+# ── Quick-range tabs first ──
+range_choice = st.radio(
+    "Quick Range",
+    options=["Custom", "1M", "3M", "1Y", "3Y", "All"],
+    index=3,
+    horizontal=True,
+    label_visibility="collapsed",
+    key="nav_range_choice"
+)
 
+range_map = {"1M": 30, "3M": 90, "1Y": 365, "3Y": 1095, "All": 9999}
+
+if range_choice != "Custom":
+    days = range_map[range_choice]
+    default_start = date.today() - timedelta(days=days)
+    default_end   = date.today()
+else:
+    default_start = date.today() - timedelta(days=365)
+    default_end   = date.today()
+
+# ── Date pickers (only active when Custom is selected) ──
+col_d1, col_d2 = st.columns([1, 1])
 with col_d1:
     start_date = st.date_input(
         "Start Date",
-        value=date.today() - timedelta(days=365),
+        value=default_start,
         max_value=date.today(),
-        key="start_date"
+        key="start_date",
+        disabled=(range_choice != "Custom")
     )
 with col_d2:
     end_date = st.date_input(
         "End Date",
-        value=date.today(),
-        min_value=start_date,
+        value=default_end,
+        min_value=start_date if range_choice == "Custom" else default_start,
         max_value=date.today(),
-        key="end_date"
+        key="end_date",
+        disabled=(range_choice != "Custom")
     )
-with col_tab:
-    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-    range_choice = st.radio(
-        "Quick Range",
-        options=["1M", "3M", "1Y", "3Y", "All"],
-        index=2,
-        horizontal=True,
-        label_visibility="collapsed"
-    )
-    range_map = {"1M": 30, "3M": 90, "1Y": 365, "3Y": 1095, "All": 3650}
-    if range_choice:
-        start_date = date.today() - timedelta(days=range_map[range_choice])
-        end_date   = date.today()
 
+# Override with quick range values
+if range_choice != "Custom":
+    start_date = default_start
+    end_date   = default_end
 
 # ── Fetch NAV history ──
 @st.cache_data(ttl=3600)
@@ -392,10 +404,13 @@ def fetch_nav_history(fund_code):
 
 nav_df_full = fetch_nav_history(scheme_code)
 
+# ── Filter using Timestamps (avoids dtype mismatch) ──
 if not nav_df_full.empty:
+    start_ts = pd.Timestamp(start_date)
+    end_ts   = pd.Timestamp(end_date)
     nav_filtered = nav_df_full[
-        (nav_df_full["Date"].dt.date >= start_date) &
-        (nav_df_full["Date"].dt.date <= end_date)
+        (nav_df_full["Date"] >= start_ts) &
+        (nav_df_full["Date"] <= end_ts)
     ].reset_index(drop=True)
 else:
     nav_filtered = pd.DataFrame()
@@ -403,13 +418,12 @@ else:
 if nav_filtered.empty:
     st.warning("No NAV data for the selected date range.")
 else:
-    max_row = nav_filtered.loc[nav_filtered["NAV"].idxmax()]
-    min_row = nav_filtered.loc[nav_filtered["NAV"].idxmin()]
+    max_row   = nav_filtered.loc[nav_filtered["NAV"].idxmax()]
+    min_row   = nav_filtered.loc[nav_filtered["NAV"].idxmin()]
     nav_start = nav_filtered["NAV"].iloc[0]
     nav_end   = nav_filtered["NAV"].iloc[-1]
     range_chg = (nav_end - nav_start) / nav_start * 100
 
-    # ── Stat pills ──
     chg_class = "pos" if range_chg >= 0 else "neg"
     chg_sign  = "+" if range_chg >= 0 else ""
     st.markdown(f"""
@@ -431,7 +445,6 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Two-column: table + chart ──
     col_tbl, col_cht = st.columns([1, 2])
 
     with col_tbl:
@@ -471,7 +484,6 @@ else:
             ),
         )
         st.plotly_chart(fig, use_container_width=True)
-
 st.divider()
 
 
