@@ -229,142 +229,26 @@ GITHUB_REPO  = st.secrets["GITHUB_REPO"]
 
 WORKFLOWS = [
     {
-        "name": "Fetch NAV Daily",
-        "file": "fetch_nav_daily.yml",
-        "description": "Fetches latest NAV data for all funds",
-        "num": "01"
-    },
-    {
-        "name": "Update Fund Snapshots",
+        "name": "Fund Snapshots",
         "file": "update_fund_snapshots.yml",
         "description": "Updates fund snapshot records",
-        "num": "02"
+        "num": "01",
+        "link": "https://taurus.streamlit.app/Portfolio_Overview",
+        "link_label": "Portfolio Overview"
     },
     {
-        "name": "Update Portfolio Daily",
+        "name": "Portfolio Daily",
         "file": "update_portfolio_daily.yml",
         "description": "Recalculates and updates portfolio values",
-        "num": "03"
+        "num": "02",
+        "link": "https://taurus.streamlit.app/Fund_Details",
+        "link_label": "Fund Details"
     },
 ]
 
 DELAY_SECONDS = 60
 
 
-# ─────────────────────────────────────────────
-# Pulser Component
-# ─────────────────────────────────────────────
-def pulser(
-    size: int = 80,
-    color: str = "#00f5d4",
-    pulse_count: int = 3,
-    speed: float = 1.8,
-    label: str = "",
-    height: int = 200,
-):
-    delays = " ".join(
-        f".ring:nth-child({i + 1}) {{ animation-delay: {i * (speed / pulse_count):.2f}s; }}"
-        for i in range(pulse_count)
-    )
-    rings_html = "\n".join(f'<div class="ring"></div>' for _ in range(pulse_count))
-
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <meta charset="utf-8"/>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&display=swap');
-      *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
-      body {{
-        background: transparent;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: {height}px;
-        font-family: 'DM Mono', monospace;
-        overflow: hidden;
-      }}
-      .pulser-wrapper {{
-        position: relative;
-        width: {size * 4}px;
-        height: {size * 4}px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }}
-      .ring {{
-        position: absolute;
-        width: {size}px;
-        height: {size}px;
-        border-radius: 50%;
-        border: 1.5px solid {color};
-        opacity: 0;
-        animation: ripple {speed}s ease-out infinite;
-      }}
-      {delays}
-      @keyframes ripple {{
-        0%   {{ transform: scale(1);   opacity: 0.7; }}
-        100% {{ transform: scale({pulse_count + 1}.5); opacity: 0; }}
-      }}
-      .core {{
-        position: relative;
-        width: {size}px;
-        height: {size}px;
-        border-radius: 50%;
-        background: radial-gradient(circle at 35% 35%, {color}cc, {color}44);
-        box-shadow:
-          0 0 {size // 4}px {color}99,
-          0 0 {size // 2}px {color}44,
-          inset 0 0 {size // 6}px {color}66;
-        animation: throb {speed * 0.6:.2f}s ease-in-out infinite alternate;
-        z-index: 10;
-      }}
-      @keyframes throb {{
-        from {{ box-shadow: 0 0 {size // 4}px {color}99, 0 0 {size // 2}px {color}44, inset 0 0 {size // 6}px {color}66; }}
-        to   {{ box-shadow: 0 0 {size // 2}px {color}dd, 0 0 {size}px {color}66, inset 0 0 {size // 4}px {color}aa; }}
-      }}
-      .core::before, .core::after {{
-        content: '';
-        position: absolute;
-        background: {color}55;
-        border-radius: 1px;
-      }}
-      .core::before {{
-        width: 1px; height: 60%;
-        top: 20%; left: 50%;
-        transform: translateX(-50%);
-      }}
-      .core::after {{
-        height: 1px; width: 60%;
-        left: 20%; top: 50%;
-        transform: translateY(-50%);
-      }}
-      .label {{
-        margin-top: 12px;
-        color: {color}cc;
-        font-size: 10px;
-        letter-spacing: 0.25em;
-        text-transform: uppercase;
-        animation: blink 1.4s step-start infinite;
-      }}
-      @keyframes blink {{
-        0%, 100% {{ opacity: 1; }}
-        50%       {{ opacity: 0.15; }}
-      }}
-    </style>
-    </head>
-    <body>
-      <div class="pulser-wrapper">
-        {rings_html}
-        <div class="core"></div>
-      </div>
-      {"<div class='label'>" + label + "</div>" if label else ""}
-    </body>
-    </html>
-    """
-    components.html(html, height=height, scrolling=False)
 
 
 # ─────────────────────────────────────────────
@@ -393,161 +277,155 @@ def trigger_workflow(workflow_filename: str) -> dict:
 # UI Layout
 # ─────────────────────────────────────────────
 
-# ── Header row: Wordmark + Pulser ──
-col_title, col_pulse = st.columns([3, 1])
+# ── Header: Wordmark + compact pulser in one iframe ──
+components.html("""
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Mono:wght@300;400&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:transparent;font-family:'DM Mono',monospace;padding:1.4rem 0 0 0;}
+  .header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;}
+  .wordmark-block{flex:1;min-width:0;}
+  h1{
+    font-family:'Syne',sans-serif;
+    font-size:4.2rem;
+    font-weight:800;
+    letter-spacing:-0.03em;
+    line-height:1;
+    white-space:nowrap;
+    background:linear-gradient(135deg,#00f5d4 0%,#00c9ff 55%,#a78bfa 100%);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .sub{
+    font-size:0.68rem;font-weight:300;letter-spacing:0.28em;
+    color:rgba(0,245,212,0.5);text-transform:uppercase;margin-top:0.45rem;
+  }
+  .divider{
+    width:100%;height:1px;
+    background:linear-gradient(90deg,rgba(0,245,212,0.4) 0%,rgba(0,201,255,0.2) 50%,transparent 100%);
+    margin:1.1rem 0 0 0;
+  }
+  /* compact pulser */
+  .pulser-wrap{
+    flex-shrink:0;width:80px;height:80px;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;margin-top:4px;
+  }
+  .ring{
+    position:absolute;width:34px;height:34px;border-radius:50%;
+    border:1px solid #00f5d4;opacity:0;
+    animation:ripple 1.5s ease-out infinite;
+  }
+  .ring:nth-child(1){animation-delay:0s;}
+  .ring:nth-child(2){animation-delay:0.25s;}
+  .ring:nth-child(3){animation-delay:0.5s;}
+  .ring:nth-child(4){animation-delay:0.75s;}
+  @keyframes ripple{0%{transform:scale(1);opacity:0.65;}100%{transform:scale(3.4);opacity:0;}}
+  .core{
+    position:relative;width:22px;height:22px;border-radius:50%;z-index:10;
+    background:radial-gradient(circle at 35% 35%,#00f5d4cc,#00f5d444);
+    animation:throb 0.9s ease-in-out infinite alternate;
+  }
+  @keyframes throb{
+    from{box-shadow:0 0 5px #00f5d499,0 0 10px #00f5d444;}
+    to{box-shadow:0 0 10px #00f5d4dd,0 0 20px #00f5d466;}
+  }
+  .live-label{
+    position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);
+    font-size:9px;letter-spacing:0.22em;color:rgba(0,245,212,0.5);
+    text-transform:uppercase;white-space:nowrap;
+    animation:blink 1.4s step-start infinite;
+  }
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.15;}}
+</style>
+</head><body>
+<div class="header-row">
+  <div class="wordmark-block">
+    <h1>TAURUS</h1>
+    <div class="sub">Portfolio Intelligence System</div>
+    <div class="divider"></div>
+  </div>
+  <div class="pulser-wrap">
+    <div class="ring"></div><div class="ring"></div>
+    <div class="ring"></div><div class="ring"></div>
+    <div class="core"></div>
+    <span class="live-label">live</span>
+  </div>
+</div>
+</body></html>
+""", height=130, scrolling=False)
 
-with col_title:
-    st.markdown(
-        '<div style="padding-top:1.5rem;">'
-        '<h1 style="font-family:Syne,sans-serif;font-size:clamp(3rem,8vw,6.5rem);font-weight:800;'
-        'letter-spacing:-0.03em;line-height:1;background:linear-gradient(135deg,#00f5d4 0%,#00c9ff 55%,#a78bfa 100%);'
-        '-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0;padding:0;">'
-        'TAURUS</h1>'
-        '<p style="font-family:\'DM Mono\',monospace;font-size:0.72rem;font-weight:300;letter-spacing:0.3em;'
-        'color:rgba(0,245,212,0.55);text-transform:uppercase;margin-top:0.4rem;">Portfolio Intelligence System</p>'
-        '</div>'
-        '<div style="width:100%;height:1px;background:linear-gradient(90deg,rgba(0,245,212,0.4) 0%,'
-        'rgba(0,201,255,0.2) 50%,transparent 100%);margin:1.2rem 0 1.6rem 0;"></div>',
-        unsafe_allow_html=True
-    )
-
-with col_pulse:
-    pulser(
-        size=40,
-        color="#00f5d4",
-        pulse_count=6,
-        speed=1.5,
-        label="live",
-        height=160,
-    )
-
-# ── Workflow pipeline cards (self-contained iframe component) ──
+# ── Workflow pipeline cards ──
 def render_pipeline_cards(workflows):
     cards_html = ""
     for wf in workflows:
         cards_html += f"""
-        <div class="card" onmouseenter="this.classList.add('hovered')" onmouseleave="this.classList.remove('hovered')">
+        <a class="card" href="{wf['link']}" target="_self"
+           onmouseenter="this.classList.add('hovered')"
+           onmouseleave="this.classList.remove('hovered')">
             <div class="card-top-bar"></div>
-            <div class="card-dot">
-                <span class="dot-inner"></span>
-            </div>
+            <div class="card-dot"><span class="dot-inner"></span></div>
             <div class="card-num">{wf['num']}</div>
             <div class="card-name">{wf['name']}</div>
             <div class="card-desc">{wf['description']}</div>
-            <div class="card-arrow">→</div>
-        </div>
+            <div class="card-link">{wf['link_label']} &rarr;</div>
+        </a>
         """
 
     html = f"""
     <!DOCTYPE html><html><head><meta charset="utf-8"/>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@300;400&display=swap');
-      * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-      body {{
-        background: transparent;
-        padding: 4px 2px 12px 2px;
-        font-family: 'DM Mono', monospace;
+      *{{box-sizing:border-box;margin:0;padding:0;}}
+      body{{background:transparent;padding:4px 2px 12px 2px;font-family:'DM Mono',monospace;}}
+      .grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}}
+      .card{{
+        background:rgba(255,255,255,0.03);
+        border:1px solid rgba(0,245,212,0.13);
+        border-radius:12px;
+        padding:1.3rem 1.3rem 1.1rem 1.3rem;
+        position:relative;overflow:hidden;
+        cursor:pointer;text-decoration:none;display:block;
+        transition:background 0.3s,border-color 0.3s,transform 0.25s;
       }}
-      .grid {{
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
+      .card.hovered{{
+        background:rgba(0,245,212,0.06);
+        border-color:rgba(0,245,212,0.5);
+        transform:translateY(-3px);
       }}
-      .card {{
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(0,245,212,0.13);
-        border-radius: 12px;
-        padding: 1.2rem 1.2rem 1rem 1.2rem;
-        position: relative;
-        overflow: hidden;
-        cursor: default;
-        transition: background 0.3s, border-color 0.3s, transform 0.25s;
+      .card-top-bar{{
+        position:absolute;top:0;left:0;right:0;height:2px;
+        background:linear-gradient(90deg,#00f5d4,#00c9ff);
+        opacity:0.35;border-radius:12px 12px 0 0;
+        transition:opacity 0.3s;
       }}
-      .card.hovered {{
-        background: rgba(0,245,212,0.06);
-        border-color: rgba(0,245,212,0.45);
-        transform: translateY(-3px);
+      .card.hovered .card-top-bar{{opacity:1;}}
+      .card-dot{{position:absolute;top:1rem;right:1rem;width:10px;height:10px;border-radius:50%;display:flex;align-items:center;justify-content:center;}}
+      .dot-inner{{display:block;width:6px;height:6px;border-radius:50%;background:rgba(0,245,212,0.3);animation:pulse-dot 2.2s ease-in-out infinite;}}
+      .card.hovered .dot-inner{{background:#00f5d4;box-shadow:0 0 8px rgba(0,245,212,0.8);animation:none;}}
+      @keyframes pulse-dot{{0%{{box-shadow:0 0 0 0 rgba(0,245,212,0.5);}}60%{{box-shadow:0 0 0 6px rgba(0,245,212,0);}}100%{{box-shadow:0 0 0 0 rgba(0,245,212,0);}}}}
+      .card-num{{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:rgba(0,245,212,0.18);line-height:1;margin-bottom:0.55rem;transition:color 0.3s;}}
+      .card.hovered .card-num{{color:rgba(0,245,212,0.5);}}
+      .card-name{{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:#b8d8d4;margin-bottom:0.3rem;letter-spacing:0.01em;transition:color 0.3s;}}
+      .card.hovered .card-name{{color:#e0f5f2;}}
+      .card-desc{{font-size:0.67rem;color:rgba(180,215,210,0.4);letter-spacing:0.03em;line-height:1.5;transition:color 0.3s;}}
+      .card.hovered .card-desc{{color:rgba(180,215,210,0.65);}}
+      .card-link{{
+        font-size:0.68rem;font-family:'DM Mono',monospace;
+        color:rgba(0,245,212,0);
+        margin-top:0.9rem;letter-spacing:0.08em;
+        transition:color 0.3s,transform 0.3s;
+        transform:translateX(-6px);display:inline-block;
       }}
-      .card-top-bar {{
-        position: absolute;
-        top: 0; left: 0; right: 0; height: 2px;
-        background: linear-gradient(90deg, #00f5d4, #00c9ff);
-        opacity: 0.4;
-        border-radius: 12px 12px 0 0;
-        transition: opacity 0.3s;
-      }}
-      .card.hovered .card-top-bar {{ opacity: 1; }}
-      .card-dot {{
-        position: absolute;
-        top: 1rem; right: 1rem;
-        width: 10px; height: 10px;
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-      }}
-      .dot-inner {{
-        display: block;
-        width: 6px; height: 6px;
-        border-radius: 50%;
-        background: rgba(0,245,212,0.3);
-        box-shadow: 0 0 0 0 rgba(0,245,212,0.4);
-        animation: pulse-dot 2.2s ease-in-out infinite;
-      }}
-      .card.hovered .dot-inner {{
-        background: #00f5d4;
-        box-shadow: 0 0 8px rgba(0,245,212,0.7);
-        animation: none;
-      }}
-      @keyframes pulse-dot {{
-        0%   {{ box-shadow: 0 0 0 0 rgba(0,245,212,0.5); }}
-        60%  {{ box-shadow: 0 0 0 5px rgba(0,245,212,0); }}
-        100% {{ box-shadow: 0 0 0 0 rgba(0,245,212,0); }}
-      }}
-      .card-num {{
-        font-family: 'Syne', sans-serif;
-        font-size: 2rem;
-        font-weight: 800;
-        color: rgba(0,245,212,0.18);
-        line-height: 1;
-        margin-bottom: 0.55rem;
-        transition: color 0.3s;
-      }}
-      .card.hovered .card-num {{ color: rgba(0,245,212,0.45); }}
-      .card-name {{
-        font-family: 'Syne', sans-serif;
-        font-size: 0.82rem;
-        font-weight: 700;
-        color: #b8d8d4;
-        margin-bottom: 0.35rem;
-        letter-spacing: 0.01em;
-        transition: color 0.3s;
-      }}
-      .card.hovered .card-name {{ color: #e0f5f2; }}
-      .card-desc {{
-        font-size: 0.66rem;
-        color: rgba(180,215,210,0.4);
-        letter-spacing: 0.03em;
-        line-height: 1.5;
-        transition: color 0.3s;
-      }}
-      .card.hovered .card-desc {{ color: rgba(180,215,210,0.7); }}
-      .card-arrow {{
-        font-size: 0.85rem;
-        color: rgba(0,245,212,0);
-        margin-top: 0.7rem;
-        transition: color 0.3s, transform 0.3s;
-        transform: translateX(-6px);
-        font-family: 'DM Mono', monospace;
-      }}
-      .card.hovered .card-arrow {{
-        color: rgba(0,245,212,0.7);
-        transform: translateX(0);
-      }}
+      .card.hovered .card-link{{color:rgba(0,245,212,0.8);transform:translateX(0);}}
     </style>
     </head><body>
     <div class="grid">{cards_html}</div>
     </body></html>
     """
-    components.html(html, height=190, scrolling=False)
+    components.html(html, height=195, scrolling=False)
 
 render_pipeline_cards(WORKFLOWS)
 
@@ -597,6 +475,6 @@ if clicked:
 
     st.divider()
     if overall_success:
-        st.success("✅  All 3 pipeline steps completed successfully.")
+        st.success("✅  All 2 pipeline steps completed successfully.")
     else:
         st.warning("⚠️  Pipeline stopped early — check errors above.")
