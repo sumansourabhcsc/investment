@@ -10,7 +10,7 @@ st.divider()
 # Page Config — MUST be first, only once
 # ─────────────────────────────────────────────
 st.set_page_config(
-    page_title="Taurus",
+    page_title="Taurus | Home",
     page_icon="🐂",
     layout="wide"
 )
