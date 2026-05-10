@@ -11,6 +11,15 @@ play_background_music(
     volume=0.02
 )
 
+import base64
+
+def get_base64_image(image_path):
+    with open(image_path, "rb") as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+img = get_base64_image("taurus.png")  # make sure taurus.png is in your project root folder
+
 
 # ─────────────────────────────────────────────
 # Page Config — MUST be first, only once
@@ -38,7 +47,7 @@ html, body, [class*="css"] {
     background-image:
         radial-gradient(ellipse 80% 50% at 10% 20%, rgba(0, 245, 212, 0.06) 0%, transparent 60%),
         radial-gradient(ellipse 60% 40% at 85% 70%, rgba(0, 140, 255, 0.05) 0%, transparent 55%),
-        url("https://raw.githubusercontent.com/sumansourabhcsc/investment/main/taurus.png");
+        url("data:image/png;base64,{img}");
     background-size: cover, cover, cover;
     background-position: center, center, center;
     background-repeat: no-repeat, no-repeat, no-repeat;
