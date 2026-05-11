@@ -9,11 +9,17 @@ from utils.data_loader import load_fund, load_nav
 from utils.xirr_helper import compute_fund_xirr
 
 st.divider()
-from utils.music import play_background_music
-play_background_music(
-    "https://raw.githubusercontent.com/sumansourabhcsc/investment/main/music.mp3",
-    volume=0.01
-)
+
+# =========================
+# MUSIC
+# =========================
+# from utils.music import play_background_music
+# play_background_music(
+#     "https://raw.githubusercontent.com/sumansourabhcsc/investment/main/music.mp3",
+#     volume=0.01
+# )
+
+
 # =========================
 # PAGE CONFIG
 # =========================
