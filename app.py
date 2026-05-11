@@ -5,11 +5,15 @@ import time
 
 from utils.add_units import show_add_units
 
-from utils.music import play_background_music
-play_background_music(
-    "https://raw.githubusercontent.com/sumansourabhcsc/investment/main/music.mp3",
-    volume=0.02
-)
+
+# =========================================================
+# MUSIC
+# =========================================================
+# from utils.music import play_background_music
+# play_background_music(
+#     "https://raw.githubusercontent.com/sumansourabhcsc/investment/main/music.mp3",
+#     volume=0.02
+# )
 
 
 
