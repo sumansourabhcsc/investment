@@ -147,6 +147,27 @@ WORKFLOWS = [
     },
 ]
 
+
+PAGES = [
+    {
+        "name": "Portfolio Overview",
+        "file": "update_fund_snapshots.yml",
+        "description": "Overall fund snapshot",
+        "num": "01",
+        "link": "https://taurus.streamlit.app/Portfolio_Overview",
+        "link_label": "Portfolio Overview"
+    },
+    {
+        "name": "Individual Funds",
+        "file": "update_portfolio_daily.yml",
+        "description": "Individual Fund Details",
+        "num": "02",
+        "link": "https://taurus.streamlit.app/Fund_Details",
+        "link_label": "Fund Details"
+    }
+   
+]
+
 DELAY_SECONDS = 60
 
 
@@ -361,7 +382,7 @@ st.markdown("""
 
 col_c1, col_c2 = st.columns(2)
 
-for col, wf in zip([col_c1, col_c2], WORKFLOWS):
+for col, wf in zip([col_c1, col_c2], PAGES):
     page_key = wf["link"].rstrip("/").split("/")[-1]
     with col:
         st.markdown(f"""
