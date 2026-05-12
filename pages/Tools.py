@@ -81,6 +81,41 @@ st.markdown(
         background: rgba(255, 107, 107, 0.15);
         border-color: rgba(255, 107, 107, 0.4); color: #ff6b6b;
     }
+
+    /* ── NEW: dual-result section banners ── */
+    .calc-section-banner {
+        border-radius: 10px;
+        padding: 10px 16px;
+        margin: 18px 0 10px 0;
+        font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+        font-weight: 600;
+    }
+    .banner-at-end {
+        background: rgba(255, 193, 7, 0.10);
+        border: 1px solid rgba(255, 193, 7, 0.35);
+        color: #ffc107;
+    }
+    .banner-today {
+        background: rgba(0, 245, 212, 0.10);
+        border: 1px solid rgba(0, 245, 212, 0.35);
+        color: #00f5d4;
+    }
+    .growth-pill {
+        display: inline-block;
+        background: rgba(0, 245, 212, 0.12);
+        border: 1px solid rgba(0, 245, 212, 0.3);
+        border-radius: 14px;
+        padding: 3px 12px;
+        font-size: 12px;
+        color: #00f5d4;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+    .growth-pill-warn {
+        background: rgba(255, 193, 7, 0.12);
+        border-color: rgba(255, 193, 7, 0.3);
+        color: #ffc107;
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -147,6 +182,55 @@ def render_result_cards(cols_data):
                 f'<p>{value}</p><div class="sub">{sub}</div></div>',
                 unsafe_allow_html=True,
             )
+
+
+def _render_fund_table(table_rows):
+    """Render the SIP transaction log table for Fund Return tab."""
+    if not table_rows:
+        return
+    col_labels = {
+        "SIP Date":               "SIP Date",
+        "NAV Date":               "NAV Date",
+        "NAV at Investment (₹)":  "NAV (₹)",
+        "Amount Invested (₹)":    "Amount",
+        "Units Purchased":        "Units",
+        "Cumulative Units":       "Cum. Units",
+        "Total Invested (₹)":     "Invested",
+        "Current Value (₹)":      "Curr. Value",
+        "Gain / Loss (₹)":        "Gain/Loss",
+    }
+    headers_fr = list(table_rows[0].keys())
+    header_html = "".join(
+        f'<th style="white-space:nowrap;">{col_labels.get(h, h)}</th>'
+        for h in headers_fr
+    )
+    rows_html = ""
+    for row in table_rows:
+        r_html = ""
+        for k, v in row.items():
+            style = 'style="white-space:nowrap;"'
+            if k in ("Amount Invested (₹)", "Total Invested (₹)", "Current Value (₹)"):
+                r_html += f"<td {style}>{fmt_inr(v)}</td>"
+            elif k == "Gain / Loss (₹)":
+                color = "#00f5d4" if v >= 0 else "#ff6b6b"
+                r_html += f'<td style="white-space:nowrap;color:{color};">{fmt_inr(v)}</td>'
+            elif k == "NAV at Investment (₹)":
+                r_html += f"<td {style}>₹{v:.4f}</td>"
+            elif k in ("Units Purchased", "Cumulative Units"):
+                r_html += f"<td {style}>{v:.4f}</td>"
+            elif isinstance(v, date):
+                r_html += f'<td {style}>{v.strftime("%d %b %y")}</td>'
+            else:
+                r_html += f"<td {style}>{v}</td>"
+        rows_html += f"<tr>{r_html}</tr>"
+    st.markdown(
+        f'<div style="overflow-x:auto;max-height:400px;overflow-y:auto;'
+        f'margin-top:8px;border:1px solid rgba(0,245,212,0.15);border-radius:8px;">'
+        f'<table class="year-table" style="min-width:700px;table-layout:auto;">'
+        f'<thead><tr>{header_html}</tr></thead>'
+        f'<tbody>{rows_html}</tbody></table></div>',
+        unsafe_allow_html=True,
+    )
 
 
 def render_breakdown_table(breakdown, currency_keys):
@@ -356,19 +440,46 @@ with tab_fund:
             key="fr_sip_amount",
         )
 
-        col_d1, col_d2 = st.columns(2)
-        with col_d1:
-            sip_start = st.date_input(
-                "SIP Start Date", value=date(2022, 1, 1), key="fr_sip_start",
-                help="SIP will be invested on the 1st of each month from this date",
+        sip_start = st.date_input(
+            "SIP Start Date", value=date(2022, 1, 1), key="fr_sip_start",
+            help="SIP will be invested on the 1st of each month from this date",
+        )
+
+        # ── Calculation Mode ──
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="section-label">Calculation Mode</div>', unsafe_allow_html=True)
+
+        calc_mode = st.radio(
+            "calc_mode_radio",
+            options=["SIP Ongoing (no end date)", "SIP Stopped (with end date)"],
+            key="fr_calc_mode",
+            label_visibility="collapsed",
+            help=(
+                "Ongoing: SIP is still running — shows total value as of today.\n\n"
+                "Stopped: SIP ended on a specific date — shows corpus at that date "
+                "AND what it's worth today (investments kept compounding)."
+            ),
+        )
+
+        sip_end = None
+
+        if calc_mode == "SIP Ongoing (no end date)":
+            # End date = today; valuation date = today
+            sip_end = date.today()
+            st.caption(f"SIP treated as active through today ({sip_end.strftime('%d %b %Y')})")
+
+        else:  # SIP Stopped
+            sip_end = st.date_input(
+                "SIP End Date",
+                value=date(2023, 12, 31),
+                key="fr_sip_end_stopped",
+                help="The last month in which SIP was invested",
             )
-        with col_d2:
-            use_today = st.toggle("Use today as End Date", value=True, key="fr_use_today")
-            if use_today:
-                sip_end = date.today()
-                st.caption(f"End date: **{sip_end}**")
-            else:
-                sip_end = st.date_input("SIP End Date", value=date.today(), key="fr_sip_end")
+            st.caption(
+                "📌 Two results will be shown:\n"
+                "① Corpus value **at SIP end date**\n"
+                "② Current value **as of today** (corpus kept growing after SIP stopped)"
+            )
 
         st.markdown("<br>", unsafe_allow_html=True)
         calc_fund_btn = st.button(
@@ -381,142 +492,292 @@ with tab_fund:
         if calc_fund_btn:
             if not fund_code:
                 st.error("Please enter or select a fund code.")
-            elif sip_start >= sip_end:
+            elif sip_end and sip_start >= sip_end:
                 st.error("SIP Start Date must be before End Date.")
             else:
-                with st.spinner("Fetching NAV history and calculating returns..."):
-                    try:
-                        result_fr = calculate_sip_returns(
-                            fund_code=fund_code,
-                            monthly_amount=sip_amount,
-                            sip_start_date=sip_start,
-                            sip_end_date=sip_end,
-                            valuation_date=date.today(),
-                        )
-                    except ValueError as e:
-                        st.error(f"❌ {e}")
-                        result_fr = None
+                # ────────────────────────────────────────────────
+                # MODE A: SIP Ongoing — single calculation, today
+                # ────────────────────────────────────────────────
+                if calc_mode == "SIP Ongoing (no end date)":
+                    with st.spinner("Fetching NAV history and calculating returns..."):
+                        try:
+                            result_fr = calculate_sip_returns(
+                                fund_code=fund_code,
+                                monthly_amount=sip_amount,
+                                sip_start_date=sip_start,
+                                sip_end_date=date.today(),
+                                valuation_date=date.today(),
+                            )
+                        except ValueError as e:
+                            st.error(f"❌ {e}")
+                            result_fr = None
 
-                if result_fr:
-                    st.markdown("<br>", unsafe_allow_html=True)
+                    if result_fr:
+                        st.markdown("<br>", unsafe_allow_html=True)
 
-                    # ── Fund name banner ──
-                    st.markdown(
-                        f'<div style="background:rgba(0,245,212,0.06);border:1px solid rgba(0,245,212,0.2);'
-                        f'border-radius:8px;padding:12px 16px;margin-bottom:16px;">'
-                        f'<div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;'
-                        f'color:#00f5d4;">Fund</div>'
-                        f'<div style="font-size:15px;font-weight:600;margin-top:2px;">'
-                        f'{result_fr["fund_name"]}</div>'
-                        f'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">'
-                        f'Code: {result_fr["fund_code"]} &nbsp;|&nbsp; '
-                        f'Valuation date: {result_fr["valuation_date"]}</div></div>',
-                        unsafe_allow_html=True,
-                    )
-
-                    # ── Summary tiles (4 tiles, last one = latest NAV + date) ──
-                    st.markdown('<div class="section-label">Summary</div>', unsafe_allow_html=True)
-                    gain_cls = "gain-positive" if result_fr["total_gains"] >= 0 else "gain-negative"
-                    render_result_cards([
-                        ("Total Invested",
-                         fmt_inr(result_fr["total_invested"]),
-                         f"{len(result_fr['sip_rows'])} SIP instalments"),
-                        ("Current Value",
-                         fmt_inr(result_fr["current_value"]),
-                         f'<span class="{gain_cls}">{result_fr["abs_return_pct"]:+.1f}% absolute</span>'),
-                        ("Total Gains",
-                         fmt_inr(result_fr["total_gains"]),
-                         f'Units held: {result_fr["total_units"]:,.4f}'),
-                        ("Latest NAV",
-                         f'₹{result_fr["latest_nav"]:.4f}',
-                         f'as on {result_fr["latest_nav_date"].strftime("%d %b %Y")}'),
-                    ])
-
-                    # ── XIRR badge ──
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    if result_fr["xirr_pct"] is not None:
-                        xv = result_fr["xirr_pct"]
-                        badge_cls = "xirr-badge" if xv >= 0 else "xirr-badge xirr-badge-neg"
-                        sign = "+" if xv >= 0 else ""
+                        # Fund name banner
                         st.markdown(
-                            f'<div style="text-align:center;padding:12px 0;">'
-                            f'<div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;'
-                            f'color:#00f5d4;margin-bottom:8px;">XIRR (Annualised Return)</div>'
-                            f'<span class="{badge_cls}">{sign}{xv:.2f}% p.a.</span></div>',
+                            f'<div style="background:rgba(0,245,212,0.06);border:1px solid rgba(0,245,212,0.2);'
+                            f'border-radius:8px;padding:12px 16px;margin-bottom:16px;">'
+                            f'<div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;'
+                            f'color:#00f5d4;">Fund</div>'
+                            f'<div style="font-size:15px;font-weight:600;margin-top:2px;">'
+                            f'{result_fr["fund_name"]}</div>'
+                            f'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">'
+                            f'Code: {result_fr["fund_code"]} &nbsp;|&nbsp; '
+                            f'Valuation date: {result_fr["valuation_date"]}</div></div>',
                             unsafe_allow_html=True,
                         )
-                    else:
-                        st.warning(f"XIRR could not be calculated: {result_fr['xirr_error']}")
 
-                    # ── Dual-line chart: Invested vs Current Value over time ──
+                        st.markdown(
+                            '<div class="calc-section-banner banner-today">'
+                            '📈 SIP Ongoing — Current Value as of Today'
+                            '</div>',
+                            unsafe_allow_html=True,
+                        )
+
+                        gain_cls = "gain-positive" if result_fr["total_gains"] >= 0 else "gain-negative"
+                        render_result_cards([
+                            ("Total Invested",
+                             fmt_inr(result_fr["total_invested"]),
+                             f"{len(result_fr['sip_rows'])} SIP instalments"),
+                            ("Current Value",
+                             fmt_inr(result_fr["current_value"]),
+                             f'<span class="{gain_cls}">{result_fr["abs_return_pct"]:+.1f}% absolute</span>'),
+                            ("Total Gains",
+                             fmt_inr(result_fr["total_gains"]),
+                             f'Units held: {result_fr["total_units"]:,.4f}'),
+                            ("Latest NAV",
+                             f'₹{result_fr["latest_nav"]:.4f}',
+                             f'as on {result_fr["latest_nav_date"].strftime("%d %b %Y")}'),
+                        ])
+
+                        # XIRR
+                        st.markdown("<br>", unsafe_allow_html=True)
+                        if result_fr["xirr_pct"] is not None:
+                            xv = result_fr["xirr_pct"]
+                            badge_cls = "xirr-badge" if xv >= 0 else "xirr-badge xirr-badge-neg"
+                            sign = "+" if xv >= 0 else ""
+                            st.markdown(
+                                f'<div style="text-align:center;padding:12px 0;">'
+                                f'<div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;'
+                                f'color:#00f5d4;margin-bottom:8px;">XIRR (Annualised Return)</div>'
+                                f'<span class="{badge_cls}">{sign}{xv:.2f}% p.a.</span></div>',
+                                unsafe_allow_html=True,
+                            )
+                        else:
+                            st.warning(f"XIRR could not be calculated: {result_fr['xirr_error']}")
+
+                        # Chart
+                        rows = result_fr["sip_rows"]
+                        if rows:
+                            chart_data = pd.DataFrame({
+                                "Date": [r["NAV Date"] for r in rows],
+                                "Invested (₹)": [r["Total Invested (₹)"] for r in rows],
+                                "Current Value (₹)": [r["Current Value (₹)"] for r in rows],
+                            }).set_index("Date")
+                            st.caption("📊 Invested vs Current Value over time")
+                            st.line_chart(chart_data, color=["#4a9eff", "#00f5d4"])
+
+                        # Transaction log
+                        st.markdown(
+                            '<div class="section-label" style="margin-top:16px;">SIP Transaction Log</div>',
+                            unsafe_allow_html=True,
+                        )
+                        _render_fund_table(result_fr["sip_rows"])
+
+                # ────────────────────────────────────────────────
+                # MODE B: SIP Stopped — TWO calculations
+                #   1) corpus at sip_end date
+                #   2) value today (corpus grew via market after stop)
+                # ────────────────────────────────────────────────
+                else:
+                    result_at_end = None
+                    result_today = None
+
+                    with st.spinner("Calculating corpus at SIP end date..."):
+                        try:
+                            result_at_end = calculate_sip_returns(
+                                fund_code=fund_code,
+                                monthly_amount=sip_amount,
+                                sip_start_date=sip_start,
+                                sip_end_date=sip_end,
+                                valuation_date=sip_end,      # ← valued AT end date
+                            )
+                        except ValueError as e:
+                            st.error(f"❌ (At SIP End) {e}")
+
+                    with st.spinner("Calculating current value as of today..."):
+                        try:
+                            result_today = calculate_sip_returns(
+                                fund_code=fund_code,
+                                monthly_amount=sip_amount,
+                                sip_start_date=sip_start,
+                                sip_end_date=sip_end,        # same SIP window
+                                valuation_date=date.today(), # ← valued at TODAY's NAV
+                            )
+                        except ValueError as e:
+                            st.error(f"❌ (Today) {e}")
+
+                    if result_at_end or result_today:
+                        st.markdown("<br>", unsafe_allow_html=True)
+
+                        # Use whichever result loaded for the fund banner
+                        _banner_result = result_at_end or result_today
+                        st.markdown(
+                            f'<div style="background:rgba(0,245,212,0.06);border:1px solid rgba(0,245,212,0.2);'
+                            f'border-radius:8px;padding:12px 16px;margin-bottom:8px;">'
+                            f'<div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;'
+                            f'color:#00f5d4;">Fund</div>'
+                            f'<div style="font-size:15px;font-weight:600;margin-top:2px;">'
+                            f'{_banner_result["fund_name"]}</div>'
+                            f'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">'
+                            f'Code: {_banner_result["fund_code"]}'
+                            f' &nbsp;|&nbsp; SIP: {sip_start.strftime("%d %b %Y")}'
+                            f' → {sip_end.strftime("%d %b %Y")}'
+                            f'</div></div>',
+                            unsafe_allow_html=True,
+                        )
+
+                    # ── SECTION 1: At SIP End Date ──
+                    if result_at_end:
+                        st.markdown(
+                            f'<div class="calc-section-banner banner-at-end">'
+                            f'① Corpus at SIP End &nbsp;—&nbsp; {sip_end.strftime("%d %b %Y")}'
+                            f'</div>',
+                            unsafe_allow_html=True,
+                        )
+                        gc1 = "gain-positive" if result_at_end["total_gains"] >= 0 else "gain-negative"
+                        render_result_cards([
+                            ("Total Invested",
+                             fmt_inr(result_at_end["total_invested"]),
+                             f"{len(result_at_end['sip_rows'])} SIP instalments"),
+                            ("Corpus at End",
+                             fmt_inr(result_at_end["current_value"]),
+                             f'<span class="{gc1}">{result_at_end["abs_return_pct"]:+.1f}% absolute</span>'),
+                            ("Gains at End",
+                             fmt_inr(result_at_end["total_gains"]),
+                             f'Units held: {result_at_end["total_units"]:,.4f}'),
+                            ("NAV at End",
+                             f'₹{result_at_end["current_nav"]:.4f}',
+                             f'as on {result_at_end["valuation_date"].strftime("%d %b %Y")}'),
+                        ])
+
+                        # XIRR at end
+                        if result_at_end["xirr_pct"] is not None:
+                            xv1 = result_at_end["xirr_pct"]
+                            bc1 = "xirr-badge" if xv1 >= 0 else "xirr-badge xirr-badge-neg"
+                            sign1 = "+" if xv1 >= 0 else ""
+                            st.markdown(
+                                f'<div style="text-align:center;padding:8px 0 4px;">'
+                                f'<div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;'
+                                f'color:#ffc107;margin-bottom:6px;">XIRR at SIP End</div>'
+                                f'<span class="{bc1}" style="background:rgba(255,193,7,0.12);'
+                                f'border-color:rgba(255,193,7,0.4);color:#ffc107;">'
+                                f'{sign1}{xv1:.2f}% p.a.</span></div>',
+                                unsafe_allow_html=True,
+                            )
+                        else:
+                            st.caption(f"XIRR (at end) unavailable: {result_at_end['xirr_error']}")
+
                     st.markdown("<br>", unsafe_allow_html=True)
-                    rows = result_fr["sip_rows"]
-                    if rows:
-                        chart_data = pd.DataFrame({
-                            "Date": [r["NAV Date"] for r in rows],
-                            "Invested (₹)": [r["Total Invested (₹)"] for r in rows],
-                            "Current Value (₹)": [r["Current Value (₹)"] for r in rows],
+
+                    # ── SECTION 2: Current Value Today ──
+                    if result_today:
+                        # How long since SIP stopped
+                        days_since = (date.today() - sip_end).days
+                        years_since = days_since / 365.25
+                        time_label = (
+                            f"{int(years_since)}y {int((years_since % 1) * 12)}m since SIP stopped"
+                            if years_since >= 1
+                            else f"{int(days_since / 30)}m since SIP stopped"
+                        )
+
+                        # Extra growth after stop
+                        extra_growth = 0.0
+                        if result_at_end:
+                            extra_growth = result_today["current_value"] - result_at_end["current_value"]
+
+                        st.markdown(
+                            f'<div class="calc-section-banner banner-today">'
+                            f'② Value Today &nbsp;—&nbsp; {date.today().strftime("%d %b %Y")}'
+                            f'<span class="growth-pill">{time_label}</span>'
+                            f'</div>',
+                            unsafe_allow_html=True,
+                        )
+
+                        gc2 = "gain-positive" if result_today["total_gains"] >= 0 else "gain-negative"
+                        extra_card_sub = (
+                            f'corpus grew {fmt_inr(extra_growth)} after stop'
+                            if result_at_end else "growth since SIP stopped"
+                        )
+                        render_result_cards([
+                            ("Total Invested",
+                             fmt_inr(result_today["total_invested"]),
+                             "same as at end — no new instalments"),
+                            ("Current Value",
+                             fmt_inr(result_today["current_value"]),
+                             f'<span class="{gc2}">{result_today["abs_return_pct"]:+.1f}% absolute</span>'),
+                            ("Extra Growth",
+                             fmt_inr(extra_growth),
+                             extra_card_sub),
+                            ("Latest NAV",
+                             f'₹{result_today["latest_nav"]:.4f}',
+                             f'as on {result_today["latest_nav_date"].strftime("%d %b %Y")}'),
+                        ])
+
+                        # XIRR today
+                        if result_today["xirr_pct"] is not None:
+                            xv2 = result_today["xirr_pct"]
+                            bc2 = "xirr-badge" if xv2 >= 0 else "xirr-badge xirr-badge-neg"
+                            sign2 = "+" if xv2 >= 0 else ""
+                            st.markdown(
+                                f'<div style="text-align:center;padding:8px 0 4px;">'
+                                f'<div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;'
+                                f'color:#00f5d4;margin-bottom:6px;">XIRR (as of Today)</div>'
+                                f'<span class="{bc2}">{sign2}{xv2:.2f}% p.a.</span></div>',
+                                unsafe_allow_html=True,
+                            )
+                        else:
+                            st.caption(f"XIRR (today) unavailable: {result_today['xirr_error']}")
+
+                    # ── Combined chart: shows full journey ──
+                    if result_today and result_today["sip_rows"]:
+                        st.markdown("<br>", unsafe_allow_html=True)
+                        rows_today = result_today["sip_rows"]
+
+                        # We split the chart data into "during SIP" and "after SIP stopped"
+                        # Since sip_rows only contains instalments up to sip_end,
+                        # the "current value" column already uses today's NAV for all rows.
+                        # We show invested (flat after end) and current value.
+                        chart_data_stopped = pd.DataFrame({
+                            "Date": [r["NAV Date"] for r in rows_today],
+                            "Invested (₹)": [r["Total Invested (₹)"] for r in rows_today],
+                            "Value (today's NAV) (₹)": [r["Current Value (₹)"] for r in rows_today],
                         }).set_index("Date")
-                        st.caption("📊 Invested vs Current Value over time")
-                        st.line_chart(chart_data, color=["#4a9eff", "#00f5d4"])
-
-                    # ── Transaction log table ──
-                    st.markdown(
-                        '<div class="section-label" style="margin-top:16px;">SIP Transaction Log</div>',
-                        unsafe_allow_html=True,
-                    )
-                    table_rows = result_fr["sip_rows"]
-                    if table_rows:
-                        # Compact column headers
-                        col_labels = {
-                            "SIP Date":               "SIP Date",
-                            "NAV Date":               "NAV Date",
-                            "NAV at Investment (₹)":  "NAV (₹)",
-                            "Amount Invested (₹)":    "Amount",
-                            "Units Purchased":        "Units",
-                            "Cumulative Units":       "Cum. Units",
-                            "Total Invested (₹)":     "Invested",
-                            "Current Value (₹)":      "Curr. Value",
-                            "Gain / Loss (₹)":        "Gain/Loss",
-                        }
-                        headers_fr = list(table_rows[0].keys())
-                        header_html = "".join(
-                            f'<th style="white-space:nowrap;">{col_labels.get(h, h)}</th>'
-                            for h in headers_fr
+                        st.caption(
+                            "📊 Invested vs Portfolio Value — all units valued at today's NAV. "
+                            "Invested line is flat after SIP stopped."
                         )
-                        rows_html = ""
-                        for row in table_rows:
-                            r_html = ""
-                            for k, v in row.items():
-                                style = 'style="white-space:nowrap;"'
-                                if k in ("Amount Invested (₹)", "Total Invested (₹)",
-                                         "Current Value (₹)", "Gain / Loss (₹)"):
-                                    color_style = ""
-                                    if k == "Gain / Loss (₹)":
-                                        color = "#00f5d4" if v >= 0 else "#ff6b6b"
-                                        color_style = f'style="white-space:nowrap;color:{color};"'
-                                        r_html += f"<td {color_style}>{fmt_inr(v)}</td>"
-                                    else:
-                                        r_html += f"<td {style}>{fmt_inr(v)}</td>"
-                                elif k == "NAV at Investment (₹)":
-                                    r_html += f"<td {style}>₹{v:.4f}</td>"
-                                elif k in ("Units Purchased", "Cumulative Units"):
-                                    r_html += f"<td {style}>{v:.4f}</td>"
-                                elif isinstance(v, date):
-                                    # Compact date: "03 Jan 22"
-                                    r_html += f'<td {style}>{v.strftime("%d %b %y")}</td>'
-                                else:
-                                    r_html += f"<td {style}>{v}</td>"
-                            rows_html += f"<tr>{r_html}</tr>"
-                    
+                        st.line_chart(chart_data_stopped, color=["#4a9eff", "#00f5d4"])
+
+                    # ── Transaction log (shows today's valuation) ──
+                    if result_today and result_today["sip_rows"]:
                         st.markdown(
-                            f'<div style="overflow-x:auto;max-height:400px;overflow-y:auto;'
-                            f'margin-top:8px;border:1px solid rgba(0,245,212,0.15);border-radius:8px;">'
-                            f'<table class="year-table" style="min-width:700px;table-layout:auto;">'
-                            f'<thead><tr>{header_html}</tr></thead>'
-                            f'<tbody>{rows_html}</tbody></table></div>',
+                            '<div class="section-label" style="margin-top:16px;">'
+                            'SIP Transaction Log (valued at today\'s NAV)'
+                            '</div>',
                             unsafe_allow_html=True,
                         )
+                        _render_fund_table(result_today["sip_rows"])
+
+        else:
+            st.markdown(
+                '<br><br><div style="text-align:center;opacity:0.4;padding:60px 20px;">'
+                '<div style="font-size:48px;">🔍</div>'
+                '<div style="margin-top:12px;font-size:14px;">Select a fund and fill in the details</div>'
+                '</div>', unsafe_allow_html=True)
+
 
 # ══════════════════════════════════════════════
 # TAB 4 – COMING SOON
