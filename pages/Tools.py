@@ -467,43 +467,56 @@ with tab_fund:
                     )
                     table_rows = result_fr["sip_rows"]
                     if table_rows:
+                        # Compact column headers
+                        col_labels = {
+                            "SIP Date":               "SIP Date",
+                            "NAV Date":               "NAV Date",
+                            "NAV at Investment (₹)":  "NAV (₹)",
+                            "Amount Invested (₹)":    "Amount",
+                            "Units Purchased":        "Units",
+                            "Cumulative Units":       "Cum. Units",
+                            "Total Invested (₹)":     "Invested",
+                            "Current Value (₹)":      "Curr. Value",
+                            "Gain / Loss (₹)":        "Gain/Loss",
+                        }
                         headers_fr = list(table_rows[0].keys())
-                        header_html = "".join(f"<th>{h}</th>" for h in headers_fr)
+                        header_html = "".join(
+                            f'<th style="white-space:nowrap;">{col_labels.get(h, h)}</th>'
+                            for h in headers_fr
+                        )
                         rows_html = ""
                         for row in table_rows:
                             r_html = ""
                             for k, v in row.items():
+                                style = 'style="white-space:nowrap;"'
                                 if k in ("Amount Invested (₹)", "Total Invested (₹)",
                                          "Current Value (₹)", "Gain / Loss (₹)"):
-                                    color = ""
+                                    color_style = ""
                                     if k == "Gain / Loss (₹)":
-                                        color = 'style="color:#00f5d4;"' if v >= 0 else 'style="color:#ff6b6b;"'
-                                    r_html += f"<td {color}>{fmt_inr(v)}</td>"
+                                        color = "#00f5d4" if v >= 0 else "#ff6b6b"
+                                        color_style = f'style="white-space:nowrap;color:{color};"'
+                                        r_html += f"<td {color_style}>{fmt_inr(v)}</td>"
+                                    else:
+                                        r_html += f"<td {style}>{fmt_inr(v)}</td>"
                                 elif k == "NAV at Investment (₹)":
-                                    r_html += f"<td>₹{v:.4f}</td>"
+                                    r_html += f"<td {style}>₹{v:.4f}</td>"
                                 elif k in ("Units Purchased", "Cumulative Units"):
-                                    r_html += f"<td>{v:.4f}</td>"
+                                    r_html += f"<td {style}>{v:.4f}</td>"
                                 elif isinstance(v, date):
-                                    r_html += f"<td>{v.strftime('%d %b %Y')}</td>"
+                                    # Compact date: "03 Jan 22"
+                                    r_html += f'<td {style}>{v.strftime("%d %b %y")}</td>'
                                 else:
-                                    r_html += f"<td>{v}</td>"
+                                    r_html += f"<td {style}>{v}</td>"
                             rows_html += f"<tr>{r_html}</tr>"
+                    
                         st.markdown(
                             f'<div style="overflow-x:auto;max-height:400px;overflow-y:auto;'
                             f'margin-top:8px;border:1px solid rgba(0,245,212,0.15);border-radius:8px;">'
-                            f'<table class="year-table"><thead><tr>{header_html}</tr></thead>'
+                            f'<table class="year-table" style="min-width:700px;table-layout:auto;">'
+                            f'<thead><tr>{header_html}</tr></thead>'
                             f'<tbody>{rows_html}</tbody></table></div>',
                             unsafe_allow_html=True,
                         )
-        else:
-            st.markdown(
-                '<br><br><div style="text-align:center;opacity:0.4;padding:60px 20px;">'
-                '<div style="font-size:48px;">🔍</div>'
-                '<div style="margin-top:12px;font-size:14px;">'
-                'Select a fund, set your SIP dates and hit Analyse</div></div>',
-                unsafe_allow_html=True,
-            )
-
 
 # ══════════════════════════════════════════════
 # TAB 4 – COMING SOON
