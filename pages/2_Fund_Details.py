@@ -179,6 +179,7 @@ fund_options  = list(mutual_funds.keys())
 selected_fund = st.selectbox("Select Fund", fund_options)
 
 scheme_code = mutual_funds[selected_fund]["code"]
+folio_no = mutual_funds[selected_fund]["folio"]
 folder      = mutual_funds[selected_fund]["folder"]
 fund_df     = load_fund(folder)
 
@@ -226,6 +227,7 @@ with col_title:
         <div>
             <div class="page-title">{selected_fund}</div>
             <div class="page-subtitle">Scheme Code: {scheme_code} &nbsp;·&nbsp; Direct Growth</div>
+            <div class="page-subtitle">Folio No: {folio_no} &nbsp;·&nbsp; </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
