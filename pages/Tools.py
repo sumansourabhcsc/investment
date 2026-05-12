@@ -19,7 +19,7 @@ st.markdown(
     <style>
     /* Full page background */
     .stApp {
-        background-image: url("https://raw.githubusercontent.com/sumansourabhcsc/investment/main/taurus.png");
+        #background-image: url("https://raw.githubusercontent.com/sumansourabhcsc/investment/main/taurus.png");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
