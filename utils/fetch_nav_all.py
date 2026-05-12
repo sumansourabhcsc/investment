@@ -15,6 +15,7 @@ mutual_funds = {
     "SBI Magnum Children's Benefit Fund": "148490",
     "Parag Parikh Flexi Cap Fund": "122639",
     "Bandhan Small Cap Fund": "147946",
+    "Edelweiss Flexi Cap Fund": "140353",
     "Motilal Oswal Midcap Fund": "127042",
     "Nippon India Large Cap Fund": "118632",
     "Axis Small Cap Fund": "125354",
