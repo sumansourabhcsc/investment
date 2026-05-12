@@ -226,7 +226,7 @@ with col_title:
         <div class="fund-logo-wrap">{logo_inner}</div>
         <div>
             <div class="page-title">{selected_fund}</div>
-            <div class="page-subtitle">Scheme Code: {scheme_code} &nbsp;·&nbsp; Direct Growth</div>
+            <div class="page-subtitle">Scheme Code: {scheme_code} &nbsp;·&nbsp; Direct Growth &nbsp;·&nbsp; Folio No: {folio_no}</div>
             <div class="page-subtitle">Folio No: {folio_no} &nbsp;·&nbsp; </div>
         </div>
     </div>
