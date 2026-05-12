@@ -1,1 +1,2 @@
-
+date,total_invested,current_value,total_units,absolute_gain_loss,total_return_pct,xirr_annual,nav
+15-04-2026,200000.0,201303.62,3996.42,1303.62,0.65%,3.13%,50.371
