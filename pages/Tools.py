@@ -400,7 +400,7 @@ with tab_fund:
                 if result_fr:
                     st.markdown("<br>", unsafe_allow_html=True)
 
-                    # Fund name banner
+                    # ── Fund name banner ──
                     st.markdown(
                         f'<div style="background:rgba(0,245,212,0.06);border:1px solid rgba(0,245,212,0.2);'
                         f'border-radius:8px;padding:12px 16px;margin-bottom:16px;">'
@@ -410,23 +410,29 @@ with tab_fund:
                         f'{result_fr["fund_name"]}</div>'
                         f'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">'
                         f'Code: {result_fr["fund_code"]} &nbsp;|&nbsp; '
-                        f'Valuation NAV date: {result_fr["valuation_date"]}</div></div>',
+                        f'Valuation date: {result_fr["valuation_date"]}</div></div>',
                         unsafe_allow_html=True,
                     )
 
-                    # Summary cards
+                    # ── Summary tiles (4 tiles, last one = latest NAV + date) ──
                     st.markdown('<div class="section-label">Summary</div>', unsafe_allow_html=True)
                     gain_cls = "gain-positive" if result_fr["total_gains"] >= 0 else "gain-negative"
                     render_result_cards([
-                        ("Total Invested", fmt_inr(result_fr["total_invested"]),
+                        ("Total Invested",
+                         fmt_inr(result_fr["total_invested"]),
                          f"{len(result_fr['sip_rows'])} SIP instalments"),
-                        ("Current Value", fmt_inr(result_fr["current_value"]),
+                        ("Current Value",
+                         fmt_inr(result_fr["current_value"]),
                          f'<span class="{gain_cls}">{result_fr["abs_return_pct"]:+.1f}% absolute</span>'),
-                        ("Total Gains", fmt_inr(result_fr["total_gains"]),
-                         f'NAV: ₹{result_fr["current_nav"]:.4f}'),
+                        ("Total Gains",
+                         fmt_inr(result_fr["total_gains"]),
+                         f'Units held: {result_fr["total_units"]:,.4f}'),
+                        ("Latest NAV",
+                         f'₹{result_fr["latest_nav"]:.4f}',
+                         f'as on {result_fr["latest_nav_date"].strftime("%d %b %Y")}'),
                     ])
 
-                    # XIRR badge
+                    # ── XIRR badge ──
                     st.markdown("<br>", unsafe_allow_html=True)
                     if result_fr["xirr_pct"] is not None:
                         xv = result_fr["xirr_pct"]
@@ -442,25 +448,19 @@ with tab_fund:
                     else:
                         st.warning(f"XIRR could not be calculated: {result_fr['xirr_error']}")
 
-                    st.markdown(
-                        f'<div style="text-align:center;color:rgba(255,255,255,0.4);'
-                        f'font-size:12px;margin-top:4px;">'
-                        f'Total Units Held: {result_fr["total_units"]:,.4f}</div>',
-                        unsafe_allow_html=True,
-                    )
-
-                    # Cumulative invested chart
+                    # ── Dual-line chart: Invested vs Current Value over time ──
                     st.markdown("<br>", unsafe_allow_html=True)
                     rows = result_fr["sip_rows"]
                     if rows:
                         chart_data = pd.DataFrame({
                             "Date": [r["NAV Date"] for r in rows],
-                            "Invested (₹)": [sip_amount * (i + 1) for i in range(len(rows))],
+                            "Invested (₹)": [r["Total Invested (₹)"] for r in rows],
+                            "Current Value (₹)": [r["Current Value (₹)"] for r in rows],
                         }).set_index("Date")
-                        st.caption("Cumulative investment over time")
-                        st.line_chart(chart_data, color=["#4a9eff"])
+                        st.caption("📊 Invested vs Current Value over time")
+                        st.line_chart(chart_data, color=["#4a9eff", "#00f5d4"])
 
-                    # Transaction log table
+                    # ── Transaction log table ──
                     st.markdown(
                         '<div class="section-label" style="margin-top:16px;">SIP Transaction Log</div>',
                         unsafe_allow_html=True,
@@ -473,9 +473,13 @@ with tab_fund:
                         for row in table_rows:
                             r_html = ""
                             for k, v in row.items():
-                                if k == "Amount (₹)":
-                                    r_html += f"<td>{fmt_inr(v)}</td>"
-                                elif k == "NAV (₹)":
+                                if k in ("Amount Invested (₹)", "Total Invested (₹)",
+                                         "Current Value (₹)", "Gain / Loss (₹)"):
+                                    color = ""
+                                    if k == "Gain / Loss (₹)":
+                                        color = 'style="color:#00f5d4;"' if v >= 0 else 'style="color:#ff6b6b;"'
+                                    r_html += f"<td {color}>{fmt_inr(v)}</td>"
+                                elif k == "NAV at Investment (₹)":
                                     r_html += f"<td>₹{v:.4f}</td>"
                                 elif k in ("Units Purchased", "Cumulative Units"):
                                     r_html += f"<td>{v:.4f}</td>"
@@ -485,7 +489,7 @@ with tab_fund:
                                     r_html += f"<td>{v}</td>"
                             rows_html += f"<tr>{r_html}</tr>"
                         st.markdown(
-                            f'<div style="overflow-x:auto;max-height:380px;overflow-y:auto;'
+                            f'<div style="overflow-x:auto;max-height:400px;overflow-y:auto;'
                             f'margin-top:8px;border:1px solid rgba(0,245,212,0.15);border-radius:8px;">'
                             f'<table class="year-table"><thead><tr>{header_html}</tr></thead>'
                             f'<tbody>{rows_html}</tbody></table></div>',
