@@ -199,6 +199,11 @@ st.markdown(
         border: 1px solid rgba(0, 245, 212, 0.35);
         color: #00f5d4;
     }
+    .banner-rolling {
+        background: rgba(100, 160, 255, 0.10);
+        border: 1px solid rgba(100, 160, 255, 0.35);
+        color: #64a0ff;
+    }
     .growth-pill {
         display: inline-block;
         background: rgba(0, 245, 212, 0.12);
@@ -215,6 +220,24 @@ st.markdown(
         border-color: rgba(255, 193, 7, 0.3);
         color: #ffc107;
     }
+
+    /* ── Rolling returns stat cards ── */
+    .rolling-stat {
+        background: rgba(100, 160, 255, 0.07);
+        border: 1px solid rgba(100, 160, 255, 0.25);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-top: 8px;
+        text-align: center;
+    }
+    .rolling-stat h4 {
+        color: #64a0ff; font-size: 11px; letter-spacing: 0.12em;
+        text-transform: uppercase; margin: 0 0 6px 0;
+    }
+    .rolling-stat .val { font-size: 24px; font-weight: 700; color: white; margin: 0; }
+    .rolling-stat .sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+    .rolling-stat-best .val { color: #00f5d4; }
+    .rolling-stat-worst .val { color: #ff6b6b; }
     </style>
     """,
     unsafe_allow_html=True
@@ -360,6 +383,135 @@ def render_breakdown_table(breakdown, currency_keys):
     )
 
 
+def render_rolling_returns(rolling: dict):
+    """
+    Render the 3-year rolling returns section.
+    Expects the dict returned by calculate_rolling_returns().
+    """
+    window = rolling["window_years"]
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="calc-section-banner banner-rolling">'
+        f'📊 {window}-Year Rolling Returns'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    if rolling["insufficient_data"] or not rolling["data"]:
+        st.warning(
+            f"Not enough NAV history to compute {window}-year rolling returns. "
+            f"The fund needs at least {window} years of data."
+        )
+        return
+
+    data = rolling["data"]
+    best = rolling["best"]
+    worst = rolling["worst"]
+
+    # ── Stat cards ──
+    cols = st.columns(4)
+    stat_items = [
+        ("Best 3Y Return", f'{best["cagr_pct"]:+.1f}%',
+         f'{best["start_date"].strftime("%b %Y")} → {best["end_date"].strftime("%b %Y")}',
+         "rolling-stat rolling-stat-best"),
+        ("Worst 3Y Return", f'{worst["cagr_pct"]:+.1f}%',
+         f'{worst["start_date"].strftime("%b %Y")} → {worst["end_date"].strftime("%b %Y")}',
+         "rolling-stat rolling-stat-worst"),
+        ("Average 3Y Return", f'{rolling["average_pct"]:+.1f}%',
+         f"across {len(data)} rolling windows",
+         "rolling-stat"),
+        ("% Positive Periods", f'{rolling["positive_pct"]:.0f}%',
+         "windows with positive CAGR",
+         "rolling-stat"),
+    ]
+    for col, (label, val, sub, cls) in zip(cols, stat_items):
+        with col:
+            st.markdown(
+                f'<div class="{cls}">'
+                f'<h4>{label}</h4>'
+                f'<div class="val">{val}</div>'
+                f'<div class="sub">{sub}</div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+
+    # ── Rolling returns line chart ──
+    st.markdown("<br>", unsafe_allow_html=True)
+    chart_df = pd.DataFrame({
+        "Date": [r["end_date"] for r in data],
+        f"{window}Y Rolling CAGR (%)": [r["cagr_pct"] for r in data],
+    }).set_index("Date")
+    st.caption(
+        f"📈 {window}-year rolling CAGR at each month-end — "
+        f"each point shows annualised return for the {window} years ending on that date"
+    )
+    st.line_chart(chart_df, color=["#64a0ff"])
+
+    # ── Distribution insight: how many periods above/below thresholds ──
+    cagrs = [r["cagr_pct"] for r in data]
+    above_15 = sum(1 for c in cagrs if c >= 15)
+    above_12 = sum(1 for c in cagrs if c >= 12)
+    below_0  = sum(1 for c in cagrs if c < 0)
+    total = len(cagrs)
+
+    st.markdown(
+        f'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">'
+        f'<div style="background:rgba(0,245,212,0.08);border:1px solid rgba(0,245,212,0.2);'
+        f'border-radius:8px;padding:10px 16px;font-size:12px;">'
+        f'<span style="color:#00f5d4;font-weight:700;">{above_15}/{total}</span>'
+        f'<span style="color:rgba(255,255,255,0.5);margin-left:6px;">periods ≥ 15% CAGR</span>'
+        f'</div>'
+        f'<div style="background:rgba(0,245,212,0.08);border:1px solid rgba(0,245,212,0.2);'
+        f'border-radius:8px;padding:10px 16px;font-size:12px;">'
+        f'<span style="color:#00f5d4;font-weight:700;">{above_12}/{total}</span>'
+        f'<span style="color:rgba(255,255,255,0.5);margin-left:6px;">periods ≥ 12% CAGR</span>'
+        f'</div>'
+        f'<div style="background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);'
+        f'border-radius:8px;padding:10px 16px;font-size:12px;">'
+        f'<span style="color:#ff6b6b;font-weight:700;">{below_0}/{total}</span>'
+        f'<span style="color:rgba(255,255,255,0.5);margin-left:6px;">periods with negative return</span>'
+        f'</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    # ── Detailed rolling returns table (collapsible) ──
+    with st.expander(f"View all {len(data)} rolling windows"):
+        rolling_table_rows = [
+            {
+                "End Date": r["end_date"].strftime("%b %Y"),
+                "Start Date": r["start_date"].strftime("%b %Y"),
+                "NAV (Start)": f'₹{r["start_nav"]:.4f}',
+                "NAV (End)": f'₹{r["end_nav"]:.4f}',
+                "3Y CAGR": r["cagr_pct"],
+            }
+            for r in data
+        ]
+        header_html = "".join(
+            f'<th style="white-space:nowrap;">{k}</th>'
+            for k in rolling_table_rows[0].keys()
+        )
+        rows_html = ""
+        for row in rolling_table_rows:
+            r_html = ""
+            for k, v in row.items():
+                if k == "3Y CAGR":
+                    color = "#00f5d4" if v >= 0 else "#ff6b6b"
+                    r_html += f'<td style="white-space:nowrap;color:{color};font-weight:600;">{v:+.2f}%</td>'
+                else:
+                    r_html += f'<td style="white-space:nowrap;">{v}</td>'
+            rows_html += f"<tr>{r_html}</tr>"
+        st.markdown(
+            f'<div style="overflow-x:auto;max-height:360px;overflow-y:auto;'
+            f'border:1px solid rgba(100,160,255,0.15);border-radius:8px;">'
+            f'<table class="year-table" style="min-width:500px;">'
+            f'<thead><tr>{header_html}</tr></thead>'
+            f'<tbody>{rows_html}</tbody></table></div>',
+            unsafe_allow_html=True,
+        )
+
+
 # ─────────────────────────────────────────────
 # Page Header
 # ─────────────────────────────────────────────
@@ -496,7 +648,8 @@ with tab_lumpsum:
 # TAB 3 – FUND RETURN CALCULATOR
 # ══════════════════════════════════════════════
 with tab_fund:
-    from utils.fund_return_calculator import calculate_sip_returns
+    from utils.fund_return_calculator import calculate_sip_returns, calculate_rolling_returns
+
     from config import mutual_funds
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -563,11 +716,10 @@ with tab_fund:
         sip_end = None
 
         if calc_mode == "SIP Ongoing (no end date)":
-            # End date = today; valuation date = today
             sip_end = date.today()
             st.caption(f"SIP treated as active through today ({sip_end.strftime('%d %b %Y')})")
 
-        else:  # SIP Stopped
+        else:
             sip_end = st.date_input(
                 "SIP End Date",
                 value=date(2023, 12, 31),
@@ -579,6 +731,19 @@ with tab_fund:
                 "① Corpus value **at SIP end date**\n"
                 "② Current value **as of today** (corpus kept growing after SIP stopped)"
             )
+
+        # ── Rolling returns toggle ──
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="section-label">Rolling Returns</div>', unsafe_allow_html=True)
+        show_rolling = st.toggle(
+            "Show 3-Year Rolling Returns",
+            value=True,
+            key="fr_show_rolling",
+            help=(
+                "Calculates the 3-year point-to-point CAGR for every month "
+                "in the fund's full NAV history. Requires at least 3 years of data."
+            ),
+        )
 
         st.markdown("<br>", unsafe_allow_html=True)
         calc_fund_btn = st.button(
@@ -685,10 +850,16 @@ with tab_fund:
                         )
                         _render_fund_table(result_fr["sip_rows"])
 
+                        # ── 3-Year Rolling Returns ──
+                        if show_rolling:
+                            full_nav_df = result_fr.get("_full_nav_df")
+                            if full_nav_df is not None and not full_nav_df.empty:
+                                with st.spinner("Computing 3-year rolling returns..."):
+                                    rolling = calculate_rolling_returns(full_nav_df, window_years=3)
+                                render_rolling_returns(rolling)
+
                 # ────────────────────────────────────────────────
                 # MODE B: SIP Stopped — TWO calculations
-                #   1) corpus at sip_end date
-                #   2) value today (corpus grew via market after stop)
                 # ────────────────────────────────────────────────
                 else:
                     result_at_end = None
@@ -701,7 +872,7 @@ with tab_fund:
                                 monthly_amount=sip_amount,
                                 sip_start_date=sip_start,
                                 sip_end_date=sip_end,
-                                valuation_date=sip_end,      # ← valued AT end date
+                                valuation_date=sip_end,
                             )
                         except ValueError as e:
                             st.error(f"❌ (At SIP End) {e}")
@@ -712,8 +883,8 @@ with tab_fund:
                                 fund_code=fund_code,
                                 monthly_amount=sip_amount,
                                 sip_start_date=sip_start,
-                                sip_end_date=sip_end,        # same SIP window
-                                valuation_date=date.today(), # ← valued at TODAY's NAV
+                                sip_end_date=sip_end,
+                                valuation_date=date.today(),
                             )
                         except ValueError as e:
                             st.error(f"❌ (Today) {e}")
@@ -721,7 +892,6 @@ with tab_fund:
                     if result_at_end or result_today:
                         st.markdown("<br>", unsafe_allow_html=True)
 
-                        # Use whichever result loaded for the fund banner
                         _banner_result = result_at_end or result_today
                         st.markdown(
                             f'<div style="background:rgba(0,245,212,0.06);border:1px solid rgba(0,245,212,0.2);'
@@ -762,7 +932,6 @@ with tab_fund:
                              f'as on {result_at_end["valuation_date"].strftime("%d %b %Y")}'),
                         ])
 
-                        # XIRR at end
                         if result_at_end["xirr_pct"] is not None:
                             xv1 = result_at_end["xirr_pct"]
                             bc1 = "xirr-badge" if xv1 >= 0 else "xirr-badge xirr-badge-neg"
@@ -783,7 +952,6 @@ with tab_fund:
 
                     # ── SECTION 2: Current Value Today ──
                     if result_today:
-                        # How long since SIP stopped
                         days_since = (date.today() - sip_end).days
                         years_since = days_since / 365.25
                         time_label = (
@@ -792,7 +960,6 @@ with tab_fund:
                             else f"{int(days_since / 30)}m since SIP stopped"
                         )
 
-                        # Extra growth after stop
                         extra_growth = 0.0
                         if result_at_end:
                             extra_growth = result_today["current_value"] - result_at_end["current_value"]
@@ -825,7 +992,6 @@ with tab_fund:
                              f'as on {result_today["latest_nav_date"].strftime("%d %b %Y")}'),
                         ])
 
-                        # XIRR today
                         if result_today["xirr_pct"] is not None:
                             xv2 = result_today["xirr_pct"]
                             bc2 = "xirr-badge" if xv2 >= 0 else "xirr-badge xirr-badge-neg"
@@ -840,15 +1006,10 @@ with tab_fund:
                         else:
                             st.caption(f"XIRR (today) unavailable: {result_today['xirr_error']}")
 
-                    # ── Combined chart: shows full journey ──
+                    # ── Combined chart ──
                     if result_today and result_today["sip_rows"]:
                         st.markdown("<br>", unsafe_allow_html=True)
                         rows_today = result_today["sip_rows"]
-
-                        # We split the chart data into "during SIP" and "after SIP stopped"
-                        # Since sip_rows only contains instalments up to sip_end,
-                        # the "current value" column already uses today's NAV for all rows.
-                        # We show invested (flat after end) and current value.
                         chart_data_stopped = pd.DataFrame({
                             "Date": [r["NAV Date"] for r in rows_today],
                             "Invested (₹)": [r["Total Invested (₹)"] for r in rows_today],
@@ -860,7 +1021,7 @@ with tab_fund:
                         )
                         st.line_chart(chart_data_stopped, color=["#4a9eff", "#00f5d4"])
 
-                    # ── Transaction log (shows today's valuation) ──
+                    # ── Transaction log ──
                     if result_today and result_today["sip_rows"]:
                         st.markdown(
                             '<div class="section-label" style="margin-top:16px;">'
@@ -869,6 +1030,15 @@ with tab_fund:
                             unsafe_allow_html=True,
                         )
                         _render_fund_table(result_today["sip_rows"])
+
+                    # ── 3-Year Rolling Returns ──
+                    if show_rolling:
+                        _ref_result = result_today or result_at_end
+                        full_nav_df = _ref_result.get("_full_nav_df") if _ref_result else None
+                        if full_nav_df is not None and not full_nav_df.empty:
+                            with st.spinner("Computing 3-year rolling returns..."):
+                                rolling = calculate_rolling_returns(full_nav_df, window_years=3)
+                            render_rolling_returns(rolling)
 
         else:
             st.markdown(
@@ -890,6 +1060,3 @@ with tab_more:
         'Goal Planner · Tax Estimator · Portfolio Overlap</div></div>',
         unsafe_allow_html=True,
     )
-
-
-
