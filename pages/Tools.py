@@ -17,23 +17,122 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    /* ── Base: deep midnight navy ── */
     .stApp {
-        background-image: url("https://raw.githubusercontent.com/sumansourabhcsc/investment/main/taurus.png");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
+        background-color: #020d1a;
+        background-image: none;
+        position: relative;
+        min-height: 100vh;
     }
+
+    /* ── Layer 1: radial teal glow orbs (pure CSS, no image) ── */
     .stApp::before {
         content: "";
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.65);
+        background:
+            radial-gradient(ellipse 80% 60% at 15% 20%,  rgba(0, 245, 212, 0.07) 0%, transparent 65%),
+            radial-gradient(ellipse 60% 80% at 85% 75%,  rgba(0, 180, 245, 0.06) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 40% at 50% 100%, rgba(0, 245, 212, 0.04) 0%, transparent 55%),
+            radial-gradient(ellipse 100% 100% at 50% 0%,  rgba(2, 20, 40, 0.8)  0%, #020d1a 70%);
         z-index: 0;
+        pointer-events: none;
     }
+
+    /* ── Layer 2: fine dot-grid pattern ── */
+    .stApp::after {
+        content: "";
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-image:
+            radial-gradient(circle, rgba(0,245,212,0.18) 1px, transparent 1px);
+        background-size: 38px 38px;
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0.55;
+    }
+
     .stApp > * { position: relative; z-index: 1; }
-    [data-testid="stSidebar"] { background: rgba(0, 0, 0, 0.6) !important; }
+
+    /* ── Sidebar: dark glass panel ── */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(160deg, rgba(2,22,44,0.97) 0%, rgba(1,14,28,0.98) 100%) !important;
+        border-right: 1px solid rgba(0,245,212,0.1) !important;
+        box-shadow: 4px 0 32px rgba(0,0,0,0.5) !important;
+    }
+
+    /* ── Subtle animated pulse on the accent orb ── */
+    @keyframes taurus-pulse {
+        0%   { opacity: 1; }
+        50%  { opacity: 0.6; }
+        100% { opacity: 1; }
+    }
+    .stApp::before { animation: taurus-pulse 8s ease-in-out infinite; }
+
+    /* ── Streamlit main block: slight glass backdrop ── */
+    [data-testid="stAppViewContainer"] > section.main > div.block-container {
+        background: rgba(2, 16, 32, 0.45);
+        border-left: 1px solid rgba(0,245,212,0.07);
+        border-right: 1px solid rgba(0,245,212,0.07);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+        border-radius: 0;
+    }
+
+    /* ── Tabs: styled to match the dark theme ── */
+    [data-testid="stTabs"] [data-baseweb="tab-list"] {
+        background: rgba(0,245,212,0.04) !important;
+        border-bottom: 1px solid rgba(0,245,212,0.15) !important;
+        border-radius: 8px 8px 0 0 !important;
+        gap: 2px;
+    }
+    [data-testid="stTabs"] [data-baseweb="tab"] {
+        color: rgba(255,255,255,0.5) !important;
+        border-radius: 6px 6px 0 0 !important;
+        font-size: 13px !important;
+        padding: 10px 18px !important;
+    }
+    [data-testid="stTabs"] [aria-selected="true"] {
+        color: #00f5d4 !important;
+        background: rgba(0,245,212,0.08) !important;
+        border-bottom: 2px solid #00f5d4 !important;
+    }
+
+    /* ── Inputs, selects: dark glass style ── */
+    .stTextInput input, .stNumberInput input, .stSelectbox select,
+    div[data-baseweb="input"] input {
+        background: rgba(0,245,212,0.04) !important;
+        border: 1px solid rgba(0,245,212,0.2) !important;
+        color: white !important;
+        border-radius: 8px !important;
+    }
+    .stTextInput input:focus, .stNumberInput input:focus {
+        border-color: rgba(0,245,212,0.6) !important;
+        box-shadow: 0 0 0 2px rgba(0,245,212,0.12) !important;
+    }
+
+    /* ── Primary button: teal glow ── */
+    .stButton button[kind="primary"] {
+        background: linear-gradient(135deg, #00c9a7 0%, #00f5d4 100%) !important;
+        color: #020d1a !important;
+        font-weight: 700 !important;
+        border: none !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 20px rgba(0,245,212,0.25) !important;
+        transition: all 0.2s ease !important;
+    }
+    .stButton button[kind="primary"]:hover {
+        box-shadow: 0 6px 28px rgba(0,245,212,0.40) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* ── Sliders: teal track ── */
+    [data-testid="stSlider"] [data-baseweb="slider"] [role="slider"] {
+        background: #00f5d4 !important;
+        box-shadow: 0 0 8px rgba(0,245,212,0.5) !important;
+    }
     html, body, [class*="css"] { color: white; }
 
     .result-card {
@@ -791,3 +890,6 @@ with tab_more:
         'Goal Planner · Tax Estimator · Portfolio Overlap</div></div>',
         unsafe_allow_html=True,
     )
+
+
+
