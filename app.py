@@ -133,10 +133,18 @@ GITHUB_REPO  = st.secrets["GITHUB_REPO"]
 
 WORKFLOWS = [
     {
+        "name": "Fetch NAV Daily",
+        "file": "fetch_nav_daily.yml",
+        "description": "Fetches latest NAV data for all funds",
+        "num": "01",
+        "link": "https://taurus.streamlit.app/Portfolio_Overview",
+        "link_label": "Portfolio Overview"
+    },
+    {
         "name": "Portfolio Overview",
         "file": "update_fund_snapshots.yml",
         "description": "Overall fund snapshot",
-        "num": "01",
+        "num": "02",
         "link": "https://taurus.streamlit.app/Portfolio_Overview",
         "link_label": "Portfolio Overview"
     },
@@ -144,7 +152,7 @@ WORKFLOWS = [
         "name": "Individual Funds",
         "file": "update_portfolio_daily.yml",
         "description": "Individual Fund Details",
-        "num": "02",
+        "num": "03",
         "link": "https://taurus.streamlit.app/Fund_Details",
         "link_label": "Fund Details"
     },
@@ -467,7 +475,7 @@ if clicked:
 
     st.divider()
     if overall_success:
-        st.success("✅  All 2 pipeline steps completed successfully.")
+        st.success("✅  All 3 pipeline steps completed successfully.")
     else:
         st.warning("⚠️  Pipeline stopped early — check errors above.")
 
