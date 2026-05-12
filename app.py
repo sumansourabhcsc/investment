@@ -6,17 +6,6 @@ import time
 from utils.add_units import show_add_units
 
 
-# =========================================================
-# MUSIC
-# =========================================================
-# from utils.music import play_background_music
-# play_background_music(
-#     "https://raw.githubusercontent.com/sumansourabhcsc/investment/main/music.mp3",
-#     volume=0.02
-# )
-
-
-
 # ─────────────────────────────────────────────
 # Page Config — MUST be first, only once
 # ─────────────────────────────────────────────
@@ -184,7 +173,7 @@ def trigger_workflow(workflow_filename: str) -> dict:
 
 
 # ─────────────────────────────────────────────
-# Header — fully responsive via clamp + vw
+# Header
 # ─────────────────────────────────────────────
 components.html("""
 <!DOCTYPE html><html><head><meta charset="utf-8"/>
@@ -198,7 +187,6 @@ components.html("""
     padding: 1.2rem 0 0 0;
     overflow: hidden;
   }
-
   .header-row {
     display: flex;
     align-items: flex-start;
@@ -206,23 +194,19 @@ components.html("""
     gap: 1rem;
     width: 100%;
   }
-
   .wordmark-block { flex: 1; min-width: 0; }
-
   h1 {
     font-family: 'Syne', sans-serif;
     font-weight: 800;
     letter-spacing: -0.03em;
     line-height: 1;
     white-space: nowrap;
-    /* Fully fluid: shrinks on mobile, caps on desktop */
     font-size: clamp(1.8rem, 10vw, 5rem);
     background: linear-gradient(135deg, #00f5d4 0%, #00c9ff 55%, #a78bfa 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-
   .sub {
     font-size: clamp(0.5rem, 1.8vw, 0.68rem);
     font-weight: 300;
@@ -234,15 +218,12 @@ components.html("""
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
   .divider {
     width: 100%;
     height: 1px;
     background: linear-gradient(90deg, rgba(0,245,212,0.4) 0%, rgba(0,201,255,0.2) 50%, transparent 100%);
     margin: 1rem 0 0 0;
   }
-
-  /* Pulser — scales with viewport */
   .pulser-wrap {
     flex-shrink: 0;
     width: clamp(50px, 8vw, 80px);
@@ -253,7 +234,6 @@ components.html("""
     position: relative;
     margin-top: 4px;
   }
-
   .ring {
     position: absolute;
     width: clamp(22px, 3.5vw, 34px);
@@ -267,12 +247,10 @@ components.html("""
   .ring:nth-child(2) { animation-delay: 0.25s; }
   .ring:nth-child(3) { animation-delay: 0.5s; }
   .ring:nth-child(4) { animation-delay: 0.75s; }
-
   @keyframes ripple {
     0%   { transform: scale(1); opacity: 0.65; }
     100% { transform: scale(3.4); opacity: 0; }
   }
-
   .core {
     position: relative;
     width: clamp(14px, 2.2vw, 22px);
@@ -282,12 +260,10 @@ components.html("""
     background: radial-gradient(circle at 35% 35%, #00f5d4cc, #00f5d444);
     animation: throb 0.9s ease-in-out infinite alternate;
   }
-
   @keyframes throb {
     from { box-shadow: 0 0 5px #00f5d499, 0 0 10px #00f5d444; }
     to   { box-shadow: 0 0 10px #00f5d4dd, 0 0 20px #00f5d466; }
   }
-
   .live-label {
     position: absolute;
     bottom: -14px;
@@ -300,7 +276,6 @@ components.html("""
     white-space: nowrap;
     animation: blink 1.4s step-start infinite;
   }
-
   @keyframes blink {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.15; }
@@ -426,7 +401,7 @@ for col, wf in zip([col_c1, col_c2], WORKFLOWS):
           </div>
         """, unsafe_allow_html=True)
 
-        if st.button("›› ", key=f"nav_{page_key}"):
+        if st.button("›› ", key=f"nav_{wf['num']}"):
             st.switch_page(PAGE_MAP[page_key])
 
         st.markdown("</div></div>", unsafe_allow_html=True)
