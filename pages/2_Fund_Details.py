@@ -3,22 +3,14 @@ import plotly.graph_objects as go
 import pandas as pd
 import requests
 from datetime import date, timedelta
+import base64
+import os
 
 from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
 from utils.xirr_helper import compute_fund_xirr
 
 st.divider()
-
-# =========================
-# MUSIC
-# =========================
-# from utils.music import play_background_music
-# play_background_music(
-#     "https://raw.githubusercontent.com/sumansourabhcsc/investment/main/music.mp3",
-#     volume=0.01
-# )
-
 
 # =========================
 # PAGE CONFIG
@@ -42,6 +34,22 @@ html, body, [class*="css"] { font-family: 'Outfit', sans-serif !important; }
 .page-subtitle {
     font-size: 13px; color: rgba(255,255,255,0.45);
     font-family: 'DM Mono', monospace; margin-bottom: 1.5rem;
+}
+
+.fund-header {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 2px;
+}
+.fund-logo-wrap {
+    width: 48px; height: 48px; border-radius: 10px;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
+}
+.fund-logo-wrap img {
+    width: 100%; height: 100%; object-fit: contain; padding: 4px;
+}
+.fund-logo-fallback {
+    font-size: 26px; line-height: 1;
 }
 
 .nav-badge {
@@ -126,6 +134,41 @@ def pct(val, decimals=2):
 def section_header(title):
     st.markdown(f'<div class="section-header">{title} <span></span></div>', unsafe_allow_html=True)
 
+# Map fund name keywords → logo filename (order matters: more specific first)
+LOGO_MAP = {
+    "mirae":        "mirae.png",
+    "axis":         "axis.png",
+    "bandhan":      "bandhan.png",
+    "edelweiss":    "edelweiss.png",
+    "hsbc":         "HSBC.png",
+    "icici":        "icici.png",
+    "kotak":        "kotak.png",
+    "motilal":      "motilal.png",
+    "nippon":       "nippon.png",
+    "parag parikh": "paragparikh.png",
+    "ppfas":        "paragparikh.png",
+    "quant":        "quant.png",
+    "sbi":          "sbi.png",
+}
+
+def get_logo_base64(fund_name: str) -> str | None:
+    """Return base64-encoded PNG for the fund house logo, or None if not found."""
+    name_lower = fund_name.lower()
+    for keyword, filename in LOGO_MAP.items():
+        if keyword in name_lower:
+            path = os.path.join("utils", "logo", filename)
+            if os.path.exists(path):
+                with open(path, "rb") as f:
+                    return base64.b64encode(f.read()).decode()
+    return None
+
+def fund_logo_html(fund_name: str) -> str:
+    """Return an <img> tag with embedded base64 logo, or a folder emoji fallback."""
+    b64 = get_logo_base64(fund_name)
+    if b64:
+        return f'<img src="data:image/png;base64,{b64}" alt="{fund_name} logo">'
+    return '<span class="fund-logo-fallback">📁</span>'
+
 
 # =========================
 # DATA LOADING
@@ -171,14 +214,20 @@ xirr_pct        = fund_xirr * 100
 
 
 # =========================
-# HEADER — Fund name + NAV badge
+# HEADER — Fund logo + name + NAV badge
 # =========================
 col_title, col_nav = st.columns([3, 1])
 
 with col_title:
+    logo_inner = fund_logo_html(selected_fund)
     st.markdown(f"""
-    <div class="page-title">📁 {selected_fund}</div>
-    <div class="page-subtitle">Scheme Code: {scheme_code} &nbsp;·&nbsp; Direct Growth</div>
+    <div class="fund-header">
+        <div class="fund-logo-wrap">{logo_inner}</div>
+        <div>
+            <div class="page-title">{selected_fund}</div>
+            <div class="page-subtitle">Scheme Code: {scheme_code} &nbsp;·&nbsp; Direct Growth</div>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
 
 with col_nav:
