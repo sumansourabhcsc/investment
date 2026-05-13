@@ -183,6 +183,14 @@ PAGES = [
         "link_label": "Portfolio Overview"
     },
     {
+        "name": "Tools",
+        "file": "update_fund_snapshots.yml",
+        "description": "sip & fund calculator",
+        "num": "01",
+        "link": "https://taurus.streamlit.app/tools",
+        "link_label": "Tools"
+    },
+    {
         "name": "Individual Funds",
         "file": "update_portfolio_daily.yml",
         "description": "Individual Fund Details",
@@ -352,6 +360,7 @@ components.html("""
 PAGE_MAP = {
     "Portfolio_Overview": "pages/1_Portfolio_Overview.py",
     "Fund_Details":       "pages/2_Fund_Details.py",
+    "Tools":              "pages/Tools.py",
 }
 
 st.markdown("""
@@ -407,7 +416,7 @@ st.markdown("""
 
 col_c1, col_c2 = st.columns(2)
 
-for col, wf in zip([col_c1, col_c2], PAGES):
+for col, wf in zip([col_c1, col_c2, col_c3], PAGES):
     page_key = wf["link"].rstrip("/").split("/")[-1]
     with col:
         st.markdown(f"""
