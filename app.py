@@ -363,17 +363,19 @@ components.html("""
 <body>
 <div class="header-row">
   <div class="wordmark-block">
-    <h1>TAURUS</h1>
+    <div style="display:flex;align-items:center;gap:1.2rem;">
+      <h1>TAURUS</h1>
+      <div class="pulser-wrap" style="margin-top:0;">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="core"></div>
+        <span class="live-label">live</span>
+      </div>
+    </div>
     <div class="sub">Portfolio Intelligence System</div>
     <div class="divider"></div>
-  </div>
-  <div class="pulser-wrap">
-    <div class="ring"></div>
-    <div class="ring"></div>
-    <div class="ring"></div>
-    <div class="ring"></div>
-    <div class="core"></div>
-    <span class="live-label">live</span>
   </div>
 </div>
 </body></html>
