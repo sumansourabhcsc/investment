@@ -182,14 +182,7 @@ PAGES = [
         "link": "https://taurus.streamlit.app/Portfolio_Overview",
         "link_label": "Portfolio Overview"
     },
-    {
-        "name": "Tools",
-        "file": "update_fund_snapshots.yml",
-        "description": "sip & fund calculator",
-        "num": "01",
-        "link": "https://taurus.streamlit.app/tools",
-        "link_label": "Tools"
-    },
+    
     {
         "name": "Individual Funds",
         "file": "update_portfolio_daily.yml",
@@ -197,6 +190,14 @@ PAGES = [
         "num": "02",
         "link": "https://taurus.streamlit.app/Fund_Details",
         "link_label": "Fund Details"
+    },
+    {
+        "name": "Tools",
+        "file": "update_fund_snapshots.yml",
+        "description": "sip & fund calculator",
+        "num": "03",
+        "link": "https://taurus.streamlit.app/tools",
+        "link_label": "Tools"
     }
    
 ]
