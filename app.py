@@ -15,6 +15,13 @@ st.set_page_config(
     layout="wide"
 )
 
+with st.sidebar:
+    st.markdown("### 🐂 TAURUS")
+    st.page_link("pages/1_Portfolio_Overview.py", label="📊 Portfolio Overview")
+    st.page_link("pages/2_Fund_Details.py", label="📁 Fund Details")  
+    st.page_link("pages/Tools.py", label="🛠 Tools")
+
+
 # ─────────────────────────────────────────────
 # Full Redesign — Styles
 # ─────────────────────────────────────────────
