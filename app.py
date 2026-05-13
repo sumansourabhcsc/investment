@@ -89,6 +89,21 @@ html, body, [class*="css"] {
 }
 
 #MainMenu, footer, header { visibility: hidden; }
+
+[data-testid="stSidebarCollapsedControl"] {
+    visibility: visible !important;
+    display: flex !important;
+}
+
+[data-testid="stSidebar"] {
+    visibility: visible !important;
+    display: block !important;
+}
+
+[data-testid="stSidebarNav"] {
+    display: block !important;
+}
+
 [data-testid="stToolbar"] { display: none; }
 
 .block-container {
