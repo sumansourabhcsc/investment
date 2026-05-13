@@ -12,7 +12,8 @@ from utils.add_units import show_add_units
 st.set_page_config(
     page_title="Taurus | Home",
     page_icon="🐂",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 with st.sidebar:
@@ -79,7 +80,7 @@ html, body, [class*="css"] {
     50%       { opacity: 0.55; }
 }
 
-/*.stApp > * { position: relative; z-index: 1; }*/
+/* .stApp > * { position: relative; z-index: 1; } */
 
 [data-testid="stSidebar"] {
     background: linear-gradient(160deg, rgba(2,22,44,0.97) 0%, rgba(1,14,28,0.98) 100%) !important;
