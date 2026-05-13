@@ -414,7 +414,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-col_c1, col_c2 = st.columns(2)
+col_c1, col_c2, col_c3= st.columns(3)
 
 for col, wf in zip([col_c1, col_c2, col_c3], PAGES):
     page_key = wf["link"].rstrip("/").split("/")[-1]
