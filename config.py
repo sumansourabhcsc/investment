@@ -24,7 +24,7 @@ mutual_funds = {
     },
     "Edelweiss Flexi Cap Fund": {
         "code": "140353",
-	"folio": "EDELWEISSFlex",
+	    "folio": "91047811036",
         "folder": "edelweiss_flexi_cap_fund"
     },
     "Parag Parikh Flexi Cap Fund": {
