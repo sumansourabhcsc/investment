@@ -235,7 +235,7 @@ with col_nav:
     st.markdown(f"""
     <div class="nav-badge">
         <div class="nav-val">{inr(latest_nav)}</div>
-        <div class="nav-date">as of {latest_date}</div>
+        <div class="nav-date">NAV as of {latest_date}</div>
     </div>
     """, unsafe_allow_html=True)
 
