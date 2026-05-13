@@ -196,7 +196,7 @@ PAGES = [
         "file": "update_fund_snapshots.yml",
         "description": "sip & fund calculator",
         "num": "03",
-        "link": "https://taurus.streamlit.app/tools",
+        "link": "https://taurus.streamlit.app/Tools",
         "link_label": "Tools"
     }
    
