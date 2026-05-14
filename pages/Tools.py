@@ -378,8 +378,9 @@ tab_sip, tab_lumpsum, tab_fund, tab_pred, tab_more = st.tabs([
     "📈  SIP Calculator",
     "💰  Lumpsum Calculator",
     "🔍  Fund Return",
-    "🔧  More (Coming Soon)",
     "📈 Fund Prediction",
+    "🔧  More (Coming Soon)",
+    
 ])
 
 
