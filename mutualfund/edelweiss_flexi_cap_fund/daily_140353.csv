@@ -1,3 +1,4 @@
 date,total_invested,current_value,total_units,absolute_gain_loss,total_return_pct,xirr_annual,nav
 12-05-2026,20000.0,19999.01,457.43,-0.99,-0.00%,inf%,43.72
 13-05-2026,20000.0,20049.33,457.43,49.33,0.25%,-inf%,43.83
+14-05-2026,20000.0,20253.35,457.43,253.35,1.27%,9794.44%,44.28
