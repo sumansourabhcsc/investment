@@ -357,7 +357,7 @@ def show_fund_prediction():
         ✦ Accounts for Indian market holidays (Republic Day, Diwali, etc.)<br>
         ✦ Models monthly SIP-driven inflow patterns<br>
         ✦ Provides calibrated 90% confidence intervals<br>
-        ✦ Trained on 3 years of daily NAV data
+        ✦ Trained on 5 years of daily NAV data
         </span>
         </div>
         """,
@@ -392,7 +392,7 @@ def show_fund_prediction():
     if fund_code:
 
         # ── Fetch data ────────────────────────────────────────────────────────
-        with st.spinner(f"📡 Fetching 3 years of NAV history for **{fund_label}**…"):
+        with st.spinner(f"📡 Fetching 5 years of NAV history for **{fund_label}**…"):
             df, api_fund_name = _fetch_nav_history(fund_code)
 
         if df.empty:
@@ -503,7 +503,7 @@ def show_fund_prediction():
             <b style="color:#00f5d4;">How to use:</b><br>
             1. Select a fund from your portfolio using the dropdown, <b>or</b><br>
             2. Enter any AMFI fund code manually (e.g. <code>120503</code>).<br><br>
-            The AI model will fetch 3 years of NAV history, train on it, and predict
+            The AI model will fetch 5 years of NAV history, train on it, and predict
             the next <b>90 days</b> with a 90% confidence band.<br><br>
             💡 <b>Find fund codes:</b>
             <a href="https://api.mfapi.in/mf/search?q=mirae" target="_blank"
