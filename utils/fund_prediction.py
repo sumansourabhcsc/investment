@@ -58,7 +58,7 @@ def _get_portfolio_funds():
 # ── Fetch NAV history ─────────────────────────────────────────────────────────
 def _fetch_nav_history(fund_code: str) -> pd.DataFrame:
     end_date   = datetime.today()
-    start_date = end_date - timedelta(days=1095)   # 3 years — Prophet needs more data
+    start_date = end_date - timedelta(days=1825)   # 5 years — Prophet needs more data
 
     url = (
         f"https://api.mfapi.in/mf/{fund_code}"
