@@ -81,7 +81,8 @@ def _fetch_nav_history(fund_code: str) -> pd.DataFrame:
     df["date"] = pd.to_datetime(df["date"], format="%d-%m-%Y", errors="coerce")
     df["nav"]  = pd.to_numeric(df["nav"], errors="coerce")
     df = df.dropna().sort_values("date").reset_index(drop=True)
-    return df
+    fund_name = data.get("meta", {}).get("scheme_name", f"Fund {fund_code}")
+    return df, fund_name
 
 
 # ── Prophet Forecast ──────────────────────────────────────────────────────────
@@ -392,10 +393,22 @@ def show_fund_prediction():
 
         # ── Fetch data ────────────────────────────────────────────────────────
         with st.spinner(f"📡 Fetching 3 years of NAV history for **{fund_label}**…"):
-            df = _fetch_nav_history(fund_code)
+            df, api_fund_name = _fetch_nav_history(fund_code)
 
         if df.empty:
             return
+        # ADD THIS BLOCK:
+        st.markdown(
+            f'<div style="background:rgba(0,245,212,0.06);border:1px solid rgba(0,245,212,0.2);'
+            f'border-radius:8px;padding:12px 16px;margin-bottom:16px;">'
+            f'<div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;'
+            f'color:#00f5d4;">Fund</div>'
+            f'<div style="font-size:15px;font-weight:600;margin-top:2px;">{api_fund_name}</div>'
+            f'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">'
+            f'Code: {fund_code} &nbsp;|&nbsp; {len(df):,} NAV records fetched</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
         if len(df) < 60:
             st.warning("⚠️ Fewer than 60 data points — Prophet needs more history for reliable predictions.")
