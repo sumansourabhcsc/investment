@@ -373,11 +373,12 @@ st.markdown(
 # ─────────────────────────────────────────────
 # Tabs
 # ─────────────────────────────────────────────
-tab_sip, tab_lumpsum, tab_fund, tab_more = st.tabs([
+tab_sip, tab_lumpsum, tab_fund, tab_pred, tab_more = st.tabs([
     "📈  SIP Calculator",
     "💰  Lumpsum Calculator",
     "🔍  Fund Return",
     "🔧  More (Coming Soon)",
+    "📈 Fund Prediction",
 ])
 
 
@@ -877,9 +878,14 @@ with tab_fund:
                 '<div style="margin-top:12px;font-size:14px;">Select a fund and fill in the details</div>'
                 '</div>', unsafe_allow_html=True)
 
+# ══════════════════════════════════════════════
+# TAB 4 – Prediction
+# ══════════════════════════════════════════════
+with tab_pred:
+    show_fund_prediction()
 
 # ══════════════════════════════════════════════
-# TAB 4 – COMING SOON
+# TAB 5 – COMING SOON
 # ══════════════════════════════════════════════
 with tab_more:
     st.markdown(
