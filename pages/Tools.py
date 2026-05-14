@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.graph_objects as go
 from datetime import date
 from utils.fund_prediction import show_fund_prediction
 
@@ -435,7 +436,15 @@ with tab_sip:
                 "Invested": [r["Total Invested"] for r in result["breakdown"]],
                 "Corpus": [r["Corpus Value"] for r in result["breakdown"]],
             }).set_index("Year")
-            st.line_chart(chart_df, color=["#4a9eff", "#00f5d4"])
+            
+            fig_sip = go.Figure()
+            fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Invested"], name="Invested", line=dict(color="#4a9eff", width=2)))
+            fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Corpus"], name="Corpus", line=dict(color="#00f5d4", width=2)))
+            fig_sip.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(color="white"), xaxis=dict(gridcolor="rgba(255,255,255,0.06)"),
+                yaxis=dict(gridcolor="rgba(255,255,255,0.06)"), margin=dict(t=20,b=20,l=20,r=20),
+                legend=dict(bgcolor="rgba(0,0,0,0.4)"))
+            st.plotly_chart(fig_sip, use_container_width=True)
             st.markdown('<div class="section-label" style="margin-top:16px;">Year-by-Year Breakdown</div>',
                         unsafe_allow_html=True)
             render_breakdown_table(result["breakdown"],
@@ -483,7 +492,15 @@ with tab_lumpsum:
                 "Principal": [result_ls["principal"]] * ls_years,
                 "Corpus": [r["Corpus Value"] for r in result_ls["breakdown"]],
             }).set_index("Year")
-            st.line_chart(chart_df_ls, color=["#4a9eff", "#00f5d4"])
+            
+            fig_sip = go.Figure()
+            fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Invested"], name="Invested", line=dict(color="#4a9eff", width=2)))
+            fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Corpus"], name="Corpus", line=dict(color="#00f5d4", width=2)))
+            fig_sip.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(color="white"), xaxis=dict(gridcolor="rgba(255,255,255,0.06)"),
+                yaxis=dict(gridcolor="rgba(255,255,255,0.06)"), margin=dict(t=20,b=20,l=20,r=20),
+                legend=dict(bgcolor="rgba(0,0,0,0.4)"))
+            st.plotly_chart(fig_sip, use_container_width=True)
             st.markdown('<div class="section-label" style="margin-top:16px;">Year-by-Year Breakdown</div>',
                         unsafe_allow_html=True)
             render_breakdown_table(result_ls["breakdown"], ["Corpus Value", "Gains"])
@@ -679,7 +696,15 @@ with tab_fund:
                                 "Current Value (₹)": [r["Current Value (₹)"] for r in rows],
                             }).set_index("Date")
                             st.caption("📊 Invested vs Current Value over time")
-                            st.line_chart(chart_data, color=["#4a9eff", "#00f5d4"])
+                            
+                            fig_sip = go.Figure()
+                            fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Invested"], name="Invested", line=dict(color="#4a9eff", width=2)))
+                            fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Corpus"], name="Corpus", line=dict(color="#00f5d4", width=2)))
+                            fig_sip.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+                                font=dict(color="white"), xaxis=dict(gridcolor="rgba(255,255,255,0.06)"),
+                                yaxis=dict(gridcolor="rgba(255,255,255,0.06)"), margin=dict(t=20,b=20,l=20,r=20),
+                                legend=dict(bgcolor="rgba(0,0,0,0.4)"))
+                            st.plotly_chart(fig_sip, use_container_width=True)
 
                         # Transaction log
                         st.markdown(
@@ -861,7 +886,15 @@ with tab_fund:
                             "📊 Invested vs Portfolio Value — all units valued at today's NAV. "
                             "Invested line is flat after SIP stopped."
                         )
-                        st.line_chart(chart_data_stopped, color=["#4a9eff", "#00f5d4"])
+                        
+                        fig_sip = go.Figure()
+                        fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Invested"], name="Invested", line=dict(color="#4a9eff", width=2)))
+                        fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Corpus"], name="Corpus", line=dict(color="#00f5d4", width=2)))
+                        fig_sip.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+                            font=dict(color="white"), xaxis=dict(gridcolor="rgba(255,255,255,0.06)"),
+                            yaxis=dict(gridcolor="rgba(255,255,255,0.06)"), margin=dict(t=20,b=20,l=20,r=20),
+                            legend=dict(bgcolor="rgba(0,0,0,0.4)"))
+                        st.plotly_chart(fig_sip, use_container_width=True)
 
                     # ── Transaction log (shows today's valuation) ──
                     if result_today and result_today["sip_rows"]:
