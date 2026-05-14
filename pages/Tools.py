@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import date
+from utils.fund_prediction import show_fund_prediction
 
 # ─────────────────────────────────────────────
 # Page Config
