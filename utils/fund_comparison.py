@@ -555,14 +555,19 @@ def show_fund_comparison():
                 s = clipped[code]["navs"]
                 rolling_max = s.cummax()
                 dd = (s - rolling_max) / rolling_max * 100
+                # Convert hex to rgba for fill — simple lookup, no string surgery
+                _fill_map = {
+                    "#00f5d4": "rgba(0,245,212,0.07)",
+                    "#bf80ff": "rgba(191,128,255,0.07)",
+                    "#ffb347": "rgba(255,179,71,0.07)",
+                }
                 fig_dd.add_trace(go.Scatter(
                     x=dd.index,
                     y=dd.values,
                     name=clipped[code]["label"],
                     line=dict(color=color, width=1.5),
                     fill="tozeroy",
-                    fillcolor=color.replace("#", "rgba(").rstrip(")") + ",0.07)"
-                    if color.startswith("#") else color,
+                    fillcolor=_fill_map.get(color, "rgba(0,245,212,0.07)"),
                     hovertemplate="%{y:.2f}%<extra>" + clipped[code]["label"] + "</extra>",
                 ))
 
