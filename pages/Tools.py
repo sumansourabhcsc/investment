@@ -374,36 +374,78 @@ def _chart_layout():
 # Nifty 50 Benchmark helpers
 # ─────────────────────────────────────────────
 
+def _parse_mfapi_date(d_str: str) -> date:
+    """
+    Parse dates from mfapi.in which returns DD-MM-YYYY (e.g. '16-05-2026').
+    Also handles YYYY-MM-DD just in case.
+    """
+    parts = d_str.strip().replace("/", "-").split("-")
+    if len(parts) != 3:
+        raise ValueError(f"Unexpected date format: {d_str}")
+    if len(parts[0]) == 4:
+        # YYYY-MM-DD
+        return date(int(parts[0]), int(parts[1]), int(parts[2]))
+    else:
+        # DD-MM-YYYY  ← mfapi standard format
+        return date(int(parts[2]), int(parts[1]), int(parts[0]))
+
+
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_nifty50_nav_history() -> dict:
     """
     Fetch Nifty 50 index fund NAV history from mfapi.in.
-    Uses UTI Nifty 50 Index Fund - Direct Plan (fund code 120716)
-    as a liquid proxy for Nifty 50 performance.
-    Falls back to SBI Nifty Index Fund (119598) if unavailable.
-    Returns a dict of {date: nav} sorted ascending.
+    Tries multiple Nifty 50 index fund codes in order:
+      120716 — UTI Nifty 50 Index Fund – Direct Growth
+      119598 — SBI Nifty Index Fund – Direct Growth
+      118989 — HDFC Index Fund Nifty 50 Plan – Direct
+    Returns {"code", "name", "navs": {date: float}} or {} on failure.
     """
-    fund_codes = ["120716", "119598", "125497"]  # UTI Nifty50 Direct, SBI Nifty, fallback
-    for code in fund_codes:
+    # Fund codes for popular Nifty 50 direct index funds on mfapi.in
+    candidates = [
+        ("120716", "UTI Nifty 50 Index Fund – Direct Growth"),
+        ("119598", "SBI Nifty Index Fund – Direct Growth"),
+        ("118989", "HDFC Index Fund Nifty 50 Plan – Direct"),
+    ]
+    last_error = ""
+    for code, fallback_name in candidates:
         try:
-            r = requests.get(f"https://api.mfapi.in/mf/{code}", timeout=10)
-            if r.status_code == 200:
-                data = r.json()
-                nav_dict = {}
-                for entry in data.get("data", []):
-                    try:
-                        d = date.fromisoformat(
-                            entry["date"][:10] if "-" in entry["date"]
-                            else f"{entry['date'][6:]}-{entry['date'][3:5]}-{entry['date'][:2]}"
-                        )
-                        nav_dict[d] = float(entry["nav"])
-                    except Exception:
-                        pass
-                if nav_dict:
-                    return {"code": code, "name": data.get("meta", {}).get("scheme_name", "Nifty 50 Index Fund"), "navs": nav_dict}
-        except Exception:
-            continue
-    return {}
+            r = requests.get(
+                f"https://api.mfapi.in/mf/{code}",
+                timeout=15,
+                headers={"User-Agent": "Mozilla/5.0 (Taurus/1.0)"},
+            )
+            if r.status_code != 200:
+                last_error = f"HTTP {r.status_code} for fund {code}"
+                continue
+
+            data = r.json()
+            nav_dict = {}
+            parse_errors = 0
+            for entry in data.get("data", []):
+                try:
+                    d = _parse_mfapi_date(entry["date"])
+                    nav_dict[d] = float(entry["nav"])
+                except Exception:
+                    parse_errors += 1
+
+            if nav_dict:
+                scheme_name = data.get("meta", {}).get("scheme_name", fallback_name)
+                return {
+                    "code": code,
+                    "name": scheme_name,
+                    "navs": nav_dict,
+                    "parse_errors": parse_errors,
+                }
+            else:
+                last_error = f"Fund {code} returned 0 valid NAV entries ({parse_errors} parse errors)"
+
+        except requests.exceptions.Timeout:
+            last_error = f"Timeout fetching fund {code}"
+        except Exception as e:
+            last_error = str(e)
+
+    # All candidates failed — return error info so the UI can show it
+    return {"error": last_error}
 
 
 def calc_benchmark_sip_returns(nav_history: dict, monthly_amount: float,
@@ -999,13 +1041,18 @@ with tab_fund:
                 if show_benchmark:
                     with st.spinner("Fetching Nifty 50 index data..."):
                         nifty_nav_history = fetch_nifty50_nav_history()
-                        if nifty_nav_history:
+                        if nifty_nav_history.get("navs"):
                             benchmark_result = calc_benchmark_sip_returns(
                                 nifty_nav_history, sip_amount, sip_start,
                                 sip_end if calc_mode == "SIP Stopped (with end date)" else date.today()
                             )
                         else:
-                            st.warning("⚠️ Could not fetch Nifty 50 data. Benchmark comparison unavailable.")
+                            err_detail = nifty_nav_history.get("error", "Unknown error")
+                            st.warning(
+                                f"⚠️ Could not fetch Nifty 50 data — benchmark unavailable.\n\n"
+                                f"**Reason:** `{err_detail}`\n\n"
+                                f"Check that `api.mfapi.in` is reachable from your Streamlit server."
+                            )
 
                 # ────────────────────────────────────────────────
                 # MODE A: SIP Ongoing
