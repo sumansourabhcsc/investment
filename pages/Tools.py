@@ -1,7 +1,14 @@
+# Working Tools — Enhanced Version
+# Improvements:
+#   1. SIP vs Lumpsum comparison overlay (Tab 1 & 2)
+#   2. Inflation-adjusted real corpus (Tab 1 & 2)
+#   3. Nifty 50 benchmark comparison on Fund Return tab (Tab 3)
+
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-from datetime import date
+from datetime import date, timedelta
+import requests
 from utils.fund_prediction import show_fund_prediction
 
 # ─────────────────────────────────────────────
@@ -151,6 +158,21 @@ st.markdown(
     .result-card p { font-size: 28px; font-weight: 700; color: white; margin: 0; }
     .result-card .sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; }
 
+    /* ── Inflation card: amber tint ── */
+    .result-card-inflation {
+        background: rgba(255, 193, 7, 0.07);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-top: 8px;
+    }
+    .result-card-inflation h3 {
+        color: #ffc107; margin-bottom: 4px; font-size: 14px;
+        letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .result-card-inflation p { font-size: 28px; font-weight: 700; color: white; margin: 0; }
+    .result-card-inflation .sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+
     .gain-positive { color: #00f5d4; font-weight: 600; }
     .gain-negative { color: #ff6b6b; font-weight: 600; }
 
@@ -183,7 +205,7 @@ st.markdown(
         border-color: rgba(255, 107, 107, 0.4); color: #ff6b6b;
     }
 
-    /* ── NEW: dual-result section banners ── */
+    /* ── dual-result section banners ── */
     .calc-section-banner {
         border-radius: 10px;
         padding: 10px 16px;
@@ -201,6 +223,16 @@ st.markdown(
         border: 1px solid rgba(0, 245, 212, 0.35);
         color: #00f5d4;
     }
+    .banner-compare {
+        background: rgba(138, 43, 226, 0.10);
+        border: 1px solid rgba(138, 43, 226, 0.35);
+        color: #bf80ff;
+    }
+    .banner-inflation {
+        background: rgba(255, 193, 7, 0.08);
+        border: 1px solid rgba(255, 193, 7, 0.25);
+        color: #ffc107;
+    }
     .growth-pill {
         display: inline-block;
         background: rgba(0, 245, 212, 0.12);
@@ -216,6 +248,26 @@ st.markdown(
         background: rgba(255, 193, 7, 0.12);
         border-color: rgba(255, 193, 7, 0.3);
         color: #ffc107;
+    }
+
+    /* ── Benchmark badge ── */
+    .benchmark-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(255,165,0,0.12);
+        border: 1px solid rgba(255,165,0,0.35);
+        border-radius: 8px; padding: 8px 14px;
+        font-size: 13px; color: #ffb347;
+    }
+    .benchmark-badge strong { font-size: 18px; }
+
+    .info-box {
+        background: rgba(0,245,212,0.05);
+        border: 1px solid rgba(0,245,212,0.15);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 12px;
+        color: rgba(255,255,255,0.6);
+        margin-top: 8px;
     }
     </style>
     """,
@@ -233,6 +285,11 @@ def fmt_inr(amount: float) -> str:
         return f"₹{amount / 1_00_000:.2f} L"
     else:
         return f"₹{amount:,.0f}"
+
+
+def inflation_adjusted(amount: float, years: int, inflation_rate: float = 6.0) -> float:
+    """Return today's purchasing-power equivalent of a future amount."""
+    return amount / ((1 + inflation_rate / 100) ** years)
 
 
 def calc_sip(monthly_sip, annual_rate, years, stepup_pct=0.0, lumpsum=0.0):
@@ -285,6 +342,21 @@ def render_result_cards(cols_data):
             )
 
 
+def render_inflation_card(real_corpus: float, nominal_corpus: float, years: int, inflation_rate: float):
+    """Render an amber inflation-adjusted result card."""
+    loss_pct = (1 - real_corpus / nominal_corpus) * 100
+    st.markdown(
+        f'<div class="result-card-inflation">'
+        f'<h3>🌡️ Inflation-Adjusted Value</h3>'
+        f'<p>{fmt_inr(real_corpus)}</p>'
+        f'<div class="sub">In today\'s purchasing power &nbsp;·&nbsp; '
+        f'at {inflation_rate:.0f}% inflation over {years}y &nbsp;·&nbsp; '
+        f'<span style="color:#ffc107;">{loss_pct:.1f}% eaten by inflation</span></div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+
 def _chart_layout():
     """Shared Plotly layout for all charts."""
     return dict(
@@ -296,6 +368,92 @@ def _chart_layout():
         margin=dict(t=20, b=20, l=20, r=20),
         legend=dict(bgcolor="rgba(0,0,0,0.4)"),
     )
+
+
+# ─────────────────────────────────────────────
+# Nifty 50 Benchmark helpers
+# ─────────────────────────────────────────────
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_nifty50_nav_history() -> dict:
+    """
+    Fetch Nifty 50 index fund NAV history from mfapi.in.
+    Uses UTI Nifty 50 Index Fund - Direct Plan (fund code 120716)
+    as a liquid proxy for Nifty 50 performance.
+    Falls back to SBI Nifty Index Fund (119598) if unavailable.
+    Returns a dict of {date: nav} sorted ascending.
+    """
+    fund_codes = ["120716", "119598", "125497"]  # UTI Nifty50 Direct, SBI Nifty, fallback
+    for code in fund_codes:
+        try:
+            r = requests.get(f"https://api.mfapi.in/mf/{code}", timeout=10)
+            if r.status_code == 200:
+                data = r.json()
+                nav_dict = {}
+                for entry in data.get("data", []):
+                    try:
+                        d = date.fromisoformat(
+                            entry["date"][:10] if "-" in entry["date"]
+                            else f"{entry['date'][6:]}-{entry['date'][3:5]}-{entry['date'][:2]}"
+                        )
+                        nav_dict[d] = float(entry["nav"])
+                    except Exception:
+                        pass
+                if nav_dict:
+                    return {"code": code, "name": data.get("meta", {}).get("scheme_name", "Nifty 50 Index Fund"), "navs": nav_dict}
+        except Exception:
+            continue
+    return {}
+
+
+def calc_benchmark_sip_returns(nav_history: dict, monthly_amount: float,
+                                 sip_start: date, sip_end: date) -> dict | None:
+    """
+    Compute SIP returns for a benchmark fund (Nifty 50 proxy)
+    over the same period as the user's fund.
+    Returns dict with total_invested, current_value, abs_return_pct, xirr_pct.
+    """
+    if not nav_history:
+        return None
+    navs = nav_history["navs"]
+    sorted_dates = sorted(navs.keys())
+
+    def nearest_nav(target: date):
+        # Find the closest available NAV date on or before target
+        candidates = [d for d in sorted_dates if d <= target]
+        if not candidates:
+            candidates = sorted_dates[:1]
+        return candidates[-1], navs[candidates[-1]]
+
+    total_units = 0.0
+    total_invested = 0.0
+
+    cur = date(sip_start.year, sip_start.month, 1)
+    while cur <= sip_end:
+        nav_date, nav = nearest_nav(cur)
+        units = monthly_amount / nav
+        total_units += units
+        total_invested += monthly_amount
+        # Next month
+        if cur.month == 12:
+            cur = date(cur.year + 1, 1, 1)
+        else:
+            cur = date(cur.year, cur.month + 1, 1)
+
+    today_date, today_nav = nearest_nav(date.today())
+    current_value = total_units * today_nav
+    gains = current_value - total_invested
+    abs_ret = (gains / total_invested * 100) if total_invested > 0 else 0
+
+    return {
+        "name": nav_history["name"],
+        "total_invested": total_invested,
+        "current_value": current_value,
+        "total_gains": gains,
+        "abs_return_pct": abs_ret,
+        "today_nav": today_nav,
+        "today_date": today_date,
+    }
 
 
 def _render_fund_table(table_rows):
@@ -432,6 +590,33 @@ with tab_sip:
             )
 
         st.markdown("<br>", unsafe_allow_html=True)
+        # ── NEW: Enhancement toggles ──
+        st.markdown('<div class="section-label">Analysis Options</div>', unsafe_allow_html=True)
+
+        col_t1, col_t2 = st.columns(2)
+        with col_t1:
+            show_compare_sip = st.toggle(
+                "📊 Compare vs Lumpsum",
+                value=False,
+                key="sip_compare_toggle",
+                help="Overlay Lumpsum chart — same total amount invested as SIP, same rate & duration"
+            )
+        with col_t2:
+            show_inflation_sip = st.toggle(
+                "🌡️ Inflation Adjusted",
+                value=False,
+                key="sip_inflation_toggle",
+                help="Show corpus in today's purchasing power after accounting for inflation"
+            )
+
+        if show_inflation_sip:
+            inflation_rate_sip = st.slider(
+                "Assumed Inflation Rate (%)", 3.0, 10.0, 6.0, 0.5, key="sip_inflation_rate"
+            )
+        else:
+            inflation_rate_sip = 6.0
+
+        st.markdown("<br>", unsafe_allow_html=True)
         calc_sip_btn = st.button(
             "📊 Calculate", type="primary", key="calc_sip", width="stretch",
         )
@@ -448,26 +633,84 @@ with tab_sip:
                  f'<span class="{gain_cls}">{result["abs_return"]:+.1f}% absolute return</span>'),
                 ("Total Gains", fmt_inr(result["total_gains"]), f"At {annual_rate}% p.a."),
             ])
+
+            # ── Inflation-Adjusted Card ──
+            if show_inflation_sip:
+                real_corpus = inflation_adjusted(result["final_corpus"], years, inflation_rate_sip)
+                st.markdown("<br>", unsafe_allow_html=True)
+                render_inflation_card(real_corpus, result["final_corpus"], years, inflation_rate_sip)
+
             st.markdown("<br>", unsafe_allow_html=True)
 
-            # ── FIX: use chart_df (Tab 1 only) ──
+            # ── Chart ──
             chart_df = pd.DataFrame({
                 "Year": [r["Year"] for r in result["breakdown"]],
                 "Invested": [r["Total Invested"] for r in result["breakdown"]],
-                "Corpus": [r["Corpus Value"] for r in result["breakdown"]],
+                "Corpus (SIP)": [r["Corpus Value"] for r in result["breakdown"]],
             }).set_index("Year")
 
             fig_sip = go.Figure()
             fig_sip.add_trace(go.Scatter(
                 x=chart_df.index, y=chart_df["Invested"],
-                name="Invested", line=dict(color="#4a9eff", width=2),
+                name="Invested (SIP)", line=dict(color="#4a9eff", width=2),
             ))
             fig_sip.add_trace(go.Scatter(
-                x=chart_df.index, y=chart_df["Corpus"],
-                name="Corpus", line=dict(color="#00f5d4", width=2),
+                x=chart_df.index, y=chart_df["Corpus (SIP)"],
+                name="Corpus (SIP)", line=dict(color="#00f5d4", width=2),
             ))
+
+            # ── NEW: Compare vs Lumpsum overlay ──
+            if show_compare_sip:
+                # Use same total investment amount as lumpsum principal
+                equivalent_lumpsum = result["total_invested"]
+                result_ls_compare = calc_lumpsum(equivalent_lumpsum, annual_rate, years)
+                ls_corpus_by_year = [r["Corpus Value"] for r in result_ls_compare["breakdown"]]
+                ls_years = [r["Year"] for r in result_ls_compare["breakdown"]]
+
+                fig_sip.add_trace(go.Scatter(
+                    x=ls_years, y=ls_corpus_by_year,
+                    name="Corpus (Lumpsum equiv.)",
+                    line=dict(color="#bf80ff", width=2, dash="dash"),
+                ))
+
+            # ── Inflation line on chart ──
+            if show_inflation_sip:
+                real_by_year = [
+                    inflation_adjusted(r["Corpus Value"], r["Year"], inflation_rate_sip)
+                    for r in result["breakdown"]
+                ]
+                fig_sip.add_trace(go.Scatter(
+                    x=chart_df.index, y=real_by_year,
+                    name=f"Real Value ({inflation_rate_sip:.0f}% inflation)",
+                    line=dict(color="#ffc107", width=2, dash="dot"),
+                ))
+
             fig_sip.update_layout(**_chart_layout())
             st.plotly_chart(fig_sip, width="stretch")
+
+            # ── SIP vs Lumpsum comparison insight banner ──
+            if show_compare_sip:
+                sip_c = result["final_corpus"]
+                ls_c = result_ls_compare["final_corpus"]
+                diff = sip_c - ls_c
+                winner = "SIP" if diff >= 0 else "Lumpsum"
+                diff_pct = abs(diff / ls_c * 100)
+                color = "#00f5d4" if diff >= 0 else "#bf80ff"
+                st.markdown(
+                    f'<div class="calc-section-banner banner-compare">'
+                    f'📊 Compare: <strong style="color:{color};">{winner}</strong> wins by '
+                    f'<strong style="color:{color};">{fmt_inr(abs(diff))}</strong> '
+                    f'({diff_pct:.1f}%) over {years}y &nbsp;·&nbsp; '
+                    f'Same ₹{fmt_inr(equivalent_lumpsum)} invested, same {annual_rate}% rate'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown(
+                    '<div class="info-box">💡 Lumpsum deploys capital immediately so it compounds '
+                    'longer. SIP wins when the market grows during the investment period, '
+                    'as periodic buying averages out entry costs (rupee cost averaging).</div>',
+                    unsafe_allow_html=True,
+                )
 
             st.markdown(
                 '<div class="section-label" style="margin-top:16px;">Year-by-Year Breakdown</div>',
@@ -504,6 +747,33 @@ with tab_lumpsum:
         ls_years = st.slider("Investment Duration (Years)", 1, 40, 10, 1, key="ls_years")
 
         st.markdown("<br>", unsafe_allow_html=True)
+        # ── NEW: Enhancement toggles ──
+        st.markdown('<div class="section-label">Analysis Options</div>', unsafe_allow_html=True)
+
+        col_lt1, col_lt2 = st.columns(2)
+        with col_lt1:
+            show_compare_ls = st.toggle(
+                "📊 Compare vs SIP",
+                value=False,
+                key="ls_compare_toggle",
+                help="Overlay SIP chart — same total invested spread monthly, same rate & duration"
+            )
+        with col_lt2:
+            show_inflation_ls = st.toggle(
+                "🌡️ Inflation Adjusted",
+                value=False,
+                key="ls_inflation_toggle",
+                help="Show corpus in today's purchasing power after accounting for inflation"
+            )
+
+        if show_inflation_ls:
+            inflation_rate_ls = st.slider(
+                "Assumed Inflation Rate (%)", 3.0, 10.0, 6.0, 0.5, key="ls_inflation_rate"
+            )
+        else:
+            inflation_rate_ls = 6.0
+
+        st.markdown("<br>", unsafe_allow_html=True)
         calc_ls_btn = st.button(
             "📊 Calculate", type="primary", key="calc_ls", width="stretch",
         )
@@ -520,13 +790,20 @@ with tab_lumpsum:
                  f'<span class="{gain_cls_ls}">{result_ls["abs_return"]:+.1f}% absolute return</span>'),
                 ("Total Gains", fmt_inr(result_ls["total_gains"]), f"At {ls_rate}% p.a."),
             ])
+
+            # ── Inflation-Adjusted Card ──
+            if show_inflation_ls:
+                real_corpus_ls = inflation_adjusted(result_ls["final_corpus"], ls_years, inflation_rate_ls)
+                st.markdown("<br>", unsafe_allow_html=True)
+                render_inflation_card(real_corpus_ls, result_ls["final_corpus"], ls_years, inflation_rate_ls)
+
             st.markdown("<br>", unsafe_allow_html=True)
 
-            # ── FIX: use chart_df_ls with correct column names ──
+            # ── Chart ──
             chart_df_ls = pd.DataFrame({
                 "Year": [r["Year"] for r in result_ls["breakdown"]],
                 "Principal": [result_ls["principal"]] * ls_years,
-                "Corpus": [r["Corpus Value"] for r in result_ls["breakdown"]],
+                "Corpus (Lumpsum)": [r["Corpus Value"] for r in result_ls["breakdown"]],
             }).set_index("Year")
 
             fig_ls = go.Figure()
@@ -535,11 +812,62 @@ with tab_lumpsum:
                 name="Principal", line=dict(color="#4a9eff", width=2),
             ))
             fig_ls.add_trace(go.Scatter(
-                x=chart_df_ls.index, y=chart_df_ls["Corpus"],
-                name="Corpus", line=dict(color="#00f5d4", width=2),
+                x=chart_df_ls.index, y=chart_df_ls["Corpus (Lumpsum)"],
+                name="Corpus (Lumpsum)", line=dict(color="#00f5d4", width=2),
             ))
+
+            # ── NEW: Compare vs SIP overlay ──
+            if show_compare_ls:
+                # Equivalent monthly SIP = principal / (years * 12)
+                equivalent_monthly = principal / (ls_years * 12)
+                result_sip_compare = calc_sip(equivalent_monthly, ls_rate, ls_years)
+                sip_corpus_by_year = [r["Corpus Value"] for r in result_sip_compare["breakdown"]]
+                sip_years = [r["Year"] for r in result_sip_compare["breakdown"]]
+
+                fig_ls.add_trace(go.Scatter(
+                    x=sip_years, y=sip_corpus_by_year,
+                    name=f"Corpus (SIP ₹{equivalent_monthly:,.0f}/mo)",
+                    line=dict(color="#bf80ff", width=2, dash="dash"),
+                ))
+
+            # ── Inflation line on chart ──
+            if show_inflation_ls:
+                real_by_year_ls = [
+                    inflation_adjusted(r["Corpus Value"], r["Year"], inflation_rate_ls)
+                    for r in result_ls["breakdown"]
+                ]
+                fig_ls.add_trace(go.Scatter(
+                    x=chart_df_ls.index, y=real_by_year_ls,
+                    name=f"Real Value ({inflation_rate_ls:.0f}% inflation)",
+                    line=dict(color="#ffc107", width=2, dash="dot"),
+                ))
+
             fig_ls.update_layout(**_chart_layout())
             st.plotly_chart(fig_ls, width="stretch")
+
+            # ── Lumpsum vs SIP comparison insight banner ──
+            if show_compare_ls:
+                ls_c = result_ls["final_corpus"]
+                sip_c = result_sip_compare["final_corpus"]
+                diff = ls_c - sip_c
+                winner = "Lumpsum" if diff >= 0 else "SIP"
+                diff_pct = abs(diff / sip_c * 100)
+                color = "#00f5d4" if diff >= 0 else "#bf80ff"
+                st.markdown(
+                    f'<div class="calc-section-banner banner-compare">'
+                    f'📊 Compare: <strong style="color:{color};">{winner}</strong> wins by '
+                    f'<strong style="color:{color};">{fmt_inr(abs(diff))}</strong> '
+                    f'({diff_pct:.1f}%) over {ls_years}y &nbsp;·&nbsp; '
+                    f'Equiv. SIP = ₹{equivalent_monthly:,.0f}/mo'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown(
+                    '<div class="info-box">💡 Lumpsum wins when markets rise steadily — '
+                    'your full capital compounds from day one. SIP wins in volatile or '
+                    'declining markets via rupee cost averaging.</div>',
+                    unsafe_allow_html=True,
+                )
 
             st.markdown(
                 '<div class="section-label" style="margin-top:16px;">Year-by-Year Breakdown</div>',
@@ -642,6 +970,16 @@ with tab_fund:
                 "② Current value **as of today** (corpus kept growing after SIP stopped)"
             )
 
+        # ── NEW: Benchmark toggle ──
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="section-label">Analysis Options</div>', unsafe_allow_html=True)
+        show_benchmark = st.toggle(
+            "📊 Compare vs Nifty 50",
+            value=False,
+            key="fr_benchmark_toggle",
+            help="Fetch Nifty 50 index fund NAV and compare your fund's SIP returns vs the benchmark",
+        )
+
         st.markdown("<br>", unsafe_allow_html=True)
         calc_fund_btn = st.button(
             "🔍 Analyse Fund Returns", type="primary", key="calc_fund",
@@ -656,8 +994,21 @@ with tab_fund:
             elif sip_end and sip_start >= sip_end:
                 st.error("SIP Start Date must be before End Date.")
             else:
+                # ── Optionally pre-fetch Nifty 50 benchmark ──
+                benchmark_result = None
+                if show_benchmark:
+                    with st.spinner("Fetching Nifty 50 index data..."):
+                        nifty_nav_history = fetch_nifty50_nav_history()
+                        if nifty_nav_history:
+                            benchmark_result = calc_benchmark_sip_returns(
+                                nifty_nav_history, sip_amount, sip_start,
+                                sip_end if calc_mode == "SIP Stopped (with end date)" else date.today()
+                            )
+                        else:
+                            st.warning("⚠️ Could not fetch Nifty 50 data. Benchmark comparison unavailable.")
+
                 # ────────────────────────────────────────────────
-                # MODE A: SIP Ongoing — single calculation, today
+                # MODE A: SIP Ongoing
                 # ────────────────────────────────────────────────
                 if calc_mode == "SIP Ongoing (no end date)":
                     with st.spinner("Fetching NAV history and calculating returns..."):
@@ -729,7 +1080,75 @@ with tab_fund:
                         else:
                             st.warning(f"XIRR could not be calculated: {result_fr['xirr_error']}")
 
-                        # ── FIX: use chart_data with correct column names ──
+                        # ── NEW: Nifty 50 Benchmark Comparison ──
+                        if show_benchmark and benchmark_result:
+                            fund_val = result_fr["current_value"]
+                            bench_val = benchmark_result["current_value"]
+                            alpha = fund_val - bench_val
+                            alpha_pct = result_fr["abs_return_pct"] - benchmark_result["abs_return_pct"]
+                            beat = alpha >= 0
+                            alpha_color = "#00f5d4" if beat else "#ff6b6b"
+                            alpha_label = "outperformed" if beat else "underperformed"
+
+                            st.markdown("<br>", unsafe_allow_html=True)
+                            st.markdown(
+                                '<div class="calc-section-banner banner-compare">'
+                                '📊 Nifty 50 Benchmark Comparison'
+                                '</div>',
+                                unsafe_allow_html=True,
+                            )
+
+                            bcol1, bcol2, bcol3 = st.columns(3)
+                            with bcol1:
+                                st.markdown(
+                                    f'<div class="result-card">'
+                                    f'<h3>Your Fund</h3>'
+                                    f'<p>{fmt_inr(fund_val)}</p>'
+                                    f'<div class="sub">{result_fr["abs_return_pct"]:+.1f}% absolute</div>'
+                                    f'</div>',
+                                    unsafe_allow_html=True,
+                                )
+                            with bcol2:
+                                st.markdown(
+                                    f'<div class="result-card" style="border-color:rgba(255,165,0,0.35);'
+                                    f'background:rgba(255,165,0,0.07);">'
+                                    f'<h3 style="color:#ffb347;">Nifty 50 Index</h3>'
+                                    f'<p>{fmt_inr(bench_val)}</p>'
+                                    f'<div class="sub">{benchmark_result["abs_return_pct"]:+.1f}% absolute</div>'
+                                    f'</div>',
+                                    unsafe_allow_html=True,
+                                )
+                            with bcol3:
+                                st.markdown(
+                                    f'<div class="result-card" style="border-color:rgba({("0,245,212" if beat else "255,107,107")},0.4);'
+                                    f'background:rgba({("0,245,212" if beat else "255,107,107")},0.07);">'
+                                    f'<h3 style="color:{alpha_color};">Alpha</h3>'
+                                    f'<p style="color:{alpha_color};">{fmt_inr(abs(alpha))}</p>'
+                                    f'<div class="sub">'
+                                    f'Fund {alpha_label} by {abs(alpha_pct):.1f}%'
+                                    f'</div></div>',
+                                    unsafe_allow_html=True,
+                                )
+
+                            verdict = (
+                                f'✅ Your fund <strong style="color:#00f5d4;">beat the Nifty 50</strong> '
+                                f'by {fmt_inr(abs(alpha))} ({abs(alpha_pct):.1f}%) — '
+                                f'active management added value.'
+                                if beat else
+                                f'⚠️ Your fund <strong style="color:#ff6b6b;">lagged the Nifty 50</strong> '
+                                f'by {fmt_inr(abs(alpha))} ({abs(alpha_pct):.1f}%) — '
+                                f'a Nifty 50 index fund would have done better.'
+                            )
+                            st.markdown(
+                                f'<div class="info-box" style="margin-top:12px;">'
+                                f'{verdict}<br>'
+                                f'<span style="font-size:11px;opacity:0.6;">'
+                                f'Benchmark: {benchmark_result["name"]} (Nifty 50 proxy via mfapi.in)'
+                                f'</span></div>',
+                                unsafe_allow_html=True,
+                            )
+
+                        # ── Chart ──
                         rows = result_fr["sip_rows"]
                         if rows:
                             chart_data = pd.DataFrame({
@@ -751,7 +1170,6 @@ with tab_fund:
                             fig_fr.update_layout(**_chart_layout())
                             st.plotly_chart(fig_fr, width="stretch")
 
-                        # Transaction log
                         st.markdown(
                             '<div class="section-label" style="margin-top:16px;">SIP Transaction Log</div>',
                             unsafe_allow_html=True,
@@ -759,9 +1177,7 @@ with tab_fund:
                         _render_fund_table(result_fr["sip_rows"])
 
                 # ────────────────────────────────────────────────
-                # MODE B: SIP Stopped — TWO calculations
-                #   1) corpus at sip_end date
-                #   2) value today (corpus grew via market after stop)
+                # MODE B: SIP Stopped — two calculations
                 # ────────────────────────────────────────────────
                 else:
                     result_at_end = None
@@ -908,7 +1324,72 @@ with tab_fund:
                         else:
                             st.caption(f"XIRR (today) unavailable: {result_today['xirr_error']}")
 
-                    # ── FIX: use chart_data_stopped with correct column names ──
+                    # ── NEW: Nifty 50 Benchmark Comparison (Stopped mode) ──
+                    if show_benchmark and benchmark_result and result_today:
+                        fund_val = result_today["current_value"]
+                        bench_val = benchmark_result["current_value"]
+                        alpha = fund_val - bench_val
+                        alpha_pct = result_today["abs_return_pct"] - benchmark_result["abs_return_pct"]
+                        beat = alpha >= 0
+                        alpha_color = "#00f5d4" if beat else "#ff6b6b"
+                        alpha_label = "outperformed" if beat else "underperformed"
+
+                        st.markdown("<br>", unsafe_allow_html=True)
+                        st.markdown(
+                            '<div class="calc-section-banner banner-compare">'
+                            '📊 Nifty 50 Benchmark Comparison (as of today)'
+                            '</div>',
+                            unsafe_allow_html=True,
+                        )
+
+                        bcol1, bcol2, bcol3 = st.columns(3)
+                        with bcol1:
+                            st.markdown(
+                                f'<div class="result-card"><h3>Your Fund</h3>'
+                                f'<p>{fmt_inr(fund_val)}</p>'
+                                f'<div class="sub">{result_today["abs_return_pct"]:+.1f}% absolute</div>'
+                                f'</div>',
+                                unsafe_allow_html=True,
+                            )
+                        with bcol2:
+                            st.markdown(
+                                f'<div class="result-card" style="border-color:rgba(255,165,0,0.35);'
+                                f'background:rgba(255,165,0,0.07);">'
+                                f'<h3 style="color:#ffb347;">Nifty 50 Index</h3>'
+                                f'<p>{fmt_inr(bench_val)}</p>'
+                                f'<div class="sub">{benchmark_result["abs_return_pct"]:+.1f}% absolute</div>'
+                                f'</div>',
+                                unsafe_allow_html=True,
+                            )
+                        with bcol3:
+                            st.markdown(
+                                f'<div class="result-card" style="border-color:rgba({("0,245,212" if beat else "255,107,107")},0.4);'
+                                f'background:rgba({("0,245,212" if beat else "255,107,107")},0.07);">'
+                                f'<h3 style="color:{alpha_color};">Alpha</h3>'
+                                f'<p style="color:{alpha_color};">{fmt_inr(abs(alpha))}</p>'
+                                f'<div class="sub">Fund {alpha_label} by {abs(alpha_pct):.1f}%</div>'
+                                f'</div>',
+                                unsafe_allow_html=True,
+                            )
+
+                        verdict = (
+                            f'✅ Your fund <strong style="color:#00f5d4;">beat the Nifty 50</strong> '
+                            f'by {fmt_inr(abs(alpha))} ({abs(alpha_pct):.1f}%).'
+                            if beat else
+                            f'⚠️ Your fund <strong style="color:#ff6b6b;">lagged the Nifty 50</strong> '
+                            f'by {fmt_inr(abs(alpha))} ({abs(alpha_pct):.1f}%) — '
+                            f'a passive Nifty index fund would have done better over this period.'
+                        )
+                        st.markdown(
+                            f'<div class="info-box" style="margin-top:12px;">'
+                            f'{verdict}<br>'
+                            f'<span style="font-size:11px;opacity:0.6;">'
+                            f'Benchmark: {benchmark_result["name"]} (Nifty 50 proxy via mfapi.in)'
+                            f'</span></div>',
+                            unsafe_allow_html=True,
+                        )
+
+                    # ── Chart ──
                     if result_today and result_today["sip_rows"]:
                         st.markdown("<br>", unsafe_allow_html=True)
                         rows_today = result_today["sip_rows"]
