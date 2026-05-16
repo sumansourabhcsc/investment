@@ -10,6 +10,7 @@ import plotly.graph_objects as go
 from datetime import date, timedelta
 import requests
 from utils.fund_prediction import show_fund_prediction
+from utils.fund_comparison import show_fund_comparison
 
 # ─────────────────────────────────────────────
 # Page Config
@@ -588,11 +589,12 @@ st.markdown(
 # ─────────────────────────────────────────────
 # Tabs
 # ─────────────────────────────────────────────
-tab_sip, tab_lumpsum, tab_fund, tab_pred, tab_more = st.tabs([
+tab_sip, tab_lumpsum, tab_fund, tab_pred, tab_compare,  = st.tabs([
     "📈  SIP Calculator",
     "💰  Lumpsum Calculator",
     "🔍  Fund Return",
     "📈 Fund Prediction",
+    "📉  Fund Comparison",      
     "🔧  More (Coming Soon)",
 ])
 
@@ -1490,6 +1492,14 @@ with tab_fund:
 # ══════════════════════════════════════════════
 with tab_pred:
     show_fund_prediction()
+
+
+# ══════════════════════════════════════════════
+# TAB 5 – FUND COMPARISON
+# ══════════════════════════════════════════════
+with tab_compare:
+    show_fund_comparison()
+
 
 
 # ══════════════════════════════════════════════
