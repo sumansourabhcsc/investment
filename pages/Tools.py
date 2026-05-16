@@ -589,7 +589,7 @@ st.markdown(
 # ─────────────────────────────────────────────
 # Tabs
 # ─────────────────────────────────────────────
-tab_sip, tab_lumpsum, tab_fund, tab_pred, tab_compare,  = st.tabs([
+tab_sip, tab_lumpsum, tab_fund, tab_pred, tab_compare  = st.tabs([
     "📈  SIP Calculator",
     "💰  Lumpsum Calculator",
     "🔍  Fund Return",
