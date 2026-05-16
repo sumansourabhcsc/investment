@@ -89,6 +89,7 @@ def _fetch_nav_series(fund_code: str) -> dict:
             return {"error": "No valid NAV entries returned"}
 
         series = pd.Series(nav_dict).sort_index()
+        series.index = pd.to_datetime(series.index)
         name = data.get("meta", {}).get("scheme_name", f"Fund {fund_code}")
         return {"name": name, "navs": series}
 
@@ -471,7 +472,7 @@ def show_fund_comparison():
         clipped = {}
         for code, d in raw_data.items():
             s = d["navs"]
-            s = s[s.index >= pd.Timestamp(start_date)]
+            s = s[s.index >= pd.Timestamp(start_date.isoformat())]
             if len(s) < 5:
                 st.warning(f"⚠️ {d['label']}: not enough NAV data in the selected period — skipped.")
                 continue
