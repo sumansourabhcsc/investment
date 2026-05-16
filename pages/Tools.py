@@ -285,6 +285,19 @@ def render_result_cards(cols_data):
             )
 
 
+def _chart_layout():
+    """Shared Plotly layout for all charts."""
+    return dict(
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="white"),
+        xaxis=dict(gridcolor="rgba(255,255,255,0.06)"),
+        yaxis=dict(gridcolor="rgba(255,255,255,0.06)"),
+        margin=dict(t=20, b=20, l=20, r=20),
+        legend=dict(bgcolor="rgba(0,0,0,0.4)"),
+    )
+
+
 def _render_fund_table(table_rows):
     """Render the SIP transaction log table for Fund Return tab."""
     if not table_rows:
@@ -381,7 +394,6 @@ tab_sip, tab_lumpsum, tab_fund, tab_pred, tab_more = st.tabs([
     "🔍  Fund Return",
     "📈 Fund Prediction",
     "🔧  More (Coming Soon)",
-    
 ])
 
 
@@ -394,15 +406,19 @@ with tab_sip:
 
     with left:
         st.markdown('<div class="section-label">Basic Details</div>', unsafe_allow_html=True)
-        monthly_sip = st.number_input("Monthly SIP Amount (₹)", min_value=100, max_value=10_000_000,
-                                      value=5000, step=500, key="sip_amount")
+        monthly_sip = st.number_input(
+            "Monthly SIP Amount (₹)", min_value=100, max_value=10_000_000,
+            value=5000, step=500, key="sip_amount",
+        )
         annual_rate = st.slider("Expected Annual Return (%)", 1.0, 30.0, 12.0, 0.5, key="sip_rate")
         years = st.slider("Investment Duration (Years)", 1, 40, 10, 1, key="sip_years")
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<div class="section-label">Optional: Lumpsum Top-up</div>', unsafe_allow_html=True)
-        lumpsum = st.number_input("Initial Lumpsum (₹)", min_value=0, max_value=100_000_000,
-                                  value=0, step=1000, key="sip_lumpsum")
+        lumpsum = st.number_input(
+            "Initial Lumpsum (₹)", min_value=0, max_value=100_000_000,
+            value=0, step=1000, key="sip_lumpsum",
+        )
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<div class="section-label">Optional: Step-Up SIP</div>', unsafe_allow_html=True)
@@ -416,7 +432,9 @@ with tab_sip:
             )
 
         st.markdown("<br>", unsafe_allow_html=True)
-        calc_sip_btn = st.button("📊 Calculate", type="primary", key="calc_sip", use_container_width=True)
+        calc_sip_btn = st.button(
+            "📊 Calculate", type="primary", key="calc_sip", width="stretch",
+        )
 
     with right:
         if calc_sip_btn:
@@ -431,30 +449,42 @@ with tab_sip:
                 ("Total Gains", fmt_inr(result["total_gains"]), f"At {annual_rate}% p.a."),
             ])
             st.markdown("<br>", unsafe_allow_html=True)
+
+            # ── FIX: use chart_df (Tab 1 only) ──
             chart_df = pd.DataFrame({
                 "Year": [r["Year"] for r in result["breakdown"]],
                 "Invested": [r["Total Invested"] for r in result["breakdown"]],
                 "Corpus": [r["Corpus Value"] for r in result["breakdown"]],
             }).set_index("Year")
-            
+
             fig_sip = go.Figure()
-            fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Invested"], name="Invested", line=dict(color="#4a9eff", width=2)))
-            fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Corpus"], name="Corpus", line=dict(color="#00f5d4", width=2)))
-            fig_sip.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(color="white"), xaxis=dict(gridcolor="rgba(255,255,255,0.06)"),
-                yaxis=dict(gridcolor="rgba(255,255,255,0.06)"), margin=dict(t=20,b=20,l=20,r=20),
-                legend=dict(bgcolor="rgba(0,0,0,0.4)"))
-            st.plotly_chart(fig_sip, use_container_width=True)
-            st.markdown('<div class="section-label" style="margin-top:16px;">Year-by-Year Breakdown</div>',
-                        unsafe_allow_html=True)
-            render_breakdown_table(result["breakdown"],
-                                   ["Monthly SIP", "Total Invested", "Corpus Value", "Gains"])
+            fig_sip.add_trace(go.Scatter(
+                x=chart_df.index, y=chart_df["Invested"],
+                name="Invested", line=dict(color="#4a9eff", width=2),
+            ))
+            fig_sip.add_trace(go.Scatter(
+                x=chart_df.index, y=chart_df["Corpus"],
+                name="Corpus", line=dict(color="#00f5d4", width=2),
+            ))
+            fig_sip.update_layout(**_chart_layout())
+            st.plotly_chart(fig_sip, width="stretch")
+
+            st.markdown(
+                '<div class="section-label" style="margin-top:16px;">Year-by-Year Breakdown</div>',
+                unsafe_allow_html=True,
+            )
+            render_breakdown_table(
+                result["breakdown"],
+                ["Monthly SIP", "Total Invested", "Corpus Value", "Gains"],
+            )
         else:
             st.markdown(
                 '<br><br><div style="text-align:center;opacity:0.4;padding:60px 20px;">'
                 '<div style="font-size:48px;">📈</div>'
                 '<div style="margin-top:12px;font-size:14px;">Fill in the details and hit Calculate</div>'
-                '</div>', unsafe_allow_html=True)
+                '</div>',
+                unsafe_allow_html=True,
+            )
 
 
 # ══════════════════════════════════════════════
@@ -466,13 +496,17 @@ with tab_lumpsum:
 
     with left2:
         st.markdown('<div class="section-label">Investment Details</div>', unsafe_allow_html=True)
-        principal = st.number_input("Investment Amount (₹)", min_value=1000, max_value=100_000_000,
-                                    value=1_00_000, step=1000, key="ls_principal")
+        principal = st.number_input(
+            "Investment Amount (₹)", min_value=1000, max_value=100_000_000,
+            value=1_00_000, step=1000, key="ls_principal",
+        )
         ls_rate = st.slider("Expected Annual Return (%)", 1.0, 30.0, 12.0, 0.5, key="ls_rate")
         ls_years = st.slider("Investment Duration (Years)", 1, 40, 10, 1, key="ls_years")
 
         st.markdown("<br>", unsafe_allow_html=True)
-        calc_ls_btn = st.button("📊 Calculate", type="primary", key="calc_ls", use_container_width=True)
+        calc_ls_btn = st.button(
+            "📊 Calculate", type="primary", key="calc_ls", width="stretch",
+        )
 
     with right2:
         if calc_ls_btn:
@@ -487,29 +521,39 @@ with tab_lumpsum:
                 ("Total Gains", fmt_inr(result_ls["total_gains"]), f"At {ls_rate}% p.a."),
             ])
             st.markdown("<br>", unsafe_allow_html=True)
+
+            # ── FIX: use chart_df_ls with correct column names ──
             chart_df_ls = pd.DataFrame({
                 "Year": [r["Year"] for r in result_ls["breakdown"]],
                 "Principal": [result_ls["principal"]] * ls_years,
                 "Corpus": [r["Corpus Value"] for r in result_ls["breakdown"]],
             }).set_index("Year")
-            
-            fig_sip = go.Figure()
-            fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Invested"], name="Invested", line=dict(color="#4a9eff", width=2)))
-            fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Corpus"], name="Corpus", line=dict(color="#00f5d4", width=2)))
-            fig_sip.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(color="white"), xaxis=dict(gridcolor="rgba(255,255,255,0.06)"),
-                yaxis=dict(gridcolor="rgba(255,255,255,0.06)"), margin=dict(t=20,b=20,l=20,r=20),
-                legend=dict(bgcolor="rgba(0,0,0,0.4)"))
-            st.plotly_chart(fig_sip, use_container_width=True)
-            st.markdown('<div class="section-label" style="margin-top:16px;">Year-by-Year Breakdown</div>',
-                        unsafe_allow_html=True)
+
+            fig_ls = go.Figure()
+            fig_ls.add_trace(go.Scatter(
+                x=chart_df_ls.index, y=chart_df_ls["Principal"],
+                name="Principal", line=dict(color="#4a9eff", width=2),
+            ))
+            fig_ls.add_trace(go.Scatter(
+                x=chart_df_ls.index, y=chart_df_ls["Corpus"],
+                name="Corpus", line=dict(color="#00f5d4", width=2),
+            ))
+            fig_ls.update_layout(**_chart_layout())
+            st.plotly_chart(fig_ls, width="stretch")
+
+            st.markdown(
+                '<div class="section-label" style="margin-top:16px;">Year-by-Year Breakdown</div>',
+                unsafe_allow_html=True,
+            )
             render_breakdown_table(result_ls["breakdown"], ["Corpus Value", "Gains"])
         else:
             st.markdown(
                 '<br><br><div style="text-align:center;opacity:0.4;padding:60px 20px;">'
                 '<div style="font-size:48px;">💰</div>'
                 '<div style="margin-top:12px;font-size:14px;">Fill in the details and hit Calculate</div>'
-                '</div>', unsafe_allow_html=True)
+                '</div>',
+                unsafe_allow_html=True,
+            )
 
 
 # ══════════════════════════════════════════════
@@ -583,11 +627,9 @@ with tab_fund:
         sip_end = None
 
         if calc_mode == "SIP Ongoing (no end date)":
-            # End date = today; valuation date = today
             sip_end = date.today()
             st.caption(f"SIP treated as active through today ({sip_end.strftime('%d %b %Y')})")
-
-        else:  # SIP Stopped
+        else:
             sip_end = st.date_input(
                 "SIP End Date",
                 value=date(2023, 12, 31),
@@ -603,7 +645,7 @@ with tab_fund:
         st.markdown("<br>", unsafe_allow_html=True)
         calc_fund_btn = st.button(
             "🔍 Analyse Fund Returns", type="primary", key="calc_fund",
-            use_container_width=True, disabled=(not fund_code),
+            width="stretch", disabled=(not fund_code),
         )
 
     # ── Results ──
@@ -687,7 +729,7 @@ with tab_fund:
                         else:
                             st.warning(f"XIRR could not be calculated: {result_fr['xirr_error']}")
 
-                        # Chart
+                        # ── FIX: use chart_data with correct column names ──
                         rows = result_fr["sip_rows"]
                         if rows:
                             chart_data = pd.DataFrame({
@@ -696,15 +738,18 @@ with tab_fund:
                                 "Current Value (₹)": [r["Current Value (₹)"] for r in rows],
                             }).set_index("Date")
                             st.caption("📊 Invested vs Current Value over time")
-                            
-                            fig_sip = go.Figure()
-                            fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Invested"], name="Invested", line=dict(color="#4a9eff", width=2)))
-                            fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Corpus"], name="Corpus", line=dict(color="#00f5d4", width=2)))
-                            fig_sip.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-                                font=dict(color="white"), xaxis=dict(gridcolor="rgba(255,255,255,0.06)"),
-                                yaxis=dict(gridcolor="rgba(255,255,255,0.06)"), margin=dict(t=20,b=20,l=20,r=20),
-                                legend=dict(bgcolor="rgba(0,0,0,0.4)"))
-                            st.plotly_chart(fig_sip, use_container_width=True)
+
+                            fig_fr = go.Figure()
+                            fig_fr.add_trace(go.Scatter(
+                                x=chart_data.index, y=chart_data["Invested (₹)"],
+                                name="Invested", line=dict(color="#4a9eff", width=2),
+                            ))
+                            fig_fr.add_trace(go.Scatter(
+                                x=chart_data.index, y=chart_data["Current Value (₹)"],
+                                name="Current Value", line=dict(color="#00f5d4", width=2),
+                            ))
+                            fig_fr.update_layout(**_chart_layout())
+                            st.plotly_chart(fig_fr, width="stretch")
 
                         # Transaction log
                         st.markdown(
@@ -729,7 +774,7 @@ with tab_fund:
                                 monthly_amount=sip_amount,
                                 sip_start_date=sip_start,
                                 sip_end_date=sip_end,
-                                valuation_date=sip_end,      # ← valued AT end date
+                                valuation_date=sip_end,
                             )
                         except ValueError as e:
                             st.error(f"❌ (At SIP End) {e}")
@@ -740,8 +785,8 @@ with tab_fund:
                                 fund_code=fund_code,
                                 monthly_amount=sip_amount,
                                 sip_start_date=sip_start,
-                                sip_end_date=sip_end,        # same SIP window
-                                valuation_date=date.today(), # ← valued at TODAY's NAV
+                                sip_end_date=sip_end,
+                                valuation_date=date.today(),
                             )
                         except ValueError as e:
                             st.error(f"❌ (Today) {e}")
@@ -749,7 +794,6 @@ with tab_fund:
                     if result_at_end or result_today:
                         st.markdown("<br>", unsafe_allow_html=True)
 
-                        # Use whichever result loaded for the fund banner
                         _banner_result = result_at_end or result_today
                         st.markdown(
                             f'<div style="background:rgba(0,245,212,0.06);border:1px solid rgba(0,245,212,0.2);'
@@ -790,7 +834,6 @@ with tab_fund:
                              f'as on {result_at_end["valuation_date"].strftime("%d %b %Y")}'),
                         ])
 
-                        # XIRR at end
                         if result_at_end["xirr_pct"] is not None:
                             xv1 = result_at_end["xirr_pct"]
                             bc1 = "xirr-badge" if xv1 >= 0 else "xirr-badge xirr-badge-neg"
@@ -811,7 +854,6 @@ with tab_fund:
 
                     # ── SECTION 2: Current Value Today ──
                     if result_today:
-                        # How long since SIP stopped
                         days_since = (date.today() - sip_end).days
                         years_since = days_since / 365.25
                         time_label = (
@@ -820,7 +862,6 @@ with tab_fund:
                             else f"{int(days_since / 30)}m since SIP stopped"
                         )
 
-                        # Extra growth after stop
                         extra_growth = 0.0
                         if result_at_end:
                             extra_growth = result_today["current_value"] - result_at_end["current_value"]
@@ -853,7 +894,6 @@ with tab_fund:
                              f'as on {result_today["latest_nav_date"].strftime("%d %b %Y")}'),
                         ])
 
-                        # XIRR today
                         if result_today["xirr_pct"] is not None:
                             xv2 = result_today["xirr_pct"]
                             bc2 = "xirr-badge" if xv2 >= 0 else "xirr-badge xirr-badge-neg"
@@ -868,15 +908,11 @@ with tab_fund:
                         else:
                             st.caption(f"XIRR (today) unavailable: {result_today['xirr_error']}")
 
-                    # ── Combined chart: shows full journey ──
+                    # ── FIX: use chart_data_stopped with correct column names ──
                     if result_today and result_today["sip_rows"]:
                         st.markdown("<br>", unsafe_allow_html=True)
                         rows_today = result_today["sip_rows"]
 
-                        # We split the chart data into "during SIP" and "after SIP stopped"
-                        # Since sip_rows only contains instalments up to sip_end,
-                        # the "current value" column already uses today's NAV for all rows.
-                        # We show invested (flat after end) and current value.
                         chart_data_stopped = pd.DataFrame({
                             "Date": [r["NAV Date"] for r in rows_today],
                             "Invested (₹)": [r["Total Invested (₹)"] for r in rows_today],
@@ -886,17 +922,22 @@ with tab_fund:
                             "📊 Invested vs Portfolio Value — all units valued at today's NAV. "
                             "Invested line is flat after SIP stopped."
                         )
-                        
-                        fig_sip = go.Figure()
-                        fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Invested"], name="Invested", line=dict(color="#4a9eff", width=2)))
-                        fig_sip.add_trace(go.Scatter(x=chart_df.index, y=chart_df["Corpus"], name="Corpus", line=dict(color="#00f5d4", width=2)))
-                        fig_sip.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-                            font=dict(color="white"), xaxis=dict(gridcolor="rgba(255,255,255,0.06)"),
-                            yaxis=dict(gridcolor="rgba(255,255,255,0.06)"), margin=dict(t=20,b=20,l=20,r=20),
-                            legend=dict(bgcolor="rgba(0,0,0,0.4)"))
-                        st.plotly_chart(fig_sip, use_container_width=True)
 
-                    # ── Transaction log (shows today's valuation) ──
+                        fig_stopped = go.Figure()
+                        fig_stopped.add_trace(go.Scatter(
+                            x=chart_data_stopped.index,
+                            y=chart_data_stopped["Invested (₹)"],
+                            name="Invested", line=dict(color="#4a9eff", width=2),
+                        ))
+                        fig_stopped.add_trace(go.Scatter(
+                            x=chart_data_stopped.index,
+                            y=chart_data_stopped["Value (today's NAV) (₹)"],
+                            name="Current Value", line=dict(color="#00f5d4", width=2),
+                        ))
+                        fig_stopped.update_layout(**_chart_layout())
+                        st.plotly_chart(fig_stopped, width="stretch")
+
+                    # ── Transaction log ──
                     if result_today and result_today["sip_rows"]:
                         st.markdown(
                             '<div class="section-label" style="margin-top:16px;">'
@@ -911,13 +952,17 @@ with tab_fund:
                 '<br><br><div style="text-align:center;opacity:0.4;padding:60px 20px;">'
                 '<div style="font-size:48px;">🔍</div>'
                 '<div style="margin-top:12px;font-size:14px;">Select a fund and fill in the details</div>'
-                '</div>', unsafe_allow_html=True)
+                '</div>',
+                unsafe_allow_html=True,
+            )
+
 
 # ══════════════════════════════════════════════
 # TAB 4 – Prediction
 # ══════════════════════════════════════════════
 with tab_pred:
     show_fund_prediction()
+
 
 # ══════════════════════════════════════════════
 # TAB 5 – COMING SOON
