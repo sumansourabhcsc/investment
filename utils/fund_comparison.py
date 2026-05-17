@@ -409,13 +409,6 @@ def show_fund_comparison():
             key="cmp_drawdown_toggle",
             help="Plots the percentage fall from each fund's previous peak",
         )
-        show_monthly_returns = st.toggle(
-            "📊 Show Monthly Returns Heatmap",
-            value=False,
-            key="cmp_monthly_toggle",
-            help="Calendar heatmap of monthly returns for each fund",
-        )
-
         st.markdown("<br>", unsafe_allow_html=True)
         compare_btn = st.button(
             "📊 Compare Funds",
@@ -633,67 +626,6 @@ def show_fund_comparison():
             )
         summary_html += "</div>"
         st.markdown(summary_html, unsafe_allow_html=True)
-
-        # ══════════════════════════════════════════
-        # CHART 3 — Monthly Returns Heatmap (optional)
-        # ══════════════════════════════════════════
-        if show_monthly_returns:
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown(
-                '<div class="cmp-banner">📅 Monthly Returns (%)</div>',
-                unsafe_allow_html=True,
-            )
-
-            for code, color in zip(codes, colors):
-                s = clipped[code]["navs"]
-                monthly = s.resample("ME").last().pct_change().dropna() * 100
-                if len(monthly) < 2:
-                    continue
-
-                df_m = pd.DataFrame({
-                    "year":  monthly.index.year,
-                    "month": monthly.index.month,
-                    "ret":   monthly.values,
-                })
-                pivot = df_m.pivot_table(index="year", columns="month", values="ret")
-                month_names = ["Jan","Feb","Mar","Apr","May","Jun",
-                               "Jul","Aug","Sep","Oct","Nov","Dec"]
-                pivot.columns = [month_names[m - 1] for m in pivot.columns]
-
-                fig_heat = go.Figure(go.Heatmap(
-                    z=pivot.values,
-                    x=pivot.columns.tolist(),
-                    y=[str(y) for y in pivot.index.tolist()],
-                    colorscale=[
-                        [0.0,  "#ff4444"],
-                        [0.35, "#662222"],
-                        [0.5,  "#111a22"],
-                        [0.65, "#1a4433"],
-                        [1.0,  "#00f5d4"],
-                    ],
-                    zmid=0,
-                    text=np.round(pivot.values, 1),
-                    texttemplate="%{text}%",
-                    textfont={"size": 10},
-                    hovertemplate="%{y} %{x}: %{z:.2f}%<extra></extra>",
-                    showscale=True,
-                    colorbar=dict(
-                        tickfont=dict(color="white"),
-                        outlinecolor="rgba(0,0,0,0)",
-                    ),
-                ))
-                fig_heat.update_layout(
-                    **_chart_layout(max(180, len(pivot) * 36 + 60)),
-                    title=dict(
-                        text=clipped[code]["label"],
-                        font=dict(color=color, size=13),
-                        x=0,
-                    ),
-                    xaxis=dict(side="top"),
-                    yaxis=dict(autorange="reversed"),
-                )
-                fig_heat.update_layout(margin=dict(t=60, b=10, l=40, r=40))
-                st.plotly_chart(fig_heat, use_container_width=True)
 
         st.markdown(
             '<div class="cmp-info-box" style="margin-top:16px;">'
