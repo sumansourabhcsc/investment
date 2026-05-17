@@ -691,8 +691,8 @@ def show_fund_comparison():
                     ),
                     xaxis=dict(side="top"),
                     yaxis=dict(autorange="reversed"),
-                    margin=dict(t=60, b=10, l=40, r=40),
                 )
+                fig_heat.update_layout(margin=dict(t=60, b=10, l=40, r=40))
                 st.plotly_chart(fig_heat, use_container_width=True)
 
         st.markdown(
