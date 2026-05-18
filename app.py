@@ -91,7 +91,7 @@ html, body, [class*="css"] {
     backdrop-filter: blur(12px);
 }
 
-#MainMenu, footer, header { visibility: hidden; }
+#MainMenu, footer { visibility: hidden; }
 
 [data-testid="stSidebarCollapsedControl"] {
     visibility: visible !important;
