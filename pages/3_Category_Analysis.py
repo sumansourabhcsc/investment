@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import requests
+import re
 from config import mutual_funds
 
 # ─────────────────────────────────────────────
@@ -80,7 +81,6 @@ html, body, [class*="css"] {
     max-width: 1200px !important;
 }
 
-/* ── Category Cards ── */
 .cat-card {
     background: rgba(8,14,20,0.82);
     border: 1px solid rgba(0,245,212,0.15);
@@ -126,7 +126,6 @@ html, body, [class*="css"] {
     margin: 3px 3px 0 0;
 }
 
-/* ── Allocation bar ── */
 .alloc-row {
     display: flex;
     align-items: center;
@@ -169,31 +168,56 @@ html, body, [class*="css"] {
     position: relative;
     overflow: hidden;
 }
-.ai-box::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #00f5d4, #00c9ff, #a78bfa);
-    border-radius: 14px 14px 0 0;
+.ai-box-header {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
 }
-.ai-section-title {
+
+/* ── Insight item card ── */
+.insight-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+.insight-tag {
+    display: inline-block;
+    border-radius: 5px;
+    padding: 2px 9px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+.insight-title {
     font-family: 'Syne', sans-serif;
     font-size: 13px;
     font-weight: 700;
-    color: #00f5d4;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin: 16px 0 8px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid rgba(0,245,212,0.1);
+    color: #dff5f0;
+    margin-bottom: 5px;
 }
-.ai-section-title:first-child { margin-top: 0; }
-.ai-content {
-    font-size: 13px;
-    color: rgba(220,235,230,0.85);
-    line-height: 1.75;
-    white-space: pre-wrap;
+.insight-body {
+    font-size: 12px;
+    color: rgba(220,235,230,0.7);
+    line-height: 1.7;
+}
+
+/* ── Overlap badge ── */
+.overlap-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    margin: 4px 4px 4px 0;
+    border: 1px solid;
 }
 
 /* ── Metric pill ── */
@@ -222,7 +246,6 @@ html, body, [class*="css"] {
     margin-top: 4px;
 }
 
-/* ── Risk badge ── */
 .risk-badge {
     display: inline-block;
     border-radius: 20px;
@@ -276,26 +299,45 @@ CATEGORY_META = {
     "Flexi Cap":     {"color": "#00c9ff", "risk": "medium", "risk_label": "Medium Risk",  "gradient": "linear-gradient(90deg,#00c9ff,#a78bfa)"},
     "International": {"color": "#a78bfa", "risk": "high",   "risk_label": "High Risk",   "gradient": "linear-gradient(90deg,#a78bfa,#f472b6)"},
     "Hybrid":        {"color": "#34d399", "risk": "low",    "risk_label": "Lower Risk",   "gradient": "linear-gradient(90deg,#34d399,#00f5d4)"},
+    "ELSS":          {"color": "#f472b6", "risk": "medium", "risk_label": "Tax Saving",   "gradient": "linear-gradient(90deg,#f472b6,#a78bfa)"},
+    "Index":         {"color": "#60a5fa", "risk": "low",    "risk_label": "Passive",      "gradient": "linear-gradient(90deg,#60a5fa,#00c9ff)"},
+    "Debt":          {"color": "#6ee7b7", "risk": "low",    "risk_label": "Low Risk",     "gradient": "linear-gradient(90deg,#6ee7b7,#34d399)"},
+    "Thematic":      {"color": "#fb923c", "risk": "high",   "risk_label": "High Risk",    "gradient": "linear-gradient(90deg,#fb923c,#ff6b6b)"},
 }
 
 # ─────────────────────────────────────────────
-# Build category breakdown from config
+# Build enriched category data from config
 # ─────────────────────────────────────────────
 def build_category_data():
+    """Group funds by category, carrying over any metadata from config."""
     cat_map = {}
     for fund_name, info in mutual_funds.items():
         cat = info.get("category", "Other")
         if cat not in cat_map:
             cat_map[cat] = []
-        cat_map[cat].append(fund_name)
+        cat_map[cat].append({
+            "name": fund_name,
+            # Pull whatever extra keys exist in config — expense_ratio, returns, aum, etc.
+            "expense_ratio": info.get("expense_ratio"),
+            "cagr_3y": info.get("cagr_3y") or info.get("returns_3y"),
+            "cagr_5y": info.get("cagr_5y") or info.get("returns_5y"),
+            "aum_cr": info.get("aum_cr") or info.get("aum"),
+            "fund_manager": info.get("fund_manager"),
+            "benchmark": info.get("benchmark"),
+            "style": info.get("style"),  # e.g. "Growth", "Value", "Blend"
+            "allocation_pct": info.get("allocation_pct"),  # actual weight if available
+        })
     return cat_map
 
 category_data = build_category_data()
-total_funds   = len(mutual_funds)
+total_funds = sum(len(v) for v in category_data.values())
 
-# Equal-weight allocation per fund (since we don't have live values loaded here)
-# Shows fund count-based allocation; AI will recommend value-based targets
-fund_count_per_cat = {cat: len(funds) for cat, funds in category_data.items()}
+# Compute allocation weight per category (use allocation_pct if available, else equal weight)
+def get_alloc_pct(funds_list):
+    weights = [f.get("allocation_pct") for f in funds_list if f.get("allocation_pct") is not None]
+    if weights and len(weights) == len(funds_list):
+        return sum(weights)
+    return len(funds_list) / total_funds * 100
 
 # ─────────────────────────────────────────────
 # Header
@@ -317,11 +359,12 @@ st.markdown("""
 # Top metrics row
 # ─────────────────────────────────────────────
 m_cols = st.columns(5)
+fund_count_per_cat = {cat: len(funds) for cat, funds in category_data.items()}
 metrics = [
-    (str(total_funds),              "Total Funds"),
-    (str(len(category_data)),       "Categories"),
-    (str(fund_count_per_cat.get("Small Cap", 0)),  "Small Cap Funds"),
-    (str(fund_count_per_cat.get("Mid Cap", 0)),    "Mid Cap Funds"),
+    (str(total_funds), "Total Funds"),
+    (str(len(category_data)), "Categories"),
+    (str(fund_count_per_cat.get("Small Cap", 0)), "Small Cap"),
+    (str(fund_count_per_cat.get("Mid Cap", 0)), "Mid Cap"),
     (str(fund_count_per_cat.get("Flexi Cap", 0) + fund_count_per_cat.get("Large Cap", 0)), "Stable Funds"),
 ]
 for col, (val, lbl) in zip(m_cols, metrics):
@@ -335,7 +378,7 @@ for col, (val, lbl) in zip(m_cols, metrics):
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
-# Two-column layout: breakdown left, allocation right
+# Two-column layout
 # ─────────────────────────────────────────────
 col_left, col_right = st.columns([3, 2], gap="large")
 
@@ -350,7 +393,8 @@ with col_left:
                                        "risk_label": "Medium Risk",
                                        "gradient": "linear-gradient(90deg,#888,#aaa)"})
         risk_cls = f"risk-{meta['risk']}"
-        chips = " ".join(f'<span class="fund-chip">{f}</span>' for f in funds)
+        chips = " ".join(f'<span class="fund-chip">{f["name"]}</span>' for f in funds)
+        alloc = get_alloc_pct(funds)
 
         st.markdown(f"""
         <div class="cat-card">
@@ -359,7 +403,7 @@ with col_left:
             <div class="cat-title">{cat}</div>
             <span class="risk-badge {risk_cls}">{meta['risk_label']}</span>
           </div>
-          <div class="cat-count">{len(funds)} fund{'s' if len(funds)>1 else ''} · {len(funds)/total_funds*100:.0f}% of portfolio by count</div>
+          <div class="cat-count">{len(funds)} fund{'s' if len(funds)>1 else ''} · {alloc:.0f}% of portfolio</div>
           <div>{chips}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -367,13 +411,12 @@ with col_left:
 with col_right:
     st.markdown("""
     <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;
-      color:#00f5d4;margin-bottom:14px;">⬡ Allocation by Fund Count</div>
+      color:#00f5d4;margin-bottom:14px;">⬡ Allocation Weight</div>
     """, unsafe_allow_html=True)
 
-    sorted_cats = sorted(category_data.items(), key=lambda x: -len(x[1]))
-    for cat, funds in sorted_cats:
+    for cat, funds in sorted(category_data.items(), key=lambda x: -get_alloc_pct(x[1])):
         meta = CATEGORY_META.get(cat, {"color": "#888", "gradient": "linear-gradient(90deg,#888,#aaa)"})
-        pct  = len(funds) / total_funds * 100
+        pct = get_alloc_pct(funds)
         st.markdown(f"""
         <div class="alloc-row">
           <div class="alloc-label" style="color:rgba(255,255,255,0.7);">{cat}</div>
@@ -384,22 +427,20 @@ with col_right:
         </div>
         """, unsafe_allow_html=True)
 
-    # Risk concentration warning
+    # Risk concentration
     high_risk_count = sum(len(v) for k, v in category_data.items()
                           if CATEGORY_META.get(k, {}).get("risk") == "high")
-    high_risk_pct   = high_risk_count / total_funds * 100
-
-    st.markdown("<br>", unsafe_allow_html=True)
+    high_risk_pct = high_risk_count / total_funds * 100
     color = "#ff6b6b" if high_risk_pct > 40 else "#ffbe50" if high_risk_pct > 25 else "#00f5a0"
     label = "⚠️ High Concentration" if high_risk_pct > 40 else "⚡ Moderate" if high_risk_pct > 25 else "✅ Balanced"
     st.markdown(f"""
     <div style="background:rgba(8,14,20,0.7);border:1px solid {color}44;border-radius:10px;
-      padding:14px 16px;margin-top:4px;">
+      padding:14px 16px;margin-top:12px;">
       <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;
         color:{color};margin-bottom:4px;">Risk Concentration</div>
       <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:{color};">{high_risk_pct:.0f}%</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">
-        in High-Risk categories (Small Cap + International)<br>
+        in High-Risk categories<br>
         <span style="color:{color};font-weight:600;">{label}</span>
       </div>
     </div>
@@ -415,11 +456,10 @@ st.markdown("""
 <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;
   color:#00f5d4;margin-bottom:6px;">⬡ AI Portfolio Intelligence</div>
 <div style="font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:18px;">
-  Powered by Claude · Personalized rebalancing & improvement suggestions
+  Powered by Claude · Deep analysis with actionable rebalancing advice
 </div>
 """, unsafe_allow_html=True)
 
-# Risk profile selector
 c1, c2, c3 = st.columns([1, 1, 2])
 with c1:
     risk_profile = st.selectbox(
@@ -435,77 +475,165 @@ with c2:
     )
 with c3:
     monthly_sip = st.number_input(
-        "Monthly SIP Amount (₹) — optional, for allocation advice",
+        "Monthly SIP Amount (₹) — optional",
         min_value=0,
         value=0,
         step=1000,
     )
 
-st.markdown("<br>", unsafe_allow_html=True)
+# Advanced options expander
+with st.expander("⚙️ Advanced Options"):
+    ca, cb = st.columns(2)
+    with ca:
+        portfolio_value = st.number_input(
+            "Total Portfolio Value (₹) — optional",
+            min_value=0,
+            value=0,
+            step=10000,
+        )
+    with cb:
+        tax_bracket = st.selectbox(
+            "Income Tax Bracket",
+            ["Not specified", "5%", "20%", "30%"],
+            index=0,
+        )
 
-analyse_btn = st.button("🤖  Run AI Category Analysis & Rebalancing", type="primary")
+st.markdown("<br>", unsafe_allow_html=True)
+analyse_btn = st.button("🤖  Run Deep AI Analysis", type="primary")
 
 if not analyse_btn:
     st.markdown("""
     <div style="text-align:center;opacity:0.3;padding:60px 20px;">
       <div style="font-size:48px;">🎯</div>
-      <div style="margin-top:12px;font-size:14px;">Set your risk profile and hit Run Analysis</div>
+      <div style="margin-top:12px;font-size:14px;">Set your profile and hit Run Analysis</div>
       <div style="font-size:12px;margin-top:6px;opacity:0.7;">
-        Claude will analyse your category mix and suggest rebalancing moves
+        Claude will dig into your category mix, flag overlaps, and suggest moves
       </div>
     </div>""", unsafe_allow_html=True)
     st.stop()
 
 # ─────────────────────────────────────────────
-# Build prompt
+# Build enriched portfolio context for Claude
 # ─────────────────────────────────────────────
-portfolio_summary = []
+portfolio_for_prompt = []
 for cat, funds in category_data.items():
     meta = CATEGORY_META.get(cat, {})
-    portfolio_summary.append({
+    fund_details = []
+    for f in funds:
+        fd = {"name": f["name"]}
+        if f.get("expense_ratio"):  fd["expense_ratio"] = f["expense_ratio"]
+        if f.get("cagr_3y"):        fd["3y_cagr"] = f["cagr_3y"]
+        if f.get("cagr_5y"):        fd["5y_cagr"] = f["cagr_5y"]
+        if f.get("aum_cr"):         fd["aum_cr"] = f["aum_cr"]
+        if f.get("fund_manager"):   fd["fund_manager"] = f["fund_manager"]
+        if f.get("style"):          fd["style"] = f["style"]
+        if f.get("benchmark"):      fd["benchmark"] = f["benchmark"]
+        if f.get("allocation_pct"): fd["current_allocation_pct"] = f["allocation_pct"]
+        fund_details.append(fd)
+
+    portfolio_for_prompt.append({
         "category": cat,
-        "fund_count": len(funds),
-        "funds": funds,
-        "allocation_pct_by_count": round(len(funds) / total_funds * 100, 1),
         "risk_level": meta.get("risk_label", "Medium Risk"),
+        "fund_count": len(funds),
+        "allocation_pct": round(get_alloc_pct(funds), 1),
+        "funds": fund_details,
     })
 
-sip_line = f"Monthly SIP: ₹{monthly_sip:,}" if monthly_sip > 0 else "Monthly SIP: Not specified"
+sip_line     = f"₹{monthly_sip:,}/month" if monthly_sip > 0 else "not specified"
+portval_line = f"₹{portfolio_value:,}" if portfolio_value > 0 else "not specified"
+tax_line     = tax_bracket if tax_bracket != "Not specified" else "not specified"
 
-prompt = f"""You are an expert Indian mutual fund portfolio advisor. Analyse this portfolio and provide comprehensive, actionable advice.
+# ─────────────────────────────────────────────
+# Prompt — structured JSON output
+# ─────────────────────────────────────────────
+PROMPT = f"""You are a senior Indian mutual fund portfolio advisor with deep expertise in SEBI regulations, AMC fund strategies, and Indian market dynamics. Analyse this portfolio thoroughly and return ONLY a valid JSON object — no markdown, no explanation outside the JSON.
 
-PORTFOLIO DETAILS:
-- Total Funds: {total_funds}
-- Investor Risk Profile: {risk_profile}
+INVESTOR PROFILE:
+- Risk Profile: {risk_profile}
 - Investment Horizon: {investment_horizon}
-- {sip_line}
+- Monthly SIP: {sip_line}
+- Total Portfolio Value: {portval_line}
+- Tax Bracket: {tax_line}
 
-CATEGORY BREAKDOWN:
-{json.dumps(portfolio_summary, indent=2)}
+PORTFOLIO (by category):
+{json.dumps(portfolio_for_prompt, indent=2)}
 
-Please provide a structured analysis with EXACTLY these 5 sections. Use plain text only — no markdown, no bullet symbols like *, no bold (**), no headers with #. Just clean flowing text under each labelled section.
+Return exactly this JSON structure (fill every field with specific, actionable content):
 
-SECTION 1 — PORTFOLIO HEALTH SCORE
-Give a score out of 100 for this portfolio. Explain what the score means in 2-3 sentences. Consider diversification, risk alignment with profile, category concentration, and overlap risk.
+{{
+  "health_score": {{
+    "score": <integer 0-100>,
+    "grade": "<A/B/C/D>",
+    "summary": "<2-3 sentence overall health assessment>",
+    "strengths": ["<specific strength 1>", "<specific strength 2>"],
+    "weaknesses": ["<specific weakness 1>", "<specific weakness 2>"]
+  }},
 
-SECTION 2 — CATEGORY CONCENTRATION ANALYSIS
-Analyse each category: Small Cap ({fund_count_per_cat.get('Small Cap',0)} funds), Mid Cap ({fund_count_per_cat.get('Mid Cap',0)} funds), Flexi Cap ({fund_count_per_cat.get('Flexi Cap',0)} funds), Large Cap ({fund_count_per_cat.get('Large Cap',0)} funds), International ({fund_count_per_cat.get('International',0)} funds), Hybrid ({fund_count_per_cat.get('Hybrid',0)} funds). Point out over-concentration or under-representation. Be specific.
+  "category_analysis": [
+    {{
+      "category": "<category name>",
+      "verdict": "<Overweight | Underweight | Optimal | Missing>",
+      "current_pct": <number>,
+      "ideal_pct_for_profile": <number>,
+      "commentary": "<2-3 sentences: what's good/bad about this category's weight given the investor's profile, horizon, and market conditions in 2025-26>",
+      "overlap_risk": "<High | Medium | Low | None>",
+      "overlap_note": "<if High or Medium: which funds overlap and why>"
+    }}
+  ],
 
-SECTION 3 — REBALANCING RECOMMENDATIONS
-Give 4-6 specific, actionable rebalancing moves. For each move say: what to do (increase/decrease/exit/add), which category, which specific fund if relevant, and why. Consider the investor's risk profile of {risk_profile} and horizon of {investment_horizon}.
+  "rebalancing_moves": [
+    {{
+      "priority": "<High | Medium | Low>",
+      "action": "<Increase SIP | Reduce SIP | Exit | Add New Fund | Switch | Merge>",
+      "category": "<category>",
+      "fund": "<specific fund name or 'any in category'>",
+      "target_fund": "<if switching/merging — the fund to move into>",
+      "reason": "<specific 2-3 sentence rationale referencing the investor's profile, current allocation, and market outlook>",
+      "expected_impact": "<what this move achieves — e.g. reduces overlap, improves risk-adjusted return>"
+    }}
+  ],
 
-SECTION 4 — FUNDS TO CONSIDER EXITING OR MERGING
-Identify any redundant funds (same category, same style). Suggest which ones to consolidate and into which. Be direct.
+  "fund_redundancies": [
+    {{
+      "funds": ["<fund A>", "<fund B>"],
+      "category": "<category>",
+      "overlap_type": "<Same benchmark | Same style | High portfolio overlap | Same fund house>",
+      "recommendation": "<keep A, exit B — or merge into — and exactly why>",
+      "urgency": "<Immediate | Next rebalancing | Optional>"
+    }}
+  ],
 
-SECTION 5 — STRATEGIC IMPROVEMENT SUGGESTIONS
-Give 3-5 broader strategic suggestions beyond rebalancing. Think about: missing categories, international diversification, thematic opportunities, tax efficiency (ELSS), index vs active mix, SIP strategy. Make these forward-looking and specific to the Indian market in 2025-2026.
+  "missing_categories": [
+    {{
+      "category": "<e.g. ELSS, Gold, Debt, Index Nifty 50, Thematic>",
+      "reason_to_add": "<why this matters for the investor's specific profile and horizon>",
+      "suggested_allocation_pct": <number>,
+      "example_funds": ["<fund name 1>", "<fund name 2>"]
+    }}
+  ],
 
-Be direct, specific, and act as a trusted advisor. Do not add disclaimers at the end."""
+  "strategic_insights": [
+    {{
+      "theme": "<short title e.g. 'Tax Efficiency via ELSS', 'Index vs Active Balance', 'SIP Step-Up Strategy'>",
+      "insight": "<3-4 sentences of specific, forward-looking advice relevant to Indian market 2025-26 and this investor's profile>",
+      "action_item": "<one concrete next step>"
+    }}
+  ],
+
+  "sip_allocation_advice": {{
+    "commentary": "<if SIP was provided: how to split the monthly SIP across categories for best impact; if not provided: general advice on how to structure SIP given the profile>",
+    "suggested_split": [
+      {{"category": "<cat>", "pct": <number>, "rationale": "<brief>"}}
+    ]
+  }}
+}}
+
+Be brutally specific. Name actual funds from the portfolio. Reference real Indian AMCs, benchmarks (Nifty 50, Nifty Midcap 150, etc.), and 2025-26 market context (rate cycle, global macro, domestic consumption themes). Do not use placeholder text."""
 
 # ─────────────────────────────────────────────
 # Call Claude
 # ─────────────────────────────────────────────
-with st.spinner("Claude is analysing your portfolio..."):
+with st.spinner("Claude is analysing your portfolio in depth..."):
     try:
         resp = requests.post(
             "https://api.anthropic.com/v1/messages",
@@ -516,10 +644,11 @@ with st.spinner("Claude is analysing your portfolio..."):
             },
             json={
                 "model":      "claude-sonnet-4-20250514",
-                "max_tokens": 2000,
-                "messages":   [{"role": "user", "content": prompt}],
+                "max_tokens": 4000,   # increased for richer output
+                "system":     "You are a senior Indian mutual fund advisor. Always respond with valid JSON only. No markdown code fences, no extra text.",
+                "messages":   [{"role": "user", "content": PROMPT}],
             },
-            timeout=60,
+            timeout=90,
         )
         if resp.status_code != 200:
             st.error(f"API error {resp.status_code}: {resp.text}")
@@ -527,86 +656,327 @@ with st.spinner("Claude is analysing your portfolio..."):
 
         raw_text = resp.json()["content"][0]["text"].strip()
 
+        # Strip markdown fences if model adds them despite instructions
+        raw_text = re.sub(r"^```(?:json)?\s*", "", raw_text)
+        raw_text = re.sub(r"\s*```$", "", raw_text)
+
+        analysis = json.loads(raw_text)
+
+    except json.JSONDecodeError as e:
+        st.error(f"Failed to parse AI response as JSON: {e}")
+        with st.expander("Raw response"):
+            st.text(raw_text)
+        st.stop()
     except Exception as e:
         st.error(f"Failed to get AI analysis: {e}")
         st.stop()
 
 # ─────────────────────────────────────────────
-# Parse and render sections
+# Render results
 # ─────────────────────────────────────────────
-SECTION_KEYS = [
-    ("SECTION 1 — PORTFOLIO HEALTH SCORE",          "📊 Portfolio Health Score"),
-    ("SECTION 2 — CATEGORY CONCENTRATION ANALYSIS", "🔍 Category Concentration Analysis"),
-    ("SECTION 3 — REBALANCING RECOMMENDATIONS",     "⚖️ Rebalancing Recommendations"),
-    ("SECTION 4 — FUNDS TO CONSIDER EXITING OR MERGING", "🔄 Funds to Exit or Merge"),
-    ("SECTION 5 — STRATEGIC IMPROVEMENT SUGGESTIONS",    "🚀 Strategic Improvement Suggestions"),
-]
-
-SECTION_COLORS = ["#00f5d4", "#00c9ff", "#ffbe50", "#ff6b6b", "#a78bfa"]
-
-def parse_sections(text, keys):
-    sections = {}
-    key_labels = [k[0] for k in keys]
-    for i, key in enumerate(key_labels):
-        start = text.find(key)
-        if start == -1:
-            sections[key] = ""
-            continue
-        start += len(key)
-        end = len(text)
-        for j in range(i + 1, len(key_labels)):
-            nxt = text.find(key_labels[j])
-            if nxt != -1:
-                end = nxt
-                break
-        sections[key] = text[start:end].strip()
-    return sections
-
-parsed = parse_sections(raw_text, SECTION_KEYS)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-for i, (section_key, display_title) in enumerate(SECTION_KEYS):
-    content = parsed.get(section_key, "").strip()
-    color   = SECTION_COLORS[i]
+# ── 1. Health Score ──────────────────────────
+hs = analysis.get("health_score", {})
+score_val = hs.get("score", 0)
+grade     = hs.get("grade", "—")
+score_color = "#00f5a0" if score_val >= 70 else "#ffbe50" if score_val >= 50 else "#ff6b6b"
 
-    # Extract health score number for visual display
-    score_html = ""
-    if i == 0:
-        import re
-        numbers = re.findall(r'\b(\d{2,3})\b', content[:80])
-        if numbers:
-            score_val = numbers[0]
-            score_int = int(score_val)
-            score_color = "#00f5a0" if score_int >= 70 else "#ffbe50" if score_int >= 50 else "#ff6b6b"
-            score_html = f"""
-            <div style="display:flex;align-items:center;gap:20px;margin-bottom:14px;">
-              <div style="text-align:center;">
-                <div style="font-family:'Syne',sans-serif;font-size:3rem;font-weight:800;
-                  color:{score_color};line-height:1;">{score_val}</div>
-                <div style="font-size:10px;color:rgba(255,255,255,0.35);
-                  letter-spacing:0.15em;text-transform:uppercase;">out of 100</div>
-              </div>
-              <div style="flex:1;height:8px;background:rgba(255,255,255,0.06);
-                border-radius:4px;overflow:hidden;">
-                <div style="width:{score_int}%;height:100%;border-radius:4px;
-                  background:linear-gradient(90deg,{score_color},{score_color}88);
-                  transition:width 1s ease;"></div>
-              </div>
-            </div>"""
-
-    st.markdown(f"""
-    <div class="ai-box" style="margin-bottom:16px;border-color:{color}33;">
-      <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:14px 14px 0 0;
-        background:linear-gradient(90deg,{color},{color}44);"></div>
-      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;
-        color:{color};letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;">
-        {display_title}
-      </div>
-      {score_html}
-      <div class="ai-content">{content}</div>
+st.markdown(f"""
+<div class="ai-box" style="margin-bottom:20px;border-color:{score_color}44;">
+  <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:14px 14px 0 0;
+    background:linear-gradient(90deg,{score_color},{score_color}44);"></div>
+  <div class="ai-box-header" style="color:{score_color};">📊 Portfolio Health Score</div>
+  <div style="display:flex;align-items:center;gap:28px;margin-bottom:18px;flex-wrap:wrap;">
+    <div style="text-align:center;">
+      <div style="font-family:'Syne',sans-serif;font-size:3.5rem;font-weight:800;
+        color:{score_color};line-height:1;">{score_val}</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.15em;
+        text-transform:uppercase;">out of 100</div>
     </div>
+    <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 20px;
+      text-align:center;">
+      <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
+        color:{score_color};">{grade}</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.1em;">GRADE</div>
+    </div>
+    <div style="flex:1;min-width:180px;">
+      <div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;margin-bottom:8px;">
+        <div style="width:{score_val}%;height:100%;border-radius:4px;
+          background:linear-gradient(90deg,{score_color},{score_color}88);"></div>
+      </div>
+      <div style="font-size:12px;color:rgba(220,235,230,0.75);line-height:1.6;">{hs.get("summary","")}</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:200px;background:rgba(0,245,160,0.05);border:1px solid rgba(0,245,160,0.15);
+      border-radius:10px;padding:12px 14px;">
+      <div style="font-size:10px;color:#00f5a0;letter-spacing:0.12em;text-transform:uppercase;
+        margin-bottom:8px;">✅ Strengths</div>
+      {"".join(f'<div style="font-size:12px;color:rgba(220,235,230,0.75);margin-bottom:5px;">· {s}</div>' for s in hs.get("strengths",[]))}
+    </div>
+    <div style="flex:1;min-width:200px;background:rgba(255,107,107,0.05);border:1px solid rgba(255,107,107,0.15);
+      border-radius:10px;padding:12px 14px;">
+      <div style="font-size:10px;color:#ff6b6b;letter-spacing:0.12em;text-transform:uppercase;
+        margin-bottom:8px;">⚠️ Weaknesses</div>
+      {"".join(f'<div style="font-size:12px;color:rgba(220,235,230,0.75);margin-bottom:5px;">· {w}</div>' for w in hs.get("weaknesses",[]))}
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ── 2. Category Analysis ─────────────────────
+cat_items = analysis.get("category_analysis", [])
+if cat_items:
+    st.markdown("""
+    <div class="ai-box" style="margin-bottom:20px;border-color:rgba(0,201,255,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:14px 14px 0 0;
+        background:linear-gradient(90deg,#00c9ff,#00c9ff44);"></div>
+      <div class="ai-box-header" style="color:#00c9ff;">🔍 Category Concentration Analysis</div>
     """, unsafe_allow_html=True)
+
+    for item in cat_items:
+        verdict = item.get("verdict", "")
+        verdict_colors = {
+            "Overweight": ("#ff6b6b", "rgba(255,107,107,0.1)"),
+            "Underweight": ("#ffbe50", "rgba(255,190,80,0.1)"),
+            "Optimal": ("#00f5a0", "rgba(0,245,160,0.1)"),
+            "Missing": ("#a78bfa", "rgba(167,139,250,0.1)"),
+        }
+        vc, vbg = verdict_colors.get(verdict, ("#888", "rgba(255,255,255,0.05)"))
+        overlap = item.get("overlap_risk", "None")
+        overlap_colors = {"High": "#ff6b6b", "Medium": "#ffbe50", "Low": "#00f5a0", "None": "#888"}
+        oc = overlap_colors.get(overlap, "#888")
+        curr = item.get("current_pct", 0)
+        ideal = item.get("ideal_pct_for_profile", 0)
+
+        st.markdown(f"""
+        <div class="insight-item" style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#dff5f0;">
+              {item.get("category","")}
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <span style="background:{vbg};border:1px solid {vc}44;color:{vc};border-radius:6px;
+                padding:2px 10px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">
+                {verdict}
+              </span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.4);">
+                Current: <b style="color:#dff5f0;">{curr:.0f}%</b>
+                &nbsp;→&nbsp; Ideal: <b style="color:{vc};">{ideal:.0f}%</b>
+              </span>
+            </div>
+          </div>
+          <div style="font-size:12px;color:rgba(220,235,230,0.72);line-height:1.7;margin-bottom:8px;">
+            {item.get("commentary","")}
+          </div>
+          {"" if overlap in ("None","Low") else f'''
+          <div style="background:rgba(255,255,255,0.03);border-left:3px solid {oc};
+            border-radius:0 6px 6px 0;padding:8px 12px;margin-top:6px;">
+            <span style="font-size:10px;color:{oc};font-weight:700;letter-spacing:0.1em;
+              text-transform:uppercase;">Overlap Risk: {overlap}</span>
+            <div style="font-size:11px;color:rgba(220,235,230,0.65);margin-top:4px;">{item.get("overlap_note","")}</div>
+          </div>'''}
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ── 3. Rebalancing Moves ─────────────────────
+moves = analysis.get("rebalancing_moves", [])
+if moves:
+    st.markdown("""
+    <div class="ai-box" style="margin-bottom:20px;border-color:rgba(255,190,80,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:14px 14px 0 0;
+        background:linear-gradient(90deg,#ffbe50,#ffbe5044);"></div>
+      <div class="ai-box-header" style="color:#ffbe50;">⚖️ Rebalancing Recommendations</div>
+    """, unsafe_allow_html=True)
+
+    priority_order = {"High": 0, "Medium": 1, "Low": 2}
+    moves_sorted = sorted(moves, key=lambda x: priority_order.get(x.get("priority","Low"), 2))
+
+    action_colors = {
+        "Exit":         ("#ff6b6b", "rgba(255,107,107,0.12)"),
+        "Reduce SIP":   ("#ff8c42", "rgba(255,140,66,0.1)"),
+        "Switch":       ("#ffbe50", "rgba(255,190,80,0.1)"),
+        "Merge":        ("#ffbe50", "rgba(255,190,80,0.1)"),
+        "Increase SIP": ("#00f5a0", "rgba(0,245,160,0.1)"),
+        "Add New Fund": ("#00c9ff", "rgba(0,201,255,0.1)"),
+    }
+    priority_colors = {"High": "#ff6b6b", "Medium": "#ffbe50", "Low": "#00f5a0"}
+
+    for m in moves_sorted:
+        action = m.get("action", "")
+        ac, abg = action_colors.get(action, ("#a78bfa", "rgba(167,139,250,0.1)"))
+        pc = priority_colors.get(m.get("priority","Low"), "#888")
+        target = m.get("target_fund")
+        target_html = f'<span style="color:#00c9ff;"> → {target}</span>' if target else ""
+
+        st.markdown(f"""
+        <div class="insight-item" style="border-left:3px solid {ac};margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+            <span style="background:{abg};border:1px solid {ac}44;color:{ac};border-radius:6px;
+              padding:3px 10px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">
+              {action}
+            </span>
+            <span style="font-size:12px;color:#dff5f0;font-weight:600;">
+              {m.get("fund","")}{target_html}
+            </span>
+            <span style="font-size:10px;color:rgba(255,255,255,0.4);">[{m.get("category","")}]</span>
+            <span style="margin-left:auto;font-size:10px;color:{pc};font-weight:700;
+              letter-spacing:0.1em;text-transform:uppercase;">{m.get("priority","")} Priority</span>
+          </div>
+          <div style="font-size:12px;color:rgba(220,235,230,0.72);line-height:1.7;margin-bottom:6px;">
+            {m.get("reason","")}
+          </div>
+          <div style="font-size:11px;color:rgba(0,245,212,0.6);font-style:italic;">
+            Impact: {m.get("expected_impact","")}
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ── 4. Fund Redundancies ─────────────────────
+redundancies = analysis.get("fund_redundancies", [])
+if redundancies:
+    st.markdown("""
+    <div class="ai-box" style="margin-bottom:20px;border-color:rgba(255,107,107,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:14px 14px 0 0;
+        background:linear-gradient(90deg,#ff6b6b,#ff6b6b44);"></div>
+      <div class="ai-box-header" style="color:#ff6b6b;">🔄 Fund Redundancies & Overlaps</div>
+    """, unsafe_allow_html=True)
+
+    urgency_colors = {"Immediate": "#ff6b6b", "Next rebalancing": "#ffbe50", "Optional": "#888"}
+
+    for r in redundancies:
+        uc = urgency_colors.get(r.get("urgency","Optional"), "#888")
+        funds_html = " + ".join(
+            f'<span style="background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);'
+            f'border-radius:6px;padding:2px 9px;font-size:11px;color:#ff9999;">{f}</span>'
+            for f in r.get("funds", [])
+        )
+        st.markdown(f"""
+        <div class="insight-item" style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;
+            flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+            <div>{funds_html}</div>
+            <span style="font-size:10px;color:{uc};font-weight:700;letter-spacing:0.1em;
+              text-transform:uppercase;">{r.get("urgency","")}</span>
+          </div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.1em;
+            text-transform:uppercase;margin-bottom:6px;">{r.get("overlap_type","")}</div>
+          <div style="font-size:12px;color:rgba(220,235,230,0.72);line-height:1.7;">
+            {r.get("recommendation","")}
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ── 5. Missing Categories ────────────────────
+missing = analysis.get("missing_categories", [])
+if missing:
+    st.markdown("""
+    <div class="ai-box" style="margin-bottom:20px;border-color:rgba(167,139,250,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:14px 14px 0 0;
+        background:linear-gradient(90deg,#a78bfa,#a78bfa44);"></div>
+      <div class="ai-box-header" style="color:#a78bfa;">🧩 Missing Categories to Consider</div>
+    """, unsafe_allow_html=True)
+
+    for mc in missing:
+        example_chips = "".join(
+            f'<span style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);'
+            f'border-radius:6px;padding:2px 9px;font-size:11px;color:#c4b5fd;margin:2px 3px 0 0;'
+            f'display:inline-block;">{ef}</span>'
+            for ef in mc.get("example_funds", [])
+        )
+        st.markdown(f"""
+        <div class="insight-item" style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#c4b5fd;">
+              + {mc.get("category","")}
+            </div>
+            <span style="font-size:11px;color:rgba(255,255,255,0.4);">
+              Suggested weight: <b style="color:#a78bfa;">{mc.get("suggested_allocation_pct",0):.0f}%</b>
+            </span>
+          </div>
+          <div style="font-size:12px;color:rgba(220,235,230,0.72);line-height:1.7;margin-bottom:8px;">
+            {mc.get("reason_to_add","")}
+          </div>
+          <div>{example_chips}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ── 6. Strategic Insights ────────────────────
+insights = analysis.get("strategic_insights", [])
+if insights:
+    st.markdown("""
+    <div class="ai-box" style="margin-bottom:20px;border-color:rgba(0,245,212,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:14px 14px 0 0;
+        background:linear-gradient(90deg,#00f5d4,#a78bfa);"></div>
+      <div class="ai-box-header" style="color:#00f5d4;">🚀 Strategic Insights</div>
+    """, unsafe_allow_html=True)
+
+    theme_colors = ["#00f5d4", "#00c9ff", "#a78bfa", "#ffbe50", "#34d399"]
+    for idx, si in enumerate(insights):
+        tc = theme_colors[idx % len(theme_colors)]
+        st.markdown(f"""
+        <div class="insight-item" style="border-left:3px solid {tc};margin-bottom:10px;">
+          <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;
+            color:{tc};margin-bottom:7px;">{si.get("theme","")}</div>
+          <div style="font-size:12px;color:rgba(220,235,230,0.72);line-height:1.75;margin-bottom:8px;">
+            {si.get("insight","")}
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px 12px;
+            font-size:11px;color:rgba(0,245,212,0.8);">
+            ▶ {si.get("action_item","")}
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ── 7. SIP Allocation ────────────────────────
+sip_adv = analysis.get("sip_allocation_advice", {})
+sip_split = sip_adv.get("suggested_split", [])
+if sip_adv.get("commentary") or sip_split:
+    st.markdown("""
+    <div class="ai-box" style="margin-bottom:20px;border-color:rgba(52,211,153,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:14px 14px 0 0;
+        background:linear-gradient(90deg,#34d399,#00f5d4);"></div>
+      <div class="ai-box-header" style="color:#34d399;">💸 SIP Allocation Strategy</div>
+    """, unsafe_allow_html=True)
+
+    if sip_adv.get("commentary"):
+        st.markdown(f"""
+        <div style="font-size:12px;color:rgba(220,235,230,0.75);line-height:1.75;margin-bottom:14px;">
+          {sip_adv["commentary"]}
+        </div>
+        """, unsafe_allow_html=True)
+
+    if sip_split:
+        for s in sip_split:
+            pct = s.get("pct", 0)
+            amt = (monthly_sip * pct / 100) if monthly_sip > 0 else 0
+            amt_str = f" · ₹{amt:,.0f}/mo" if amt > 0 else ""
+            st.markdown(f"""
+            <div class="alloc-row" style="margin-bottom:8px;">
+              <div class="alloc-label" style="color:rgba(255,255,255,0.7);width:150px;">{s.get("category","")}</div>
+              <div class="alloc-bar-wrap">
+                <div class="alloc-bar-fill" style="width:{pct:.0f}%;background:linear-gradient(90deg,#34d399,#00f5d4);"></div>
+              </div>
+              <div class="alloc-pct" style="width:90px;">{pct:.0f}%{amt_str}</div>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);margin:-4px 0 10px 160px;">
+              {s.get("rationale","")}
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # Footer
@@ -615,7 +985,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("""
 <div style="font-size:11px;color:rgba(255,255,255,0.2);
   border-top:1px solid rgba(255,255,255,0.07);padding-top:16px;margin-top:8px;">
-  🤖 Analysis generated by Claude (Anthropic) · Based on fund category composition ·
+  🤖 Analysis generated by Claude Sonnet (Anthropic) · Based on fund category composition ·
   For informational purposes only · Not financial advice · Consult a SEBI-registered advisor
 </div>
 """, unsafe_allow_html=True)
