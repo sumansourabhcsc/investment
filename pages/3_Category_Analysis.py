@@ -1,4 +1,84 @@
 import streamlit as st
+import requests
+from datetime import datetime, timedelta
+
+# ─────────────────────────────────────────────
+# MF API helpers  (api.mfapi.in — free, no key)
+# ─────────────────────────────────────────────
+# Scheme codes from config.py
+SCHEME_CODES = {
+    "Mirae Asset FANG+":                                 "148928",
+    "SBI Magnum Children's Benefit Fund":                "148490",
+    "Bandhan Small Cap Fund":                            "147946",
+    "Motilal Oswal Midcap Fund":                         "127042",
+    "Edelweiss Flexi Cap Fund":                          "140353",
+    "Parag Parikh Flexi Cap Fund":                       "122639",
+    "Nippon India Large Cap Fund":                       "118632",
+    "Axis Small Cap Fund":                               "125354",
+    "SBI Small Cap Fund":                                "125497",
+    "quant Small Cap Fund":                              "120828",
+    "HSBC Midcap Fund":                                  "151034",
+    "Kotak Midcap Fund":                                 "119775",
+    "quant Mid Cap Fund":                                "120841",
+    "Edelweiss Nifty Midcap150 Momentum 50 Index Fund":  "150902",
+    "Kotak Flexicap Fund":                               "112090",
+    "ICICI Pru BHARAT 22 FOF":                           "143903",
+}
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_fund_data(scheme_code: str) -> dict:
+    """
+    Fetch NAV history + metadata from api.mfapi.in.
+    Returns dict with: fund_manager, scheme_name, nav_data (list of {date, nav}),
+    cagr_1y, cagr_3y, cagr_5y, current_nav, nav_date.
+    Returns None on failure.
+    """
+    try:
+        r = requests.get(f"https://api.mfapi.in/mf/{scheme_code}", timeout=10)
+        if r.status_code != 200:
+            return None
+        payload = r.json()
+        meta   = payload.get("meta", {})
+        data   = payload.get("data", [])
+        if not data:
+            return None
+
+        # Parse NAV entries — format: {"date": "18-05-2025", "nav": "123.45"}
+        nav_entries = []
+        for entry in data:
+            try:
+                d = datetime.strptime(entry["date"], "%d-%m-%Y")
+                nav_entries.append((d, float(entry["nav"])))
+            except Exception:
+                continue
+        if not nav_entries:
+            return None
+
+        nav_entries.sort(key=lambda x: x[0], reverse=True)
+        latest_date, latest_nav = nav_entries[0]
+
+        def cagr(years):
+            target = latest_date - timedelta(days=int(years * 365.25))
+            # find closest available date
+            past = min(nav_entries, key=lambda x: abs((x[0] - target).days))
+            actual_years = (latest_date - past[0]).days / 365.25
+            if actual_years < years * 0.85 or past[1] <= 0:
+                return None
+            return ((latest_nav / past[1]) ** (1 / actual_years) - 1) * 100
+
+        return {
+            "fund_manager":  meta.get("fund_manager", "—"),
+            "scheme_name":   meta.get("scheme_name", "—"),
+            "fund_house":    meta.get("fund_house", "—"),
+            "scheme_type":   meta.get("scheme_type", "—"),
+            "current_nav":   latest_nav,
+            "nav_date":      latest_date.strftime("%d %b %Y"),
+            "cagr_1y":       cagr(1),
+            "cagr_3y":       cagr(3),
+            "cagr_5y":       cagr(5),
+        }
+    except Exception:
+        return None
 
 # ─────────────────────────────────────────────
 # Page Config
@@ -117,7 +197,7 @@ html, body, [class*="css"] {
 /* Fund stats table */
 .fund-row {
     display: grid;
-    grid-template-columns: 200px 75px 65px 65px 85px 85px 130px 55px;
+    grid-template-columns: 220px 80px 90px 75px 75px 75px 1fr;
     gap: 8px;
     align-items: center;
     padding: 10px 14px;
@@ -130,7 +210,7 @@ html, body, [class*="css"] {
 .fund-row:hover { background: rgba(0,245,212,0.04); border-color: rgba(0,245,212,0.12); }
 .fund-row-header {
     display: grid;
-    grid-template-columns: 200px 75px 65px 65px 85px 85px 130px 55px;
+    grid-template-columns: 220px 80px 90px 75px 75px 75px 1fr;
     gap: 8px;
     padding: 6px 14px;
     font-size: 10px;
@@ -207,86 +287,22 @@ html, body, [class*="css"] {
 # Data — hardcoded from published figures (May 2025)
 # ─────────────────────────────────────────────
 FUND_DATA = {
-    "Mirae Asset FANG+": {
-        "category": "International", "expense_ratio": 0.52, "cagr_3y": 12.4, "cagr_5y": 18.6,
-        "aum_cr": 1842, "risk_score": 8, "style": "Growth", "benchmark": "NYSE FANG+ TR",
-        "fund_manager": "Ekta Gala", "overlap_group": "international",
-    },
-    "SBI Magnum Children's Benefit Fund": {
-        "category": "Hybrid", "expense_ratio": 0.91, "cagr_3y": 16.2, "cagr_5y": 15.8,
-        "aum_cr": 1156, "risk_score": 5, "style": "Blend", "benchmark": "CRISIL Hybrid 35+65",
-        "fund_manager": "Rama Iyer Srinivasan", "overlap_group": "hybrid",
-    },
-    "Bandhan Small Cap Fund": {
-        "category": "Small Cap", "expense_ratio": 0.39, "cagr_3y": 22.1, "cagr_5y": 28.4,
-        "aum_cr": 7842, "risk_score": 9, "style": "Growth", "benchmark": "Nifty Smallcap 250 TR",
-        "fund_manager": "Manish Gunwani", "overlap_group": "smallcap",
-    },
-    "Motilal Oswal Midcap Fund": {
-        "category": "Mid Cap", "expense_ratio": 0.58, "cagr_3y": 28.6, "cagr_5y": 29.1,
-        "aum_cr": 22485, "risk_score": 8, "style": "Growth", "benchmark": "Nifty Midcap 150 TR",
-        "fund_manager": "Niket Shah", "overlap_group": "midcap_active",
-    },
-    "Edelweiss Flexi Cap Fund": {
-        "category": "Flexi Cap", "expense_ratio": 0.44, "cagr_3y": 14.8, "cagr_5y": 17.2,
-        "aum_cr": 2103, "risk_score": 6, "style": "Blend", "benchmark": "Nifty 500 TR",
-        "fund_manager": "Trideep Bhattacharya", "overlap_group": "flexicap",
-    },
-    "Parag Parikh Flexi Cap Fund": {
-        "category": "Flexi Cap", "expense_ratio": 0.63, "cagr_3y": 17.9, "cagr_5y": 21.3,
-        "aum_cr": 78642, "risk_score": 6, "style": "Value", "benchmark": "Nifty 500 TR",
-        "fund_manager": "Rajeev Thakkar", "overlap_group": "flexicap",
-    },
-    "Nippon India Large Cap Fund": {
-        "category": "Large Cap", "expense_ratio": 0.73, "cagr_3y": 18.4, "cagr_5y": 17.9,
-        "aum_cr": 31204, "risk_score": 5, "style": "Blend", "benchmark": "Nifty 100 TR",
-        "fund_manager": "Sailesh Raj Bhan", "overlap_group": "largecap",
-    },
-    "Axis Small Cap Fund": {
-        "category": "Small Cap", "expense_ratio": 0.52, "cagr_3y": 18.3, "cagr_5y": 26.1,
-        "aum_cr": 20876, "risk_score": 9, "style": "Growth", "benchmark": "Nifty Smallcap 250 TR",
-        "fund_manager": "Anupam Tiwari", "overlap_group": "smallcap",
-    },
-    "SBI Small Cap Fund": {
-        "category": "Small Cap", "expense_ratio": 0.64, "cagr_3y": 19.7, "cagr_5y": 25.8,
-        "aum_cr": 30142, "risk_score": 9, "style": "Growth", "benchmark": "Nifty Smallcap 250 TR",
-        "fund_manager": "R. Srinivasan", "overlap_group": "smallcap",
-    },
-    "quant Small Cap Fund": {
-        "category": "Small Cap", "expense_ratio": 0.62, "cagr_3y": 30.4, "cagr_5y": 44.2,
-        "aum_cr": 24361, "risk_score": 10, "style": "Quant", "benchmark": "Nifty Smallcap 250 TR",
-        "fund_manager": "Sanjeev Sharma", "overlap_group": "smallcap",
-    },
-    "HSBC Midcap Fund": {
-        "category": "Mid Cap", "expense_ratio": 0.52, "cagr_3y": 21.3, "cagr_5y": 22.6,
-        "aum_cr": 10245, "risk_score": 8, "style": "Growth", "benchmark": "Nifty Midcap 150 TR",
-        "fund_manager": "Venugopal Manghat", "overlap_group": "midcap_active",
-    },
-    "Kotak Midcap Fund": {
-        "category": "Mid Cap", "expense_ratio": 0.44, "cagr_3y": 20.8, "cagr_5y": 21.4,
-        "aum_cr": 15367, "risk_score": 8, "style": "Blend", "benchmark": "Nifty Midcap 150 TR",
-        "fund_manager": "Koustubh Deshpande", "overlap_group": "midcap_active",
-    },
-    "quant Mid Cap Fund": {
-        "category": "Mid Cap", "expense_ratio": 0.58, "cagr_3y": 27.2, "cagr_5y": 31.8,
-        "aum_cr": 8924, "risk_score": 9, "style": "Quant", "benchmark": "Nifty Midcap 150 TR",
-        "fund_manager": "Ankit Pande", "overlap_group": "midcap_quant",
-    },
-    "Edelweiss Nifty Midcap150 Momentum 50 Index Fund": {
-        "category": "Mid Cap", "expense_ratio": 0.30, "cagr_3y": 24.1, "cagr_5y": 26.3,
-        "aum_cr": 4218, "risk_score": 7, "style": "Momentum/Index", "benchmark": "Nifty Midcap150 Momentum 50",
-        "fund_manager": "Bhavesh Jain", "overlap_group": "midcap_index",
-    },
-    "Kotak Flexicap Fund": {
-        "category": "Flexi Cap", "expense_ratio": 0.55, "cagr_3y": 16.3, "cagr_5y": 16.8,
-        "aum_cr": 48762, "risk_score": 6, "style": "Blend", "benchmark": "Nifty 500 TR",
-        "fund_manager": "Harsha Upadhyaya", "overlap_group": "flexicap",
-    },
-    "ICICI Pru BHARAT 22 FOF": {
-        "category": "Large Cap", "expense_ratio": 0.15, "cagr_3y": 21.6, "cagr_5y": 19.2,
-        "aum_cr": 2841, "risk_score": 5, "style": "Index/Passive", "benchmark": "BSE Bharat 22 Index",
-        "fund_manager": "Nishit Patel", "overlap_group": "largecap",
-    },
+    "Mirae Asset FANG+":                            {"category": "International", "overlap_group": "international"},
+    "SBI Magnum Children's Benefit Fund":           {"category": "Hybrid",        "overlap_group": "hybrid"},
+    "Bandhan Small Cap Fund":                       {"category": "Small Cap",     "overlap_group": "smallcap"},
+    "Motilal Oswal Midcap Fund":                    {"category": "Mid Cap",       "overlap_group": "midcap_active"},
+    "Edelweiss Flexi Cap Fund":                     {"category": "Flexi Cap",     "overlap_group": "flexicap"},
+    "Parag Parikh Flexi Cap Fund":                  {"category": "Flexi Cap",     "overlap_group": "flexicap"},
+    "Nippon India Large Cap Fund":                  {"category": "Large Cap",     "overlap_group": "largecap"},
+    "Axis Small Cap Fund":                          {"category": "Small Cap",     "overlap_group": "smallcap"},
+    "SBI Small Cap Fund":                           {"category": "Small Cap",     "overlap_group": "smallcap"},
+    "quant Small Cap Fund":                         {"category": "Small Cap",     "overlap_group": "smallcap"},
+    "HSBC Midcap Fund":                             {"category": "Mid Cap",       "overlap_group": "midcap_active"},
+    "Kotak Midcap Fund":                            {"category": "Mid Cap",       "overlap_group": "midcap_active"},
+    "quant Mid Cap Fund":                           {"category": "Mid Cap",       "overlap_group": "midcap_quant"},
+    "Edelweiss Nifty Midcap150 Momentum 50 Index Fund": {"category": "Mid Cap",  "overlap_group": "midcap_index"},
+    "Kotak Flexicap Fund":                          {"category": "Flexi Cap",     "overlap_group": "flexicap"},
+    "ICICI Pru BHARAT 22 FOF":                      {"category": "Large Cap",     "overlap_group": "largecap"},
 }
 
 CATEGORY_META = {
@@ -458,105 +474,129 @@ with tab1:
             </div>""", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════
-# TAB 2 — Fund Stats Table
+# TAB 2 — Fund Stats Table (Live from MF API)
 # ══════════════════════════════════════════════
 with tab2:
-    st.markdown('<div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#00f5d4;margin-bottom:16px;">⬡ All Funds — Detailed Stats</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#00f5d4;margin-bottom:4px;">⬡ All Funds — Live Stats</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:16px;">
+      Source: <b style="color:rgba(0,245,212,0.5);">api.mfapi.in</b> · NAV &amp; CAGR calculated live · Cached 1 hour
+    </div>
+    """, unsafe_allow_html=True)
 
-    # Filter controls
-    fc1, fc2, fc3 = st.columns(3)
+    # ── Fetch all funds (with progress bar) ──
+    live_data = {}
+    failed    = []
+    progress  = st.progress(0, text="Fetching live NAV data...")
+    total     = len(SCHEME_CODES)
+    for i, (fname, code) in enumerate(SCHEME_CODES.items()):
+        result = fetch_fund_data(code)
+        if result:
+            live_data[fname] = result
+        else:
+            failed.append(fname)
+        progress.progress((i + 1) / total, text=f"Fetching {fname[:40]}...")
+    progress.empty()
+
+    if failed:
+        st.warning(f"Could not fetch data for: {', '.join(failed)}")
+
+    # ── Filter controls ──
+    fc1, fc2 = st.columns(2)
     with fc1:
-        filter_cat = st.selectbox("Filter by Category", ["All"] + sorted(category_data.keys()))
+        filter_cat2 = st.selectbox("Filter by Category", ["All"] + sorted(category_data.keys()), key="tab2_cat")
     with fc2:
-        sort_by = st.selectbox("Sort by", ["Category", "3Y CAGR ↓", "5Y CAGR ↓", "Expense Ratio ↑", "Risk Score ↓", "AUM ↓"])
-    with fc3:
-        filter_risk = st.selectbox("Filter by Risk", ["All", "High (8-10)", "Medium (5-7)", "Low (1-4)"])
+        sort_by2 = st.selectbox("Sort by", ["Category", "1Y CAGR ↓", "3Y CAGR ↓", "5Y CAGR ↓", "Current NAV ↓"], key="tab2_sort")
 
-    # Apply filters
-    funds_to_show = list(FUND_DATA.items())
-    if filter_cat != "All":
-        funds_to_show = [(n, f) for n, f in funds_to_show if f["category"] == filter_cat]
-    if filter_risk == "High (8-10)":
-        funds_to_show = [(n, f) for n, f in funds_to_show if f["risk_score"] >= 8]
-    elif filter_risk == "Medium (5-7)":
-        funds_to_show = [(n, f) for n, f in funds_to_show if 5 <= f["risk_score"] <= 7]
-    elif filter_risk == "Low (1-4)":
-        funds_to_show = [(n, f) for n, f in funds_to_show if f["risk_score"] <= 4]
+    # Build display list
+    display_funds = []
+    for fname, finfo in FUND_DATA.items():
+        if filter_cat2 != "All" and finfo["category"] != filter_cat2:
+            continue
+        live = live_data.get(fname, {})
+        display_funds.append((fname, finfo["category"], live))
 
     # Sort
-    sort_map = {
-        "3Y CAGR ↓":       (lambda x: -x[1]["cagr_3y"]),
-        "5Y CAGR ↓":       (lambda x: -x[1]["cagr_5y"]),
-        "Expense Ratio ↑": (lambda x:  x[1]["expense_ratio"]),
-        "Risk Score ↓":    (lambda x: -x[1]["risk_score"]),
-        "AUM ↓":           (lambda x: -x[1]["aum_cr"]),
-        "Category":        (lambda x:  x[1]["category"]),
-    }
-    funds_to_show.sort(key=sort_map.get(sort_by, lambda x: x[1]["category"]))
+    def sort_key(item):
+        _, _, live = item
+        if sort_by2 == "1Y CAGR ↓":  return -(live.get("cagr_1y") or -999)
+        if sort_by2 == "3Y CAGR ↓":  return -(live.get("cagr_3y") or -999)
+        if sort_by2 == "5Y CAGR ↓":  return -(live.get("cagr_5y") or -999)
+        if sort_by2 == "Current NAV ↓": return -(live.get("current_nav") or 0)
+        return item[1]  # category
+    display_funds.sort(key=sort_key)
 
+    # ── Table header ──
     st.markdown("""
     <div class="fund-row-header">
-      <div>Fund</div><div>Category</div><div>3Y CAGR</div><div>5Y CAGR</div>
-      <div>Expense Ratio</div><div>AUM (₹ Cr)</div><div>Fund Manager</div><div>Risk</div>
+      <div>Fund</div><div>Category</div><div>Current NAV</div>
+      <div>1Y CAGR</div><div>3Y CAGR</div><div>5Y CAGR</div><div>Fund Manager</div>
     </div>""", unsafe_allow_html=True)
 
-    for fname, finfo in funds_to_show:
-        cat = finfo["category"]
+    # ── Rows ──
+    for fname, cat, live in display_funds:
         meta = CATEGORY_META.get(cat, {"color": "#888"})
-        rs = finfo["risk_score"]
-        risk_dot = "risk-dot-high" if rs >= 8 else "risk-dot-medium" if rs >= 5 else "risk-dot-low"
-        risk_txt_color = "#ff6b6b" if rs >= 8 else "#ffbe50" if rs >= 5 else "#00f5a0"
-        cagr3_color = "#00f5a0" if finfo["cagr_3y"] >= 20 else "#ffbe50" if finfo["cagr_3y"] >= 15 else "#ff6b6b"
-        exp_color = "#00f5a0" if finfo["expense_ratio"] <= 0.5 else "#ffbe50" if finfo["expense_ratio"] <= 0.75 else "#ff6b6b"
+
+        nav_str     = f"₹{live['current_nav']:.2f}" if live.get("current_nav") else "—"
+        nav_date    = live.get("nav_date", "")
+        manager     = live.get("fund_manager", "—")
+
+        def fmt_cagr(val):
+            if val is None: return "—", "#888"
+            color = "#00f5a0" if val >= 20 else "#ffbe50" if val >= 12 else "#ff6b6b"
+            return f"{val:.1f}%", color
+
+        c1y, col1y = fmt_cagr(live.get("cagr_1y"))
+        c3y, col3y = fmt_cagr(live.get("cagr_3y"))
+        c5y, col5y = fmt_cagr(live.get("cagr_5y"))
 
         st.markdown(f"""
         <div class="fund-row">
-          <div style="font-size:12px;color:#dff5f0;font-weight:600;line-height:1.3;">{fname}</div>
-          <div style="font-size:11px;" ><span style="color:{meta['color']};font-size:10px;">{cat}</span></div>
-          <div style="font-size:13px;font-weight:700;color:{cagr3_color};">{finfo['cagr_3y']:.1f}%</div>
-          <div style="font-size:13px;font-weight:700;color:#00c9ff;">{finfo['cagr_5y']:.1f}%</div>
-          <div style="font-size:12px;color:{exp_color};">{finfo['expense_ratio']:.2f}%</div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.6);">₹{finfo['aum_cr']:,}</div>
-          <div style="font-size:11px;color:rgba(200,220,215,0.75);line-height:1.3;">{finfo.get('fund_manager','—')}</div>
-          <div style="display:flex;align-items:center;gap:5px;">
-            <span class="{risk_dot}"></span>
-            <span style="font-size:12px;color:{risk_txt_color};font-weight:700;">{rs}</span>
+          <div>
+            <div style="font-size:12px;color:#dff5f0;font-weight:600;line-height:1.3;">{fname}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">{live.get('fund_house','')}</div>
           </div>
+          <div><span style="color:{meta['color']};font-size:10px;">{cat}</span></div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#dff5f0;">{nav_str}</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);">{nav_date}</div>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:{col1y};">{c1y}</div>
+          <div style="font-size:13px;font-weight:700;color:{col3y};">{c3y}</div>
+          <div style="font-size:13px;font-weight:700;color:{col5y};">{c5y}</div>
+          <div style="font-size:11px;color:rgba(200,220,215,0.75);line-height:1.4;">{manager}</div>
         </div>""", unsafe_allow_html=True)
 
-    # Summary stats below table
-    st.markdown("<br>", unsafe_allow_html=True)
-    s1, s2, s3, s4 = st.columns(4)
-    shown_funds = [f for _, f in funds_to_show]
-    if shown_funds:
+    # ── Summary cards (only for funds with live data) ──
+    live_with_cagr3 = [(n, d) for n, d in live_data.items() if d.get("cagr_3y") is not None]
+    if live_with_cagr3:
+        st.markdown("<br>", unsafe_allow_html=True)
+        s1, s2, s3 = st.columns(3)
         with s1:
-            best_3y = max(shown_funds, key=lambda x: x["cagr_3y"])
+            best = max(live_with_cagr3, key=lambda x: x[1]["cagr_3y"])
             st.markdown(f"""<div style="background:rgba(0,245,160,0.06);border:1px solid rgba(0,245,160,0.15);border-radius:10px;padding:12px 14px;">
               <div style="font-size:10px;color:#00f5a0;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Best 3Y CAGR</div>
-              <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#00f5d4;">{best_3y['cagr_3y']:.1f}%</div>
-              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">{[n for n,f in funds_to_show if f==best_3y][0]}</div>
+              <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#00f5d4;">{best[1]['cagr_3y']:.1f}%</div>
+              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">{best[0]}</div>
             </div>""", unsafe_allow_html=True)
         with s2:
-            cheapest = min(shown_funds, key=lambda x: x["expense_ratio"])
-            st.markdown(f"""<div style="background:rgba(0,201,255,0.06);border:1px solid rgba(0,201,255,0.15);border-radius:10px;padding:12px 14px;">
-              <div style="font-size:10px;color:#00c9ff;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Lowest Expense</div>
-              <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#00f5d4;">{cheapest['expense_ratio']:.2f}%</div>
-              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">{[n for n,f in funds_to_show if f==cheapest][0]}</div>
-            </div>""", unsafe_allow_html=True)
+            live_with_cagr5 = [(n, d) for n, d in live_data.items() if d.get("cagr_5y") is not None]
+            if live_with_cagr5:
+                best5 = max(live_with_cagr5, key=lambda x: x[1]["cagr_5y"])
+                st.markdown(f"""<div style="background:rgba(0,201,255,0.06);border:1px solid rgba(0,201,255,0.15);border-radius:10px;padding:12px 14px;">
+                  <div style="font-size:10px;color:#00c9ff;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Best 5Y CAGR</div>
+                  <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#00f5d4;">{best5[1]['cagr_5y']:.1f}%</div>
+                  <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">{best5[0]}</div>
+                </div>""", unsafe_allow_html=True)
         with s3:
-            biggest = max(shown_funds, key=lambda x: x["aum_cr"])
-            st.markdown(f"""<div style="background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.15);border-radius:10px;padding:12px 14px;">
-              <div style="font-size:10px;color:#a78bfa;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Largest AUM</div>
-              <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#00f5d4;">₹{biggest['aum_cr']:,}Cr</div>
-              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">{[n for n,f in funds_to_show if f==biggest][0]}</div>
-            </div>""", unsafe_allow_html=True)
-        with s4:
-            riskiest = max(shown_funds, key=lambda x: x["risk_score"])
-            st.markdown(f"""<div style="background:rgba(255,107,107,0.06);border:1px solid rgba(255,107,107,0.15);border-radius:10px;padding:12px 14px;">
-              <div style="font-size:10px;color:#ff6b6b;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Highest Risk</div>
-              <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#ff6b6b;">{riskiest['risk_score']}/10</div>
-              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">{[n for n,f in funds_to_show if f==riskiest][0]}</div>
-            </div>""", unsafe_allow_html=True)
+            live_with_1y = [(n, d) for n, d in live_data.items() if d.get("cagr_1y") is not None]
+            if live_with_1y:
+                best1 = max(live_with_1y, key=lambda x: x[1]["cagr_1y"])
+                st.markdown(f"""<div style="background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.15);border-radius:10px;padding:12px 14px;">
+                  <div style="font-size:10px;color:#a78bfa;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Best 1Y CAGR</div>
+                  <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#00f5d4;">{best1[1]['cagr_1y']:.1f}%</div>
+                  <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">{best1[0]}</div>
+                </div>""", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════
 # TAB 3 — Rebalancing Calculator
