@@ -117,7 +117,7 @@ html, body, [class*="css"] {
 /* Fund stats table */
 .fund-row {
     display: grid;
-    grid-template-columns: 220px 80px 70px 70px 90px 90px 60px;
+    grid-template-columns: 200px 75px 65px 65px 85px 85px 130px 55px;
     gap: 8px;
     align-items: center;
     padding: 10px 14px;
@@ -130,7 +130,7 @@ html, body, [class*="css"] {
 .fund-row:hover { background: rgba(0,245,212,0.04); border-color: rgba(0,245,212,0.12); }
 .fund-row-header {
     display: grid;
-    grid-template-columns: 220px 80px 70px 70px 90px 90px 60px;
+    grid-template-columns: 200px 75px 65px 65px 85px 85px 130px 55px;
     gap: 8px;
     padding: 6px 14px;
     font-size: 10px;
@@ -210,82 +210,82 @@ FUND_DATA = {
     "Mirae Asset FANG+": {
         "category": "International", "expense_ratio": 0.52, "cagr_3y": 12.4, "cagr_5y": 18.6,
         "aum_cr": 1842, "risk_score": 8, "style": "Growth", "benchmark": "NYSE FANG+ TR",
-        "overlap_group": "international",
+        "fund_manager": "Ekta Gala", "overlap_group": "international",
     },
     "SBI Magnum Children's Benefit Fund": {
         "category": "Hybrid", "expense_ratio": 0.91, "cagr_3y": 16.2, "cagr_5y": 15.8,
         "aum_cr": 1156, "risk_score": 5, "style": "Blend", "benchmark": "CRISIL Hybrid 35+65",
-        "overlap_group": "hybrid",
+        "fund_manager": "Rama Iyer Srinivasan", "overlap_group": "hybrid",
     },
     "Bandhan Small Cap Fund": {
         "category": "Small Cap", "expense_ratio": 0.39, "cagr_3y": 22.1, "cagr_5y": 28.4,
         "aum_cr": 7842, "risk_score": 9, "style": "Growth", "benchmark": "Nifty Smallcap 250 TR",
-        "overlap_group": "smallcap",
+        "fund_manager": "Manish Gunwani", "overlap_group": "smallcap",
     },
     "Motilal Oswal Midcap Fund": {
         "category": "Mid Cap", "expense_ratio": 0.58, "cagr_3y": 28.6, "cagr_5y": 29.1,
         "aum_cr": 22485, "risk_score": 8, "style": "Growth", "benchmark": "Nifty Midcap 150 TR",
-        "overlap_group": "midcap_active",
+        "fund_manager": "Niket Shah", "overlap_group": "midcap_active",
     },
     "Edelweiss Flexi Cap Fund": {
         "category": "Flexi Cap", "expense_ratio": 0.44, "cagr_3y": 14.8, "cagr_5y": 17.2,
         "aum_cr": 2103, "risk_score": 6, "style": "Blend", "benchmark": "Nifty 500 TR",
-        "overlap_group": "flexicap",
+        "fund_manager": "Trideep Bhattacharya", "overlap_group": "flexicap",
     },
     "Parag Parikh Flexi Cap Fund": {
         "category": "Flexi Cap", "expense_ratio": 0.63, "cagr_3y": 17.9, "cagr_5y": 21.3,
         "aum_cr": 78642, "risk_score": 6, "style": "Value", "benchmark": "Nifty 500 TR",
-        "overlap_group": "flexicap",
+        "fund_manager": "Rajeev Thakkar", "overlap_group": "flexicap",
     },
     "Nippon India Large Cap Fund": {
         "category": "Large Cap", "expense_ratio": 0.73, "cagr_3y": 18.4, "cagr_5y": 17.9,
         "aum_cr": 31204, "risk_score": 5, "style": "Blend", "benchmark": "Nifty 100 TR",
-        "overlap_group": "largecap",
+        "fund_manager": "Sailesh Raj Bhan", "overlap_group": "largecap",
     },
     "Axis Small Cap Fund": {
         "category": "Small Cap", "expense_ratio": 0.52, "cagr_3y": 18.3, "cagr_5y": 26.1,
         "aum_cr": 20876, "risk_score": 9, "style": "Growth", "benchmark": "Nifty Smallcap 250 TR",
-        "overlap_group": "smallcap",
+        "fund_manager": "Anupam Tiwari", "overlap_group": "smallcap",
     },
     "SBI Small Cap Fund": {
         "category": "Small Cap", "expense_ratio": 0.64, "cagr_3y": 19.7, "cagr_5y": 25.8,
         "aum_cr": 30142, "risk_score": 9, "style": "Growth", "benchmark": "Nifty Smallcap 250 TR",
-        "overlap_group": "smallcap",
+        "fund_manager": "R. Srinivasan", "overlap_group": "smallcap",
     },
     "quant Small Cap Fund": {
         "category": "Small Cap", "expense_ratio": 0.62, "cagr_3y": 30.4, "cagr_5y": 44.2,
         "aum_cr": 24361, "risk_score": 10, "style": "Quant", "benchmark": "Nifty Smallcap 250 TR",
-        "overlap_group": "smallcap",
+        "fund_manager": "Sanjeev Sharma", "overlap_group": "smallcap",
     },
     "HSBC Midcap Fund": {
         "category": "Mid Cap", "expense_ratio": 0.52, "cagr_3y": 21.3, "cagr_5y": 22.6,
         "aum_cr": 10245, "risk_score": 8, "style": "Growth", "benchmark": "Nifty Midcap 150 TR",
-        "overlap_group": "midcap_active",
+        "fund_manager": "Venugopal Manghat", "overlap_group": "midcap_active",
     },
     "Kotak Midcap Fund": {
         "category": "Mid Cap", "expense_ratio": 0.44, "cagr_3y": 20.8, "cagr_5y": 21.4,
         "aum_cr": 15367, "risk_score": 8, "style": "Blend", "benchmark": "Nifty Midcap 150 TR",
-        "overlap_group": "midcap_active",
+        "fund_manager": "Koustubh Deshpande", "overlap_group": "midcap_active",
     },
     "quant Mid Cap Fund": {
         "category": "Mid Cap", "expense_ratio": 0.58, "cagr_3y": 27.2, "cagr_5y": 31.8,
         "aum_cr": 8924, "risk_score": 9, "style": "Quant", "benchmark": "Nifty Midcap 150 TR",
-        "overlap_group": "midcap_quant",
+        "fund_manager": "Ankit Pande", "overlap_group": "midcap_quant",
     },
     "Edelweiss Nifty Midcap150 Momentum 50 Index Fund": {
         "category": "Mid Cap", "expense_ratio": 0.30, "cagr_3y": 24.1, "cagr_5y": 26.3,
         "aum_cr": 4218, "risk_score": 7, "style": "Momentum/Index", "benchmark": "Nifty Midcap150 Momentum 50",
-        "overlap_group": "midcap_index",
+        "fund_manager": "Bhavesh Jain", "overlap_group": "midcap_index",
     },
     "Kotak Flexicap Fund": {
         "category": "Flexi Cap", "expense_ratio": 0.55, "cagr_3y": 16.3, "cagr_5y": 16.8,
         "aum_cr": 48762, "risk_score": 6, "style": "Blend", "benchmark": "Nifty 500 TR",
-        "overlap_group": "flexicap",
+        "fund_manager": "Harsha Upadhyaya", "overlap_group": "flexicap",
     },
     "ICICI Pru BHARAT 22 FOF": {
         "category": "Large Cap", "expense_ratio": 0.15, "cagr_3y": 21.6, "cagr_5y": 19.2,
         "aum_cr": 2841, "risk_score": 5, "style": "Index/Passive", "benchmark": "BSE Bharat 22 Index",
-        "overlap_group": "largecap",
+        "fund_manager": "Nishit Patel", "overlap_group": "largecap",
     },
 }
 
@@ -497,7 +497,7 @@ with tab2:
     st.markdown("""
     <div class="fund-row-header">
       <div>Fund</div><div>Category</div><div>3Y CAGR</div><div>5Y CAGR</div>
-      <div>Expense Ratio</div><div>AUM (₹ Cr)</div><div>Risk</div>
+      <div>Expense Ratio</div><div>AUM (₹ Cr)</div><div>Fund Manager</div><div>Risk</div>
     </div>""", unsafe_allow_html=True)
 
     for fname, finfo in funds_to_show:
@@ -517,6 +517,7 @@ with tab2:
           <div style="font-size:13px;font-weight:700;color:#00c9ff;">{finfo['cagr_5y']:.1f}%</div>
           <div style="font-size:12px;color:{exp_color};">{finfo['expense_ratio']:.2f}%</div>
           <div style="font-size:12px;color:rgba(255,255,255,0.6);">₹{finfo['aum_cr']:,}</div>
+          <div style="font-size:11px;color:rgba(200,220,215,0.75);line-height:1.3;">{finfo.get('fund_manager','—')}</div>
           <div style="display:flex;align-items:center;gap:5px;">
             <span class="{risk_dot}"></span>
             <span style="font-size:12px;color:{risk_txt_color};font-weight:700;">{rs}</span>
