@@ -74,8 +74,8 @@ html, body, [class*="css"] {
     backdrop-filter: blur(12px);
 }
 
-#MainMenu, footer, header { visibility: hidden; }
-[data-testid="stToolbar"] { display: none; }
+#MainMenu, footer { visibility: hidden; }
+
 
 .block-container {
     padding-top: 2rem !important;
