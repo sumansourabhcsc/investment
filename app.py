@@ -107,7 +107,7 @@ html, body, [class*="css"] {
     display: block !important;
 }
 
-[data-testid="stToolbar"] { display: none; }
+
 
 .block-container {
     padding-top: 2rem !important;
