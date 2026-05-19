@@ -338,12 +338,10 @@ for fname, finfo in FUND_DATA.items():
         category_data[cat] = []
     category_data[cat].append({"name": fname, **finfo})
 
+fund_count_per_cat = {cat: len(funds) for cat, funds in category_data.items()}
+
 def cat_pct(cat):
     return len(category_data.get(cat, [])) / total_funds * 100
-
-def portfolio_risk_score():
-    scores = [f["risk_score"] for f in FUND_DATA.values()]
-    return sum(scores) / len(scores)
 
 # ─────────────────────────────────────────────
 # Header
@@ -366,15 +364,14 @@ st.markdown("""
 # Top metrics
 # ─────────────────────────────────────────────
 m_cols = st.columns(5)
-avg_expense = sum(f["expense_ratio"] for f in FUND_DATA.values()) / total_funds
-avg_3y = sum(f["cagr_3y"] for f in FUND_DATA.values()) / total_funds
-port_risk = portfolio_risk_score()
+high_risk_cats  = ["Small Cap", "Mid Cap", "International"]
+high_risk_funds = sum(len(v) for k, v in category_data.items() if k in high_risk_cats)
 metrics = [
-    (str(total_funds), "Total Funds"),
-    (str(len(category_data)), "Categories"),
-    (f"{avg_expense:.2f}%", "Avg Expense Ratio"),
-    (f"{avg_3y:.1f}%", "Avg 3Y CAGR"),
-    (f"{port_risk:.1f}/10", "Portfolio Risk"),
+    (str(total_funds),                                        "Total Funds"),
+    (str(len(category_data)),                                 "Categories"),
+    (str(fund_count_per_cat.get("Small Cap", 0)),             "Small Cap Funds"),
+    (str(fund_count_per_cat.get("Mid Cap", 0)),               "Mid Cap Funds"),
+    (f"{high_risk_funds}/{total_funds}",                      "High Risk Funds"),
 ]
 for col, (val, lbl) in zip(m_cols, metrics):
     with col:
@@ -410,8 +407,6 @@ with tab1:
             risk_cls = "risk-high" if meta["risk"] == "high" else "risk-medium" if meta["risk"] == "medium" else "risk-low"
             chips = " ".join(f'<span class="fund-chip">{f["name"]}</span>' for f in funds)
             pct = cat_pct(cat)
-            avg_cat_risk = sum(f["risk_score"] for f in funds) / len(funds)
-            avg_cat_3y   = sum(f["cagr_3y"] for f in funds) / len(funds)
 
             st.markdown(f"""
             <div class="cat-card">
@@ -421,10 +416,6 @@ with tab1:
                 <span class="{risk_cls}">{meta['risk_label']}</span>
               </div>
               <div class="cat-count">{len(funds)} fund{'s' if len(funds)>1 else ''} · {pct:.0f}% of portfolio</div>
-              <div style="display:flex;gap:16px;margin-bottom:10px;">
-                <span style="font-size:11px;color:rgba(255,255,255,0.45);">Avg Risk: <b style="color:{meta['color']};">{avg_cat_risk:.1f}/10</b></span>
-                <span style="font-size:11px;color:rgba(255,255,255,0.45);">Avg 3Y CAGR: <b style="color:#00f5d4;">{avg_cat_3y:.1f}%</b></span>
-              </div>
               <div>{chips}</div>
             </div>
             """, unsafe_allow_html=True)
@@ -442,11 +433,15 @@ with tab1:
               <div class="alloc-pct">{pct:.0f}%</div>
             </div>""", unsafe_allow_html=True)
 
-        # Portfolio risk meter
-        pr = portfolio_risk_score()
-        needle_pct = (pr / 10) * 100
-        risk_color = "#ff6b6b" if pr >= 7.5 else "#ffbe50" if pr >= 5 else "#00f5a0"
-        risk_label = "High Risk" if pr >= 7.5 else "Moderate Risk" if pr >= 5 else "Low Risk"
+        # Portfolio risk meter — derived from category composition
+        high_risk_pct  = sum(cat_pct(c) for c in category_data if CATEGORY_META.get(c, {}).get("risk") == "high")
+        med_risk_pct   = sum(cat_pct(c) for c in category_data if CATEGORY_META.get(c, {}).get("risk") == "medium")
+        # Score: high=3, medium=2, low=1 weighted by allocation
+        low_risk_pct   = 100 - high_risk_pct - med_risk_pct
+        pr = (high_risk_pct * 3 + med_risk_pct * 2 + low_risk_pct * 1) / 100 * (10 / 3)
+        needle_pct = min(pr / 10 * 100, 100)
+        risk_color = "#ff6b6b" if pr >= 7 else "#ffbe50" if pr >= 4.5 else "#00f5a0"
+        risk_label = "High Risk" if pr >= 7 else "Moderate Risk" if pr >= 4.5 else "Low Risk"
         st.markdown(f"""
         <div style="background:rgba(8,14,20,0.7);border:1px solid {risk_color}44;border-radius:10px;padding:16px;margin-top:14px;">
           <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:{risk_color};margin-bottom:8px;">Portfolio Risk Meter</div>
@@ -459,6 +454,9 @@ with tab1:
           </div>
           <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,0.3);margin-top:4px;">
             <span>Low</span><span>Moderate</span><span>High</span>
+          </div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;">
+            {high_risk_pct:.0f}% high · {med_risk_pct:.0f}% medium · {low_risk_pct:.0f}% low risk categories
           </div>
         </div>
         """, unsafe_allow_html=True)
