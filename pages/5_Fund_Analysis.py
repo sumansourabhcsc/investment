@@ -2,7 +2,6 @@ import streamlit as st
 import math
 import os
 import pandas as pd
-from config import MUTUAL_FUNDS, CATEGORY_META
 
 st.set_page_config(
     page_title="Portfolio",
@@ -10,6 +9,84 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ── Config (mirrors your config.py exactly) ────────────────────────────────────
+MUTUAL_FUNDS = {
+    "Mirae Asset FANG+": {
+        "code": "148928", "folio": "79938977986",
+        "category": "International", "folder": "mirae_fang_plus"
+    },
+    "SBI Magnum Children's Benefit Fund": {
+        "code": "148490", "folio": "43682993",
+        "category": "Hybrid", "folder": "sbi_childrens_fund"
+    },
+    "Bandhan Small Cap Fund": {
+        "code": "147946", "folio": "7429522",
+        "category": "Small Cap", "folder": "bandhan_small_cap_fund"
+    },
+    "Motilal Oswal Midcap Fund": {
+        "code": "127042", "folio": "6910146429673",
+        "category": "Mid Cap", "folder": "motilal_oswal_midcap_fund"
+    },
+    "Edelweiss Flexi Cap Fund": {
+        "code": "140353", "folio": "91047811036",
+        "category": "Flexi Cap", "folder": "edelweiss_flexi_cap_fund"
+    },
+    "Parag Parikh Flexi Cap Fund": {
+        "code": "122639", "folio": "10944223, 18757062",
+        "category": "Flexi Cap", "folder": "parag_parikh_flexicap_fund"
+    },
+    "Nippon India Large Cap Fund": {
+        "code": "118632", "folio": "499446784807",
+        "category": "Large Cap", "folder": "nippon_largecap_fund"
+    },
+    "Axis Small Cap Fund": {
+        "code": "125354", "folio": "910100034824",
+        "category": "Small Cap", "folder": "axis_small_cap_fund"
+    },
+    "SBI Small Cap Fund": {
+        "code": "125497", "folio": "28621020",
+        "category": "Small Cap", "folder": "sbi_small_cap_fund"
+    },
+    "quant Small Cap Fund": {
+        "code": "120828", "folio": "51011322275",
+        "category": "Small Cap", "folder": "quant_small_cap_fund"
+    },
+    "HSBC Midcap Fund": {
+        "code": "151034", "folio": "3543668",
+        "category": "Mid Cap", "folder": "hsbc_midcap_fund"
+    },
+    "Kotak Midcap Fund": {
+        "code": "119775", "folio": "10368494",
+        "category": "Mid Cap", "folder": "kotak_midcap_fund"
+    },
+    "quant Mid Cap Fund": {
+        "code": "120841", "folio": "51011322275",
+        "category": "Mid Cap", "folder": "quant_midcap_fund"
+    },
+    "Edelweiss Nifty Midcap150 Momentum 50 Index Fund": {
+        "code": "150902", "folio": "9106300903",
+        "category": "Mid Cap", "folder": "edelweiss_midcap150_momentum"
+    },
+    "Kotak Flexicap Fund": {
+        "code": "112090", "folio": "4681104",
+        "category": "Flexi Cap", "folder": "kotak_flexicap_fund"
+    },
+    "ICICI Pru BHARAT 22 FOF": {
+        "code": "143903", "folio": "16393741",
+        "category": "Large Cap", "folder": "icici_bharat22_fof"
+    },
+}
+
+# ── Category visual config ──────────────────────────────────────────────────────
+CATEGORY_META = {
+    "Small Cap":    {"color": "#FF6B6B", "glow": "rgba(255,107,107,0.3)",  "risk": "HIGH"},
+    "Mid Cap":      {"color": "#FFB347", "glow": "rgba(255,179,71,0.3)",   "risk": "HIGH"},
+    "Flexi Cap":    {"color": "#4FC3F7", "glow": "rgba(79,195,247,0.3)",   "risk": "MEDIUM"},
+    "Large Cap":    {"color": "#69F0AE", "glow": "rgba(105,240,174,0.3)",  "risk": "LOW"},
+    "International":{"color": "#CE93D8", "glow": "rgba(206,147,216,0.3)", "risk": "HIGH"},
+    "Hybrid":       {"color": "#80CBC4", "glow": "rgba(128,203,196,0.3)",  "risk": "LOW"},
+}
 
 # ── Data loading ────────────────────────────────────────────────────────────────
 @st.cache_data(ttl=300)
@@ -59,17 +136,19 @@ def build_portfolio_data():
     Aggregate fund data into per-category and per-fund structures.
     Returns: funds_data (list of dicts), category_data (dict)
     """
+    # Build per-fund rows
     funds_data = []
     for fund_name, meta in MUTUAL_FUNDS.items():
         latest = load_fund_latest(meta["folder"], meta["code"])
         funds_data.append({
-            "name":     fund_name,
-            "code":     meta["code"],
-            "category": meta["category"],
-            "folder":   meta["folder"],
+            "name":          fund_name,
+            "code":          meta["code"],
+            "category":      meta["category"],
+            "folder":        meta["folder"],
             **latest,
         })
 
+    # Aggregate by category
     category_data = {}
     for cat in CATEGORY_META:
         cat_funds = [f for f in funds_data if f["category"] == cat]
@@ -88,17 +167,18 @@ def build_portfolio_data():
 funds_data, category_data = build_portfolio_data()
 
 # ── Portfolio totals ────────────────────────────────────────────────────────────
-total_invested    = sum(f["invested"]      for f in funds_data)
-total_current     = sum(f["current_value"] for f in funds_data)
-total_gain        = total_current - total_invested
-total_return_pct  = (total_gain / total_invested * 100) if total_invested > 0 else 0
-total_funds_count = len(MUTUAL_FUNDS)
-high_risk_count   = sum(
+total_invested      = sum(f["invested"]      for f in funds_data)
+total_current       = sum(f["current_value"] for f in funds_data)
+total_gain          = total_current - total_invested
+total_return_pct    = (total_gain / total_invested * 100) if total_invested > 0 else 0
+total_funds_count   = len(MUTUAL_FUNDS)
+high_risk_count     = sum(
     1 for f in funds_data
     if CATEGORY_META.get(f["category"], {}).get("risk") == "HIGH"
 )
 
 def cat_pct_of_portfolio(cat: str) -> float:
+    """Category's current value as % of total portfolio current value."""
     if total_current == 0:
         return 0.0
     return category_data[cat]["current_value"] / total_current * 100
@@ -126,6 +206,7 @@ html, body, [class*="css"] {
 .block-container { padding-top: 2.5rem !important; max-width: 1400px !important; }
 #MainMenu, footer { visibility: hidden; }
 
+/* animated grid bg */
 .bg-grid {
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background-image:
@@ -140,10 +221,12 @@ html, body, [class*="css"] {
 }
 .stApp > * { position: relative; z-index: 1; }
 
+/* page title */
 .page-title { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.02em; color: #F0F4FF; line-height: 1; }
 .page-sub   { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.3);
               letter-spacing: 0.2em; text-transform: uppercase; margin-top: 6px; }
 
+/* stat chips */
 .stat-row  { display: flex; gap: 12px; margin: 20px 0; flex-wrap: wrap; }
 .stat-chip {
     background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
@@ -164,6 +247,7 @@ html, body, [class*="css"] {
 .stat-chip-val-green  { font-size:1.3rem;font-weight:700;line-height:1;color:#69F0AE; }
 .stat-chip-val-red    { font-size:1.3rem;font-weight:700;line-height:1;color:#FF6B6B; }
 
+/* category card */
 .cat-card {
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
     border-radius: 16px; padding: 20px 22px; margin-bottom: 12px;
@@ -198,16 +282,19 @@ html, body, [class*="css"] {
 }
 .cat-card:hover .fund-tag { background: rgba(255,255,255,0.08); }
 
+/* progress bar */
 .prog-wrap { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; margin: 10px 0 14px; }
 .prog-fill { height: 100%; border-radius: 3px; transition: width 1s cubic-bezier(0.4,0,0.2,1); animation: fillBar 1.2s ease both; }
 @keyframes fillBar { from { width: 0 !important; } }
 
-.risk-badge  { display: inline-block; border-radius: 20px; padding: 2px 10px;
-               font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 500; letter-spacing: 0.15em; }
-.risk-HIGH   { background: rgba(255,107,107,0.12); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.25); }
-.risk-MEDIUM { background: rgba(255,179,71,0.12);  color: #FFB347; border: 1px solid rgba(255,179,71,0.25); }
-.risk-LOW    { background: rgba(105,240,174,0.12); color: #69F0AE; border: 1px solid rgba(105,240,174,0.25); }
+/* risk badge */
+.risk-badge      { display: inline-block; border-radius: 20px; padding: 2px 10px;
+                   font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 500; letter-spacing: 0.15em; }
+.risk-HIGH       { background: rgba(255,107,107,0.12); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.25); }
+.risk-MEDIUM     { background: rgba(255,179,71,0.12);  color: #FFB347; border: 1px solid rgba(255,179,71,0.25); }
+.risk-LOW        { background: rgba(105,240,174,0.12); color: #69F0AE; border: 1px solid rgba(105,240,174,0.25); }
 
+/* donut */
 .donut-wrap { position: relative; width: 220px; height: 220px; margin: 0 auto 20px; }
 .donut-wrap svg { width: 100%; height: 100%; }
 .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column;
@@ -216,6 +303,7 @@ html, body, [class*="css"] {
 .donut-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.35);
                letter-spacing: 0.2em; text-transform: uppercase; margin-top: 4px; }
 
+/* legend */
 .legend-row { display: flex; align-items: center; gap: 10px; padding: 8px 0;
               border-bottom: 1px solid rgba(255,255,255,0.04); animation: fadeUp 0.4s ease both; }
 .legend-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -223,9 +311,11 @@ html, body, [class*="css"] {
 .legend-pct  { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; }
 .legend-val  { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.3); width: 80px; text-align: right; }
 
+/* section label */
 .section-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.2em;
                  text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 16px; }
 
+/* rebalancing table row */
 .calc-header {
     display: grid;
     grid-template-columns: 140px 1fr 110px 90px 110px 120px;
@@ -248,10 +338,12 @@ html, body, [class*="css"] {
 .action-sell { color: #FF6B6B; font-weight: 600; font-size: 12px; font-family:'JetBrains Mono',monospace; }
 .action-hold { color: rgba(255,255,255,0.3); font-size: 12px; font-family:'JetBrains Mono',monospace; }
 
+/* result cards */
 .result-card { border-radius: 12px; padding: 16px 18px; text-align: center; }
 .result-val  { font-size: 1.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
 .result-lbl  { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px; }
 
+/* fund detail table */
 .fund-table { width:100%; border-collapse:collapse; font-family:'JetBrains Mono',monospace; font-size:11px; }
 .fund-table th { color:rgba(255,255,255,0.3); font-size:9px; letter-spacing:0.12em; text-transform:uppercase;
                  padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.06); text-align:left; }
@@ -260,6 +352,7 @@ html, body, [class*="css"] {
 .fund-table .pos { color:#69F0AE; }
 .fund-table .neg { color:#FF6B6B; }
 
+/* number input / selectbox overrides */
 .stNumberInput input {
     background: rgba(255,255,255,0.05) !important;
     border: 1px solid rgba(255,255,255,0.1) !important;
@@ -271,44 +364,6 @@ html, body, [class*="css"] {
     border: 1px solid rgba(255,255,255,0.1) !important;
     border-radius: 8px !important; color: #F0F4FF !important;
 }
-
-/* profit target tab */
-.pt-fund-card {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 14px; padding: 20px 22px; margin-bottom: 10px;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    animation: fadeUp 0.5s ease both;
-}
-.pt-fund-card:hover {
-    border-color: rgba(255,255,255,0.14);
-    box-shadow: 0 6px 24px rgba(0,0,0,0.4);
-}
-.pt-fund-name { font-size: 13px; font-weight: 600; color: #F0F4FF; margin-bottom: 2px; }
-.pt-fund-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px;
-                color: rgba(255,255,255,0.3); letter-spacing: 0.1em; margin-bottom: 12px; }
-.pt-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px; margin-bottom: 14px;
-}
-.pt-kv { display: flex; flex-direction: column; }
-.pt-kv-label { font-family: 'JetBrains Mono', monospace; font-size: 9px;
-               color: rgba(255,255,255,0.28); letter-spacing: 0.12em;
-               text-transform: uppercase; margin-bottom: 3px; }
-.pt-kv-val   { font-family: 'JetBrains Mono', monospace; font-size: 13px;
-               color: rgba(220,230,245,0.85); font-weight: 500; }
-.pt-result-banner {
-    border-radius: 10px; padding: 14px 18px;
-    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-}
-.pt-result-item { display: flex; flex-direction: column; }
-.pt-result-val  { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; line-height: 1; }
-.pt-result-lbl  { font-family: 'JetBrains Mono', monospace; font-size: 9px;
-                  color: rgba(255,255,255,0.35); letter-spacing: 0.12em;
-                  text-transform: uppercase; margin-top: 3px; }
-.pt-warn { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #FF6B6B; margin-top: 8px; }
-.pt-sep  { width: 1px; height: 40px; background: rgba(255,255,255,0.08); flex-shrink: 0; }
 
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
@@ -372,16 +427,15 @@ st.markdown(f"""
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ── Tabs ────────────────────────────────────────────────────────────────────────
-tab_overview, tab_funds, tab_calc, tab_profit = st.tabs([
+tab_overview, tab_funds, tab_calc = st.tabs([
     "◈  Portfolio Overview",
     "≡  Fund Details",
-    "⇌  Rebalancing Calculator",
-    "⊕  Profit Target",
+    "⇌  Rebalancing Calculator"
 ])
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 1 — OVERVIEW
+# TAB 1 — OVERVIEW  (categories sorted by current value)
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_overview:
     left_col, right_col = st.columns([5, 3], gap="large")
@@ -400,6 +454,7 @@ with tab_overview:
             funds_html = "".join(f'<span class="fund-tag">{f}</span>' for f in info["fund_names"])
             gain_cls   = "cat-gain-pos" if info["gain_loss"] >= 0 else "cat-gain-neg"
             gain_sign  = "+" if info["gain_loss"] >= 0 else ""
+            # per-category return %
             cat_ret    = (info["gain_loss"] / info["invested"] * 100) if info["invested"] > 0 else 0
 
             st.markdown(f"""
@@ -439,6 +494,7 @@ with tab_overview:
     with right_col:
         st.markdown('<div class="section-label">▸ Allocation by Current Value</div>', unsafe_allow_html=True)
 
+        # SVG donut — weighted by current_value
         cx, cy, r_outer, r_inner = 110, 110, 95, 58
         slices_svg = ""
         cumulative = 0.0
@@ -486,6 +542,7 @@ with tab_overview:
         </div>
         """, unsafe_allow_html=True)
 
+        # Legend
         for cat, info in sorted_cats:
             p = cat_pct_of_portfolio(cat)
             st.markdown(f"""
@@ -497,6 +554,7 @@ with tab_overview:
             </div>
             """, unsafe_allow_html=True)
 
+        # Risk split
         st.markdown("<br>", unsafe_allow_html=True)
         high_val = sum(info["current_value"] for c, info in category_data.items() if CATEGORY_META[c]["risk"] == "HIGH")
         med_val  = sum(info["current_value"] for c, info in category_data.items() if CATEGORY_META[c]["risk"] == "MEDIUM")
@@ -529,6 +587,7 @@ with tab_overview:
 with tab_funds:
     st.markdown('<div class="section-label">▸ Individual Fund Breakdown</div>', unsafe_allow_html=True)
 
+    # Group by category for display
     for cat, info in sorted_cats:
         if not info["funds"]:
             continue
@@ -552,8 +611,8 @@ with tab_funds:
 
         rows_html = ""
         for f in info["funds"]:
-            gl_cls   = "pos" if f["gain_loss"] >= 0 else "neg"
-            gl_sign  = "+" if f["gain_loss"] >= 0 else ""
+            gl_cls  = "pos" if f["gain_loss"] >= 0 else "neg"
+            gl_sign = "+" if f["gain_loss"] >= 0 else ""
             xirr_cls = "pos" if f["xirr"] >= 0 else "neg"
             date_str = str(f["date"]) if f["date"] else "—"
             rows_html += f"""
@@ -587,10 +646,12 @@ with tab_funds:
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 3 — REBALANCING CALCULATOR
+# (works on ACTUAL current values from daily CSVs, not equal-weight assumptions)
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_calc:
     st.markdown('<div class="section-label">▸ Rebalancing Calculator — based on your actual portfolio</div>', unsafe_allow_html=True)
 
+    # ── Info banner ──────────────────────────────────────────────────────────
     st.markdown(f"""
     <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);
       border-radius:10px;padding:12px 18px;margin-bottom:20px;
@@ -602,6 +663,7 @@ with tab_calc:
     </div>
     """, unsafe_allow_html=True)
 
+    # ── Inputs row ───────────────────────────────────────────────────────────
     inp1, inp2, inp3 = st.columns(3)
     with inp1:
         profile = st.selectbox("Risk Profile", ["Aggressive", "Moderate", "Conservative"])
@@ -614,8 +676,10 @@ with tab_calc:
     with inp3:
         monthly_sip = st.number_input("Monthly SIP (₹)", min_value=0, value=0, step=1_000, format="%d")
 
+    # Effective portfolio value for rebalancing = current + fresh capital
     rebal_total = total_current + fresh_capital
 
+    # ── Preset targets per profile ───────────────────────────────────────────
     TARGETS = {
         "Aggressive":   {"Small Cap": 25, "Mid Cap": 30, "Flexi Cap": 20, "Large Cap": 10, "International": 10, "Hybrid": 5},
         "Moderate":     {"Small Cap": 12, "Mid Cap": 22, "Flexi Cap": 20, "Large Cap": 25, "International": 8,  "Hybrid": 13},
@@ -633,10 +697,12 @@ with tab_calc:
     </div>
     """, unsafe_allow_html=True)
 
+    # ── Target allocation sliders ─────────────────────────────────────────────
     target_allocs = {}
     sl_cols = st.columns(3)
     for i, cat in enumerate(CATEGORY_META.keys()):
-        default = TARGETS[profile].get(cat, 0)
+        default = TARGETS[profile][cat]
+        color   = CATEGORY_META[cat]["color"]
         curr_p  = cat_pct_of_portfolio(cat)
         with sl_cols[i % 3]:
             target_allocs[cat] = st.slider(
@@ -645,9 +711,9 @@ with tab_calc:
                 help=f"Your current: {curr_p:.1f}%  |  {profile} preset: {default}%"
             )
 
-    total_tgt = sum(target_allocs.values())
-    tgt_valid = abs(total_tgt - 100) <= 2
-    tgt_color = "#69F0AE" if tgt_valid else "#FF6B6B"
+    total_tgt  = sum(target_allocs.values())
+    tgt_valid  = abs(total_tgt - 100) <= 2
+    tgt_color  = "#69F0AE" if tgt_valid else "#FF6B6B"
 
     st.markdown(f"""
     <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;
@@ -655,6 +721,7 @@ with tab_calc:
       Target total: {total_tgt}% &nbsp; {'✓ valid' if tgt_valid else '✗ must sum to ~100%'}
     </div>""", unsafe_allow_html=True)
 
+    # ── Rebalancing table ─────────────────────────────────────────────────────
     st.markdown("""
     <div class="calc-header">
       <div>Category</div>
@@ -671,7 +738,7 @@ with tab_calc:
         curr_p   = cat_pct_of_portfolio(cat)
         tgt_p    = target_allocs[cat]
         tgt_val  = rebal_total * tgt_p / 100
-        diff     = tgt_val - curr_val
+        diff     = tgt_val - curr_val          # positive = need to buy, negative = need to sell
 
         if diff > 500:
             action_html = f'<span class="action-buy">▲ BUY ₹{abs(diff):,.0f}</span>'
@@ -701,6 +768,7 @@ with tab_calc:
           <div>{action_html}</div>
         </div>""", unsafe_allow_html=True)
 
+    # ── Summary cards ─────────────────────────────────────────────────────────
     st.markdown("<br>", unsafe_allow_html=True)
     r1, r2, r3, r4 = st.columns(4)
     with r1:
@@ -731,6 +799,7 @@ with tab_calc:
           <div class="result-lbl">Rebalancing Base</div>
         </div>""", unsafe_allow_html=True)
 
+    # ── Fund-level buy/sell guidance ──────────────────────────────────────────
     if tgt_valid:
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<div class="section-label">▸ Fund-level Guidance (proportional within category)</div>', unsafe_allow_html=True)
@@ -763,7 +832,7 @@ with tab_calc:
             for f in info["funds"]:
                 fund_curr  = f["current_value"]
                 fund_share = fund_curr / curr_val if curr_val > 0 else 1 / n_funds
-                fund_diff  = diff * fund_share
+                fund_diff  = diff * fund_share   # proportional to each fund's current weight
                 act_c      = "#69F0AE" if fund_diff > 0 else "#FF6B6B"
                 act_txt    = f"▲ +₹{fund_diff:,.0f}" if fund_diff > 0 else f"▼ -₹{abs(fund_diff):,.0f}"
 
@@ -781,6 +850,7 @@ with tab_calc:
 
             st.markdown("</div>", unsafe_allow_html=True)
 
+    # ── SIP Split ─────────────────────────────────────────────────────────────
     if monthly_sip > 0 and tgt_valid:
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(f"""
@@ -790,12 +860,12 @@ with tab_calc:
         """, unsafe_allow_html=True)
 
         for cat, info in category_data.items():
-            tgt     = target_allocs[cat]
-            amt     = monthly_sip * tgt / 100
+            tgt  = target_allocs[cat]
+            amt  = monthly_sip * tgt / 100
             if amt <= 0:
                 continue
-            n_funds  = len(info["funds"])
-            per_fund = amt / n_funds if n_funds > 0 else 0
+            n_funds    = len(info["funds"])
+            per_fund   = amt / n_funds if n_funds > 0 else 0
 
             st.markdown(f"""
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
@@ -810,208 +880,6 @@ with tab_calc:
             </div>""", unsafe_allow_html=True)
 
         st.markdown("</div>", unsafe_allow_html=True)
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# TAB 4 — PROFIT TARGET CALCULATOR
-# ══════════════════════════════════════════════════════════════════════════════
-with tab_profit:
-    st.markdown('<div class="section-label">▸ Profit Target Calculator — units to sell for desired profit</div>', unsafe_allow_html=True)
-
-    # ── Inputs ───────────────────────────────────────────────────────────────
-    gc1, gc2, gc3 = st.columns([2, 1, 1])
-    with gc1:
-        profit_target = st.number_input(
-            "Desired Profit (₹)",
-            min_value=1_000, value=125_000, step=5_000, format="%d",
-            help="The profit (gain) amount you want to realise by selling units"
-        )
-    with gc2:
-        tax_rate = st.number_input(
-            "Tax Rate on Gains (%)",
-            min_value=0.0, max_value=40.0, value=12.5, step=0.5, format="%.1f",
-            help="LTCG = 12.5%, STCG = 20% for equity funds"
-        )
-    with gc3:
-        sort_by = st.selectbox(
-            "Sort funds by",
-            ["Absolute P&L (↓)", "Return % (↓)", "XIRR (↓)", "Fund Name (A-Z)"]
-        )
-
-    # gross profit needed before tax to net the desired amount
-    gross_target = profit_target / (1 - tax_rate / 100) if tax_rate < 100 else profit_target
-
-    # ── Sorting ──────────────────────────────────────────────────────────────
-    def sort_key(f):
-        if sort_by == "Absolute P&L (↓)": return -f["gain_loss"]
-        if sort_by == "Return % (↓)":     return -f["return_pct"]
-        if sort_by == "XIRR (↓)":         return -f["xirr"]
-        return f["name"]
-
-    sorted_funds = sorted([f for f in funds_data if f["current_value"] > 0], key=sort_key)
-
-    # ── Info strip ───────────────────────────────────────────────────────────
-    st.markdown(f"""
-    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);
-      border-radius:10px;padding:10px 18px;margin:12px 0 18px;
-      font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4);">
-      ▸ Profit target: &nbsp;<span style="color:#69F0AE;">₹{profit_target:,}</span>
-      &nbsp;·&nbsp; Tax rate: <span style="color:#FFB347;">{tax_rate}%</span>
-      &nbsp;·&nbsp; Gross sale needed before tax:
-      <span style="color:#F0F4FF;">₹{gross_target:,.0f}</span>
-      &nbsp;·&nbsp; Units = gross_profit_target ÷ gain_per_unit
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ── Per-fund cards ───────────────────────────────────────────────────────
-    for f in sorted_funds:
-        invested     = f["invested"]
-        curr_val     = f["current_value"]
-        gain_total   = f["gain_loss"]
-        nav          = f["nav"]
-        cat          = f["category"]
-        color        = CATEGORY_META.get(cat, {}).get("color", "#888")
-        glow         = CATEGORY_META.get(cat, {}).get("glow",  "rgba(136,136,136,0.2)")
-        risk         = CATEGORY_META.get(cat, {}).get("risk",  "—")
-
-        total_units   = curr_val / nav if nav > 0 else 0
-        avg_cost      = invested / total_units if total_units > 0 else 0
-        gain_per_unit = nav - avg_cost
-        return_pct    = (gain_total / invested * 100) if invested > 0 else 0
-
-        if gain_per_unit > 0:
-            units_to_sell  = gross_target / gain_per_unit
-            sale_value     = units_to_sell * nav
-            tax_amount     = (units_to_sell * gain_per_unit) * (tax_rate / 100)
-            net_profit     = (units_to_sell * gain_per_unit) - tax_amount
-            feasible       = units_to_sell <= total_units
-            pct_of_holding = (units_to_sell / total_units * 100) if total_units > 0 else 0
-        else:
-            units_to_sell  = None
-            sale_value     = None
-            tax_amount     = None
-            net_profit     = None
-            feasible       = False
-            pct_of_holding = 0
-
-        gl_color = "#69F0AE" if gain_total >= 0 else "#FF6B6B"
-
-        if gain_per_unit <= 0:
-            banner_html = '<div class="pt-warn">⚠ No profit per unit — fund is at a loss or break-even. Cannot achieve target from this fund.</div>'
-        elif not feasible:
-            banner_html = f"""
-            <div class="pt-result-banner" style="background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.18);">
-              <div class="pt-result-item">
-                <div class="pt-result-val" style="color:#FF6B6B;">{units_to_sell:,.2f}</div>
-                <div class="pt-result-lbl">Units needed</div>
-              </div>
-              <div class="pt-sep"></div>
-              <div class="pt-result-item">
-                <div class="pt-result-val" style="color:#FF6B6B;">{total_units:,.2f}</div>
-                <div class="pt-result-lbl">Units available</div>
-              </div>
-              <div class="pt-sep"></div>
-              <div class="pt-result-item">
-                <div class="pt-result-val" style="color:#FF6B6B;">₹{sale_value:,.0f}</div>
-                <div class="pt-result-lbl">Sale value needed</div>
-              </div>
-              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;
-                color:#FF6B6B;margin-left:auto;">✗ Insufficient — sell all {total_units:,.2f} units for ₹{curr_val:,.0f}</div>
-            </div>"""
-        else:
-            banner_html = f"""
-            <div class="pt-result-banner" style="background:rgba(105,240,174,0.06);border:1px solid rgba(105,240,174,0.18);">
-              <div class="pt-result-item">
-                <div class="pt-result-val" style="color:#69F0AE;">{units_to_sell:,.2f}</div>
-                <div class="pt-result-lbl">Units to sell</div>
-              </div>
-              <div class="pt-sep"></div>
-              <div class="pt-result-item">
-                <div class="pt-result-val" style="color:#4FC3F7;">₹{sale_value:,.0f}</div>
-                <div class="pt-result-lbl">Sale proceeds</div>
-              </div>
-              <div class="pt-sep"></div>
-              <div class="pt-result-item">
-                <div class="pt-result-val" style="color:#FFB347;">₹{tax_amount:,.0f}</div>
-                <div class="pt-result-lbl">Tax (~{tax_rate}%)</div>
-              </div>
-              <div class="pt-sep"></div>
-              <div class="pt-result-item">
-                <div class="pt-result-val" style="color:#69F0AE;">₹{net_profit:,.0f}</div>
-                <div class="pt-result-lbl">Net profit</div>
-              </div>
-              <div class="pt-sep"></div>
-              <div class="pt-result-item">
-                <div class="pt-result-val" style="color:rgba(255,255,255,0.5);">{pct_of_holding:.1f}%</div>
-                <div class="pt-result-lbl">of holding sold</div>
-              </div>
-              <div style="margin-left:auto;">
-                <div style="height:5px;width:120px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;">
-                  <div style="width:{min(pct_of_holding,100):.1f}%;height:100%;background:#69F0AE;border-radius:3px;"></div>
-                </div>
-                <div style="font-family:'JetBrains Mono',monospace;font-size:9px;
-                  color:rgba(255,255,255,0.3);margin-top:4px;text-align:right;">{total_units - units_to_sell:,.2f} units remain</div>
-              </div>
-            </div>"""
-
-        st.markdown(f"""
-        <div class="pt-fund-card" style="border-left: 3px solid {color};">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px;">
-            <div>
-              <div class="pt-fund-name">{f['name']}</div>
-              <div class="pt-fund-meta">{cat} &nbsp;·&nbsp; <span class="risk-badge risk-{risk}">{risk}</span></div>
-            </div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;
-              color:rgba(255,255,255,0.25);text-align:right;white-space:nowrap;">
-              NAV ₹{nav:.4f} &nbsp;·&nbsp; as of {f['date']}
-            </div>
-          </div>
-          <div class="pt-grid">
-            <div class="pt-kv">
-              <div class="pt-kv-label">Invested</div>
-              <div class="pt-kv-val">₹{invested:,.0f}</div>
-            </div>
-            <div class="pt-kv">
-              <div class="pt-kv-label">Current Value</div>
-              <div class="pt-kv-val">₹{curr_val:,.0f}</div>
-            </div>
-            <div class="pt-kv">
-              <div class="pt-kv-label">Total Gain</div>
-              <div class="pt-kv-val" style="color:{gl_color};">{"+" if gain_total >= 0 else ""}₹{gain_total:,.0f} ({return_pct:.1f}%)</div>
-            </div>
-            <div class="pt-kv">
-              <div class="pt-kv-label">XIRR</div>
-              <div class="pt-kv-val" style="color:{'#69F0AE' if f['xirr']>=0 else '#FF6B6B'};">{f['xirr']:.2f}%</div>
-            </div>
-            <div class="pt-kv">
-              <div class="pt-kv-label">Est. Units Held</div>
-              <div class="pt-kv-val">{total_units:,.3f}</div>
-            </div>
-            <div class="pt-kv">
-              <div class="pt-kv-label">Avg. Cost/Unit</div>
-              <div class="pt-kv-val">₹{avg_cost:.4f}</div>
-            </div>
-            <div class="pt-kv">
-              <div class="pt-kv-label">Gain / Unit</div>
-              <div class="pt-kv-val" style="color:{gl_color};">₹{gain_per_unit:.4f}</div>
-            </div>
-            <div class="pt-kv">
-              <div class="pt-kv-label">Current NAV</div>
-              <div class="pt-kv-val" style="color:{color};">₹{nav:.4f}</div>
-            </div>
-          </div>
-          {banner_html}
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.15);
-      border-top:1px solid rgba(255,255,255,0.05);padding-top:12px;margin-top:20px;letter-spacing:0.08em;">
-      ⚠ Units estimated as current_value ÷ NAV (point-in-time approximation).
-      Avg cost = total_invested ÷ estimated_units. Tax shown is simplified — actual LTCG/STCG depends on
-      holding period per lot. Consult a SEBI-registered advisor for redemption planning.
-    </div>
-    """, unsafe_allow_html=True)
 
 
 # ── Footer ──────────────────────────────────────────────────────────────────────
