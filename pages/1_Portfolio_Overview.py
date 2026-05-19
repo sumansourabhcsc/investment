@@ -14,8 +14,19 @@ from utils.load_funds import load_all_funds
 from utils.xirr_overall import compute_overall_xirr
 from utils.xirr_helper import compute_fund_xirr
 
+st.divider()
 # =========================================================
-# PAGE CONFIG  (must be first Streamlit call)
+# MUSIC
+# =========================================================
+# from utils.music import play_background_music
+# play_background_music(
+#     "https://raw.githubusercontent.com/sumansourabhcsc/investment/main/music.mp3",
+#     volume=0.02
+# )
+
+
+# =========================================================
+# PAGE CONFIG
 # =========================================================
 st.set_page_config(
     page_title="Taurus | Dashboard",
@@ -23,193 +34,123 @@ st.set_page_config(
     page_icon="🐂"
 )
 
-# ── Design tokens (shared with fund_analysis page) ───────────────────────────
-SUCCESS  = "#69F0AE"
-DANGER   = "#FF6B6B"
-WARN     = "#FFB347"
-ACCENT   = "#4FC3F7"
-BG_MAIN  = "#060910"
-CARD_BG  = "#0A0E17"
+SUCCESS = "#1D9E75"
+DANGER  = "#E24B4A"
+BG_MAIN = "#0A0F1E"
+CARD_BG = "#0F1629"
+
+# PALETTE = ["#7C3AED","#1D9E75","#06B6D4","#EF9F27","#E24B4A",
+#            "#D4537E","#4F8BF9","#00f5d4","#F59E0B","#8B5CF6"]
 
 PALETTE = [
-    "#2E7D8C", "#E8573F", "#D4A96A", "#4A7C59",
-    "#5B6FA6", "#C4784A", "#7DB5B0", "#8B5E83",
-    "#B5C85A", "#3D5A80",
+    "#2E7D8C",  # deep teal blue
+    "#E8573F",  # muted coral red
+    "#D4A96A",  # warm sand/tan
+    "#4A7C59",  # forest green
+    "#5B6FA6",  # slate blue
+    "#C4784A",  # burnt sienna
+    "#7DB5B0",  # soft seafoam
+    "#8B5E83",  # muted mauve
+    "#B5C85A",  # olive lime
+    "#3D5A80",  # navy blue
 ]
 
-# ── Global CSS (mirrors fund_analysis.py) ────────────────────────────────────
+
+# =========================================================
+# GOOGLE FONTS + MINIMAL SAFE CSS
+# =========================================================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body, [class*="css"] {
-    font-family: 'Space Grotesk', sans-serif;
-    background: #060910;
-    color: #E8EDF5;
-}
-.stApp { background: #060910; min-height: 100vh; }
-[data-testid="stSidebar"] {
-    background: #0A0E17 !important;
-    border-right: 1px solid rgba(255,255,255,0.06) !important;
-}
-.block-container { padding-top: 2.5rem !important; max-width: 1400px !important; }
-#MainMenu, footer { visibility: hidden; }
-
-/* animated grid background */
-.bg-grid {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-    background-size: 60px 60px;
-    animation: gridShift 25s linear infinite;
-}
-@keyframes gridShift {
-    0%   { background-position: 0 0; }
-    100% { background-position: 60px 60px; }
-}
-.stApp > * { position: relative; z-index: 1; }
-
-/* page title */
-.page-title { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.02em; color: #F0F4FF; line-height: 1; }
-.page-sub   {
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    color: rgba(255,255,255,0.3); letter-spacing: 0.2em;
-    text-transform: uppercase; margin-top: 6px;
-}
-
-/* live badge */
-.live-badge {
-    display: inline-flex; align-items: center; gap: 7px;
-    background: rgba(105,240,174,0.10); border: 1px solid rgba(105,240,174,0.28);
-    border-radius: 20px; padding: 5px 14px;
-    font-size: 11px; font-weight: 500; color: #69F0AE;
-    font-family: 'Space Grotesk', sans-serif;
-}
-.live-dot {
-    width: 7px; height: 7px; border-radius: 50%; background: #69F0AE;
-    animation: livepulse 2s ease-in-out infinite;
-}
-@keyframes livepulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.35;transform:scale(0.65);} }
-
-/* stat chips */
-.stat-row  { display: flex; gap: 12px; margin: 22px 0 28px; flex-wrap: wrap; }
-.stat-chip {
-    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px; padding: 14px 22px;
-    display: flex; flex-direction: column; align-items: flex-start;
-    animation: fadeUp 0.6s ease both;
-}
-.stat-chip-val {
-    font-size: 1.55rem; font-weight: 700; line-height: 1;
-    background: linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.55) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.stat-chip-lbl {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
-    color: rgba(255,255,255,0.32); letter-spacing: 0.15em;
-    text-transform: uppercase; margin-top: 5px;
-}
-.stat-chip-val-green { font-size:1.3rem;font-weight:700;line-height:1;color:#69F0AE; }
-.stat-chip-val-red   { font-size:1.3rem;font-weight:700;line-height:1;color:#FF6B6B; }
-
-/* section label */
-.section-label {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
-    letter-spacing: 0.2em; text-transform: uppercase;
-    color: rgba(255,255,255,0.3); margin-bottom: 16px;
-    display: flex; align-items: center; gap: 10px;
-}
-.section-label::after {
-    content: ''; flex: 1; height: 1px;
-    background: rgba(255,255,255,0.06);
-}
-
-/* info card */
-.info-card {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px; padding: 12px 18px; margin-bottom: 20px;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    color: rgba(255,255,255,0.4);
-}
-
-/* daily change summary */
-.change-box {
-    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 14px; padding: 18px 24px; margin-top: 16px;
-    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
-}
-
-/* result / summary cards */
-.result-card { border-radius: 12px; padding: 18px 20px; text-align: center; }
-.result-val  { font-size: 1.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-.result-lbl  { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 6px; }
-
-/* dataframe overrides */
-[data-testid="stDataFrame"] {
-    border-radius: 14px !important; overflow: hidden !important;
-    border: 1px solid rgba(255,255,255,0.07) !important;
-}
-.stSelectbox label, .stDateInput label {
-    color: rgba(255,255,255,0.35) !important; font-size: 10px !important;
-    text-transform: uppercase; letter-spacing: 0.12em; font-weight: 500 !important;
-    font-family: 'JetBrains Mono', monospace !important;
-}
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap');
+html, body, [class*="css"] { font-family: 'Outfit', sans-serif !important; }
+.block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; }
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #060910; }
+::-webkit-scrollbar-track { background: #0A0F1E; }
 ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 6px; }
+section[data-testid="stSidebar"] { background: #0D1526 !important; border-right: 1px solid rgba(255,255,255,0.05); }
+[data-testid="stDataFrame"] { border-radius: 14px !important; overflow: hidden !important; border: 1px solid rgba(255,255,255,0.07) !important; }
+.stSelectbox label, .stDateInput label { color: rgba(255,255,255,0.45) !important; font-size: 11px !important; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500 !important; }
 hr { border-color: rgba(255,255,255,0.06) !important; margin: 2rem 0 !important; }
-
-@keyframes fadeUp {
-    from { opacity:0; transform:translateY(14px); }
-    to   { opacity:1; transform:translateY(0); }
-}
+@keyframes livepulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
 </style>
-<div class="bg-grid"></div>
 """, unsafe_allow_html=True)
 
 
 # =========================================================
-# HELPERS
+# HELPERS — 100% inlined styles, no CSS class dependency
 # =========================================================
 
-def sec_header(label: str):
-    st.markdown(f'<div class="section-label">▸ {label}</div>', unsafe_allow_html=True)
-
-
-def kpi_stat(value: str, label: str, value_class: str = "stat-chip-val") -> str:
+def kpi_card(icon, label, value, value_color, sub, bottom_color):
+    """KPI card with every style attribute inlined — renders correctly in st.markdown."""
     return f"""
-    <div class="stat-chip">
-      <div class="{value_class}">{value}</div>
-      <div class="stat-chip-lbl">{label}</div>
+    <div style="background:#0F1629; border:1px solid rgba(255,255,255,0.08);
+        border-radius:16px; padding:20px 20px 16px; position:relative;
+        overflow:hidden; box-sizing:border-box; height:100%;">
+        <div style="position:absolute; bottom:0; left:0; right:0; height:3px;
+            background:{bottom_color}; border-radius:0 0 16px 16px;"></div>
+        <div style="font-size:18px; margin-bottom:10px; line-height:1;">{icon}</div>
+        <div style="font-size:11px; color:rgba(255,255,255,0.4); text-transform:uppercase;
+            letter-spacing:0.08em; font-weight:500; margin-bottom:8px;
+            font-family:'Outfit',sans-serif;">{label}</div>
+        <div style="font-size:26px; font-weight:700; font-family:'DM Mono',monospace;
+            line-height:1.1; color:{value_color};">{value}</div>
+        <div style="font-size:11px; color:rgba(255,255,255,0.3); margin-top:5px;
+            font-family:'DM Mono',monospace;">{sub}</div>
     </div>"""
 
 
-def result_card(value: str, label: str, color: str, bg_color: str, border_color: str) -> str:
-    return f"""
-    <div class="result-card" style="background:{bg_color};border:1px solid {border_color};">
-      <div class="result-val" style="color:{color};">{value}</div>
-      <div class="result-lbl">{label}</div>
-    </div>"""
+def sec_header(icon, title):
+    st.markdown(f"""
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:1rem; margin-top:0.5rem;">
+        <div style="width:32px; height:32px; border-radius:8px; background:#1E293B;
+            display:flex; align-items:center; justify-content:center;
+            font-size:15px; flex-shrink:0;">{icon}</div>
+        <div style="font-size:16px; font-weight:600; color:#F1F5F9;
+            font-family:'Outfit',sans-serif;">{title}</div>
+        <div style="flex:1; height:1px; background:rgba(255,255,255,0.06);"></div>
+    </div>""", unsafe_allow_html=True)
+
+
+def change_summary_box(total_change):
+    sign  = "+" if total_change >= 0 else ""
+    color = SUCCESS if total_change >= 0 else DANGER
+    icon  = "📈" if total_change >= 0 else "📉"
+    st.markdown(f"""
+    <div style="margin-top:14px; background:#0F1629; padding:18px 24px;
+        border-radius:14px; border:1px solid rgba(255,255,255,0.07);
+        display:flex; align-items:center; justify-content:space-between;
+        flex-wrap:wrap; gap:10px;">
+        <div style="font-size:13px; color:rgba(255,255,255,0.45); font-weight:500;
+            font-family:'Outfit',sans-serif;">{icon} Total Daily Change Across All Funds</div>
+        <div style="font-size:24px; font-weight:700; font-family:'DM Mono',monospace;
+            color:{color};">{sign}₹{abs(total_change):,.2f}</div>
+    </div>""", unsafe_allow_html=True)
 
 
 # =========================================================
 # PAGE HERO
 # =========================================================
-col_hero, col_badge = st.columns([1, 0])   # badge floated via flex trick below
 st.markdown("""
-<div style="display:flex;align-items:flex-start;justify-content:space-between;
-  flex-wrap:wrap;gap:12px;margin-bottom:4px;">
-  <div>
-    <div class="page-title">📊 Portfolio Dashboard</div>
-    <div class="page-sub">◈ Taurus · Mutual Fund Tracker · Live NAV</div>
-  </div>
-  <div>
-    <div class="live-badge"><div class="live-dot"></div>Live NAV</div>
-  </div>
+<div style="display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:1.8rem; flex-wrap:wrap; gap:12px;">
+    <div>
+        <div style="font-size:28px; font-weight:700; color:#F1F5F9;
+            letter-spacing:-0.5px; font-family:'Outfit',sans-serif;">
+            📊 Portfolio Dashboard
+        </div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.35); margin-top:4px;
+            font-family:'DM Mono',monospace;">
+            Taurus · Mutual Fund Tracker · Live NAV
+        </div>
+    </div>
+    <div style="display:inline-flex; align-items:center; gap:7px;
+        background:rgba(29,158,117,0.12); border:1px solid rgba(29,158,117,0.3);
+        border-radius:20px; padding:6px 14px; font-size:12px; font-weight:500;
+        color:#1D9E75; font-family:'Outfit',sans-serif;">
+        <div style="width:7px; height:7px; border-radius:50%; background:#1D9E75;
+            animation:livepulse 2s ease-in-out infinite;"></div>
+        Live NAV
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -257,38 +198,69 @@ all_funds_df        = load_all_funds()
 overall_xirr        = compute_overall_xirr(all_funds_df)
 overall_xirr_pct    = overall_xirr * 100
 
-pnl_sign  = "+" if total_pnl >= 0 else ""
-ret_sign  = "+" if absolute_return_pct >= 0 else ""
-xirr_sign = "+" if overall_xirr_pct >= 0 else ""
-
-pnl_cls  = "stat-chip-val-green" if total_pnl >= 0 else "stat-chip-val-red"
-ret_cls  = "stat-chip-val-green" if absolute_return_pct >= 0 else "stat-chip-val-red"
-xirr_cls = "stat-chip-val-green" if overall_xirr_pct >= 0 else "stat-chip-val-red"
+pnl_color  = SUCCESS if total_pnl >= 0 else DANGER
+ret_color  = SUCCESS if absolute_return_pct >= 0 else DANGER
+xirr_color = SUCCESS if overall_xirr_pct >= 0 else DANGER
+pnl_sign   = "+" if total_pnl >= 0 else ""
+ret_sign   = "+" if absolute_return_pct >= 0 else ""
+xirr_sign  = "+" if overall_xirr_pct >= 0 else ""
+xirr_bar   = SUCCESS if overall_xirr_pct >= 0 else DANGER
 
 
 # =========================================================
-# KPI STAT CHIPS
+# KPI CARDS — each rendered in its own st.column
+# Using st.markdown per column — this is the CORRECT Streamlit approach
 # =========================================================
-st.markdown(f"""
-<div class="stat-row">
-  {kpi_stat(f"₹{total_invested/1e5:.2f}L", "Total Invested")}
-  {kpi_stat(f"₹{total_current/1e5:.2f}L", "Current Value")}
-  {kpi_stat(f"{pnl_sign}₹{abs(total_pnl)/1e5:.2f}L", "Unrealised P&L", pnl_cls)}
-  {kpi_stat(f"{ret_sign}{absolute_return_pct:.2f}%", "Absolute Return", ret_cls)}
-  {kpi_stat(f"{xirr_sign}{overall_xirr_pct:.2f}%", "Overall XIRR", xirr_cls)}
-  {kpi_stat(str(len(summary)), "Active Funds")}
-</div>
-""", unsafe_allow_html=True)
+c1, c2, c3, c4, c5 = st.columns(5)
+
+with c1:
+    st.markdown(kpi_card(
+        "💰", "Total Invested",
+        f"₹{total_invested:,.0f}",
+        "#F1F5F9",
+        f"across {len(summary)} funds",
+        "#7C3AED"
+    ), unsafe_allow_html=True)
+
+with c2:
+    st.markdown(kpi_card(
+        "📈", "Current Value",
+        f"₹{total_current:,.0f}",
+        SUCCESS, "live NAV", SUCCESS
+    ), unsafe_allow_html=True)
+
+with c3:
+    st.markdown(kpi_card(
+        "📊", "Total P&L",
+        f"{pnl_sign}₹{abs(total_pnl):,.0f}",
+        pnl_color, "unrealised gain/loss", "#06B6D4"
+    ), unsafe_allow_html=True)
+
+with c4:
+    st.markdown(kpi_card(
+        "📉", "Absolute Return",
+        f"{ret_sign}{absolute_return_pct:.2f}%",
+        ret_color, "since first investment", "#EF9F27"
+    ), unsafe_allow_html=True)
+
+with c5:
+    st.markdown(kpi_card(
+        "📌", "Overall XIRR",
+        f"{xirr_sign}{overall_xirr_pct:.2f}%",
+        xirr_color, "annualised return", xirr_bar
+    ), unsafe_allow_html=True)
+
+st.divider()
 
 
 # =========================================================
 # FUND TABLE + DONUT CHART
 # =========================================================
-sec_header("Fund Details")
+sec_header("📋", "Fund Details")
 
 df = pd.DataFrame(summary, columns=[
-    "Fund", "SchemeCode", "Invested", "Current",
-    "P&L", "Latest NAV", "NAV Date", "XIRR"
+    "Fund","SchemeCode","Invested","Current",
+    "P&L","Latest NAV","NAV Date","XIRR"
 ])
 
 col_tbl, col_donut = st.columns([7, 3])
@@ -308,32 +280,31 @@ with col_tbl:
 with col_donut:
     fig_donut = go.Figure(go.Pie(
         labels=df["Fund"], values=df["Current"], hole=0.65,
-        marker=dict(colors=PALETTE[:len(df)], line=dict(color="#060910", width=3)),
+        marker=dict(colors=PALETTE[:len(df)], line=dict(color="#0A0F1E", width=3)),
         textinfo="percent",
-        textfont=dict(size=11, family="JetBrains Mono"),
+        textfont=dict(size=12, family="DM Mono"),
         hovertemplate="<b>%{label}</b><br>₹%{value:,.0f}<br>%{percent}<extra></extra>"
     ))
     fig_donut.update_layout(
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="rgba(255,255,255,0.6)", family="Space Grotesk"),
-        showlegend=False,
+        font=dict(color="white", family="Outfit"), showlegend=False,
+        legend=dict(font=dict(size=11, color="rgba(255,255,255,0.6)"),
+                    bgcolor="rgba(0,0,0,0)", x=0, y=-0.15, orientation="h"),
         margin=dict(t=10, b=10, l=10, r=10),
         annotations=[dict(
             text=f"<b>₹{total_current/1e5:.1f}L</b>",
             x=0.5, y=0.5,
-            font=dict(size=18, color="white", family="JetBrains Mono"),
+            font=dict(size=18, color="white", family="DM Mono"),
             showarrow=False
         )]
     )
     st.plotly_chart(fig_donut, use_container_width=True)
 
-st.divider()
-
 
 # =========================================================
 # TREEMAP
 # =========================================================
-sec_header("Portfolio Allocation")
+sec_header("🌳", "Portfolio Allocation")
 
 fig_tree = px.treemap(
     df, path=["Fund"], values="Current",
@@ -343,13 +314,13 @@ fig_tree = px.treemap(
 )
 fig_tree.update_layout(
     paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(color="white", family="Space Grotesk"),
+    font=dict(color="white", family="Outfit"),
     margin=dict(t=10, l=10, r=10, b=10), coloraxis_showscale=False
 )
 fig_tree.update_traces(
     textinfo="label+percent entry",
-    textfont=dict(size=13, family="Space Grotesk"),
-    marker=dict(line=dict(width=2, color="#060910"))
+    textfont=dict(size=13, family="Outfit"),
+    marker=dict(line=dict(width=2, color="#0A0F1E"))
 )
 st.plotly_chart(fig_tree, use_container_width=True)
 
@@ -359,7 +330,7 @@ st.divider()
 # =========================================================
 # DAILY PORTFOLIO SUMMARY
 # =========================================================
-sec_header("Daily Portfolio Summary")
+sec_header("📊", "Daily Portfolio Summary")
 
 daily_path = "data/portfolio_daily.csv"
 daily_df   = pd.read_csv(daily_path)
@@ -370,17 +341,15 @@ display_daily = daily_df.copy()
 display_daily["Date"] = display_daily["Date"].dt.strftime("%d-%m-%Y")
 st.dataframe(display_daily, use_container_width=True)
 
-st.divider()
-
 
 # =========================================================
 # PERFORMANCE CHART
 # =========================================================
-sec_header("Portfolio Performance")
+sec_header("📈", "Portfolio Performance")
 
 chart_df = daily_df.sort_values("Date")
 chart_df["OneDayChangePct_val"] = (
-    chart_df["OneDayChangePct"].str.replace("%", "", regex=False).astype(float)
+    chart_df["OneDayChangePct"].str.replace("%","",regex=False).astype(float)
 )
 bar_colors = [SUCCESS if x >= 0 else DANGER for x in chart_df["OneDayChange"]]
 
@@ -393,26 +362,21 @@ fig_perf.add_trace(go.Bar(
 fig_perf.add_trace(go.Scatter(
     x=chart_df["Date"], y=chart_df["TotalValue"],
     name="Total Value (₹)", mode="lines",
-    line=dict(color=ACCENT, width=2.5),
-    fill="tozeroy", fillcolor="rgba(79,195,247,0.06)",
+    line=dict(color="#4F8BF9", width=2.5),
+    fill="tozeroy", fillcolor="rgba(79,139,249,0.06)",
     hovertemplate="<b>%{x|%d %b %Y}</b><br>Value: ₹%{y:,.0f}<extra></extra>"
 ), secondary_y=True)
 fig_perf.update_layout(
-    paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(10,14,23,0.7)",
-    font=dict(color="rgba(255,255,255,0.5)", family="Space Grotesk"),
+    paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15,22,41,0.6)",
+    font=dict(color="rgba(255,255,255,0.6)", family="Outfit"),
     hovermode="x unified", height=460, margin=dict(t=20, b=10, l=10, r=10),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0,
-                font=dict(size=12, color="rgba(255,255,255,0.5)"), bgcolor="rgba(0,0,0,0)"),
-    bargap=0.3,
-    xaxis=dict(showgrid=False, zeroline=False),
+                font=dict(size=12, color="rgba(255,255,255,0.6)"), bgcolor="rgba(0,0,0,0)"),
+    bargap=0.3, xaxis=dict(showgrid=False, zeroline=False),
 )
-fig_perf.update_yaxes(
-    showgrid=True, gridcolor="rgba(255,255,255,0.05)",
-    zeroline=False, tickprefix="₹", secondary_y=False
-)
-fig_perf.update_yaxes(
-    showgrid=False, zeroline=False, tickprefix="₹", secondary_y=True
-)
+fig_perf.update_yaxes(showgrid=True, gridcolor="rgba(255,255,255,0.05)",
+                      zeroline=False, tickprefix="₹", secondary_y=False)
+fig_perf.update_yaxes(showgrid=False, zeroline=False, tickprefix="₹", secondary_y=True)
 st.plotly_chart(fig_perf, use_container_width=True)
 
 st.divider()
@@ -421,7 +385,7 @@ st.divider()
 # =========================================================
 # MONTHLY INVESTMENT SUMMARY
 # =========================================================
-sec_header("Monthly Investment Summary")
+sec_header("📅", "Monthly Investment Summary")
 
 monthly_data = []
 month_map    = {1:"Jan",2:"Feb",3:"Mar",4:"Apr",5:"May",6:"Jun",
@@ -469,19 +433,18 @@ if monthly_data:
         final_df[col] = final_df[col].map(lambda x: f"{x:,.0f}")
     st.dataframe(final_df, use_container_width=True)
 
-    # Monthly stacked bar chart
     bar_data = year_df.copy()
     bar_data["Month_Name"] = bar_data["Month"].map(month_map)
     fig_month = px.bar(
         bar_data, x="Month_Name", y="Amount", color="Fund",
         barmode="stack", color_discrete_sequence=PALETTE,
-        labels={"Month_Name": "Month", "Amount": "Amount (₹)"}
+        labels={"Month_Name":"Month","Amount":"Amount (₹)"}
     )
     fig_month.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(10,14,23,0.7)",
-        font=dict(color="rgba(255,255,255,0.5)", family="Space Grotesk"),
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15,22,41,0.6)",
+        font=dict(color="rgba(255,255,255,0.6)", family="Outfit"),
         height=340, margin=dict(t=20, b=10, l=10, r=10),
-        legend=dict(font=dict(size=11, color="rgba(255,255,255,0.45)"),
+        legend=dict(font=dict(size=11, color="rgba(255,255,255,0.55)"),
                     bgcolor="rgba(0,0,0,0)", orientation="h",
                     yanchor="bottom", y=1.02, xanchor="left", x=0),
         bargap=0.25,
@@ -498,7 +461,7 @@ st.divider()
 # =========================================================
 # DAILY CHANGE ACROSS FUNDS
 # =========================================================
-sec_header("Daily Change Across Funds")
+sec_header("💹", "Daily Change Across Funds")
 
 latest_nav_date  = nav_df["Date"].max().date()
 selected_date    = st.date_input("Select Date", value=latest_nav_date)
@@ -540,32 +503,16 @@ for fund_name, meta in mutual_funds.items():
     ])
 
 df_daily_change = pd.DataFrame(daily_rows, columns=[
-    "Date", "Fund Name", "Fund Code",
-    "Change in Value", "% Change in NAV", "Indicator"
+    "Date","Fund Name","Fund Code",
+    "Change in Value","% Change in NAV","Indicator"
 ])
 st.dataframe(df_daily_change, use_container_width=True)
 
-# ── Total daily change summary card ──────────────────────────────────────────
 total_change = df_daily_change["Change in Value"].sum() if not df_daily_change.empty else 0
-sign         = "+" if total_change >= 0 else ""
-chg_color    = SUCCESS if total_change >= 0 else DANGER
-chg_icon     = "📈" if total_change >= 0 else "📉"
-
-st.markdown(f"""
-<div class="change-box">
-  <div style="font-size:12px;color:rgba(255,255,255,0.4);
-    font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;">
-    {chg_icon} &nbsp;Total Daily Change Across All Funds
-  </div>
-  <div style="font-size:1.6rem;font-weight:700;
-    font-family:'JetBrains Mono',monospace;color:{chg_color};">
-    {sign}₹{abs(total_change):,.2f}
-  </div>
-</div>
-""", unsafe_allow_html=True)
-
+change_summary_box(total_change)
 st.divider()
-
-# ── Footer ────────────────────────────────────────────────────────────────────
 from utils.footer import show_footer
+
+# ... all your page content ...
+
 show_footer()
