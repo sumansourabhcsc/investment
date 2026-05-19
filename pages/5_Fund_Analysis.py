@@ -204,7 +204,7 @@ html, body, [class*="css"] {
     border-right: 1px solid rgba(255,255,255,0.06) !important;
 }
 .block-container { padding-top: 2.5rem !important; max-width: 1400px !important; }
-#MainMenu, footer, header { visibility: hidden; }
+#MainMenu, footer { visibility: hidden; }
 
 /* animated grid bg */
 .bg-grid {
