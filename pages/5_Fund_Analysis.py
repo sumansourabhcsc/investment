@@ -676,8 +676,43 @@ with tab_calc:
     with inp3:
         monthly_sip = st.number_input("Monthly SIP (₹)", min_value=0, value=0, step=1_000, format="%d")
 
-    # Effective portfolio value for rebalancing = current + fresh capital
-    rebal_total = total_current + fresh_capital
+    # ── Category inclusion toggle ─────────────────────────────────────────────
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);
+      letter-spacing:0.18em;text-transform:uppercase;margin-bottom:8px;">
+      ▸ Include categories in rebalancing
+    </div>""", unsafe_allow_html=True)
+
+    all_cats = list(CATEGORY_META.keys())
+    selected_cats = st.multiselect(
+        label="",
+        options=all_cats,
+        default=all_cats,
+        key="rebal_cats",
+        help="Unselected categories are frozen at their current value and excluded from target allocation math."
+    )
+
+    # Show frozen categories as chips
+    excluded_cats = [c for c in all_cats if c not in selected_cats]
+    if excluded_cats:
+        chips_html = "".join([
+            f'<span style="display:inline-flex;align-items:center;gap:6px;'
+            f'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);'
+            f'border-radius:20px;padding:3px 10px;margin:3px 4px 0 0;'
+            f'font-family:\'JetBrains Mono\',monospace;font-size:10px;color:rgba(255,255,255,0.35);">'
+            f'<span style="width:6px;height:6px;border-radius:50%;background:{CATEGORY_META[c]["color"]};flex-shrink:0;"></span>'
+            f'{c} — frozen</span>'
+            for c in excluded_cats
+        ])
+        st.markdown(f"""
+        <div style="margin-top:6px;margin-bottom:4px;">{chips_html}</div>
+        """, unsafe_allow_html=True)
+
+    # ── Rebalancing base = current value of SELECTED categories + fresh capital
+    frozen_value   = sum(category_data[c]["current_value"] for c in excluded_cats)
+    active_current = sum(category_data[c]["current_value"] for c in selected_cats)
+    rebal_total    = active_current + fresh_capital
 
     # ── Preset targets per profile ───────────────────────────────────────────
     TARGETS = {
@@ -686,85 +721,135 @@ with tab_calc:
         "Conservative": {"Small Cap": 5,  "Mid Cap": 10, "Flexi Cap": 20, "Large Cap": 40, "International": 5,  "Hybrid": 20},
     }
 
+    # Rescale preset targets to only selected categories, proportionally
+    def rescaled_defaults(profile, selected):
+        raw    = {c: TARGETS[profile][c] for c in selected}
+        total  = sum(raw.values())
+        if total == 0:
+            return {c: 0 for c in selected}
+        return {c: round(v / total * 100) for c, v in raw.items()}
+
+    scaled_defaults = rescaled_defaults(profile, selected_cats)
+
     st.markdown("<br>", unsafe_allow_html=True)
+
+    frozen_note = ""
+    if excluded_cats:
+        frozen_note = f'&nbsp;·&nbsp; <span style="color:#FFB347;">{len(excluded_cats)} categor{"y" if len(excluded_cats)==1 else "ies"} frozen (₹{frozen_value:,.0f})</span>'
+
     st.markdown(f"""
     <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);
       border-radius:10px;padding:10px 16px;margin-bottom:16px;
       font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4);">
-      ▸ Preset targets for <span style="color:#F0F4FF;">{profile}</span> profile loaded.
-      Drag sliders to customise target allocation.
-      {f'Fresh capital of <span style="color:#69F0AE;">₹{fresh_capital:,}</span> included in rebalancing total.' if fresh_capital > 0 else ''}
+      ▸ Rebalancing base: <span style="color:#F0F4FF;">₹{rebal_total:,.0f}</span>
+      (active categories{' + fresh capital' if fresh_capital > 0 else ''}){frozen_note}
+      {f'<br>Fresh capital of <span style="color:#69F0AE;">₹{fresh_capital:,}</span> included.' if fresh_capital > 0 else ''}
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Target allocation sliders ─────────────────────────────────────────────
+    # ── Target allocation sliders — only for selected categories ──────────────
     target_allocs = {}
-    sl_cols = st.columns(3)
-    for i, cat in enumerate(CATEGORY_META.keys()):
-        default = TARGETS[profile][cat]
-        color   = CATEGORY_META[cat]["color"]
-        curr_p  = cat_pct_of_portfolio(cat)
-        with sl_cols[i % 3]:
-            target_allocs[cat] = st.slider(
-                cat, 0, 60, default, 1,
-                key=f"rebal_{cat}",
-                help=f"Your current: {curr_p:.1f}%  |  {profile} preset: {default}%"
-            )
 
-    total_tgt  = sum(target_allocs.values())
-    tgt_valid  = abs(total_tgt - 100) <= 2
-    tgt_color  = "#69F0AE" if tgt_valid else "#FF6B6B"
+    if selected_cats:
+        n_cols  = min(3, len(selected_cats))
+        sl_cols = st.columns(n_cols)
+        for i, cat in enumerate(selected_cats):
+            default = scaled_defaults.get(cat, 0)
+            curr_p  = category_data[cat]["current_value"] / active_current * 100 if active_current > 0 else 0
+            with sl_cols[i % n_cols]:
+                target_allocs[cat] = st.slider(
+                    cat, 0, 100, default, 1,
+                    key=f"rebal_{cat}",
+                    help=f"Current within active: {curr_p:.1f}%  |  {profile} preset: {scaled_defaults.get(cat, 0)}%"
+                )
 
-    st.markdown(f"""
-    <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;
-      color:{tgt_color};margin-bottom:20px;">
-      Target total: {total_tgt}% &nbsp; {'✓ valid' if tgt_valid else '✗ must sum to ~100%'}
-    </div>""", unsafe_allow_html=True)
+    # Frozen cats get a fixed "target" = their current value (no change)
+    for cat in excluded_cats:
+        target_allocs[cat] = None  # sentinel — excluded from slider math
 
-    # ── Rebalancing table ─────────────────────────────────────────────────────
+    total_tgt = sum(v for v in target_allocs.values() if v is not None)
+    tgt_valid = abs(total_tgt - 100) <= 2 if selected_cats else False
+    tgt_color = "#69F0AE" if tgt_valid else "#FF6B6B"
+
+    if selected_cats:
+        st.markdown(f"""
+        <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;
+          color:{tgt_color};margin-bottom:20px;">
+          Active target total: {total_tgt}% &nbsp; {'✓ valid' if tgt_valid else '✗ must sum to ~100%'}
+        </div>""", unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;
+          color:rgba(255,107,107,0.8);margin-bottom:20px;padding:16px;
+          background:rgba(255,107,107,0.06);border:1px solid rgba(255,107,107,0.2);border-radius:8px;">
+          ✗ Select at least one category to rebalance.
+        </div>""", unsafe_allow_html=True)
+
+    # ── Rebalancing table — all categories, frozen ones shown differently ─────
     st.markdown("""
-    <div class="calc-header">
-      <div>Category</div>
-      <div>Current → Target</div>
-      <div>Current Value</div>
-      <div>Current %</div>
-      <div>Target Value</div>
-      <div>Action</div>
+    <div style="display:grid;grid-template-columns:140px 1fr 110px 90px 110px 120px;
+      gap:10px;padding:4px 12px;font-family:'JetBrains Mono',monospace;font-size:9px;
+      letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:6px;">
+      <div>Category</div><div>Current → Target</div><div>Current Value</div>
+      <div>Current %</div><div>Target Value</div><div>Action</div>
     </div>""", unsafe_allow_html=True)
 
-    total_buy = 0.0; total_sell = 0.0
-    for cat, info in category_data.items():
+    total_buy = 0.0
+    total_sell = 0.0
+
+    for cat in all_cats:
+        info     = category_data[cat]
         curr_val = info["current_value"]
-        curr_p   = cat_pct_of_portfolio(cat)
-        tgt_p    = target_allocs[cat]
-        tgt_val  = rebal_total * tgt_p / 100
-        diff     = tgt_val - curr_val          # positive = need to buy, negative = need to sell
+        is_frozen = cat in excluded_cats
+
+        if is_frozen:
+            # Frozen row — greyed out, no action
+            curr_p_display = curr_val / (total_current + fresh_capital) * 100 if (total_current + fresh_capital) > 0 else 0
+            frozen_bar = f'<div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;"><div style="width:{min(curr_p_display,100):.1f}%;height:100%;background:{info["color"]};opacity:0.2;border-radius:2px;"></div></div>'
+            st.markdown(f"""
+            <div style="display:grid;grid-template-columns:140px 1fr 110px 90px 110px 120px;
+              gap:10px;align-items:center;padding:10px 12px;border-radius:8px;margin-bottom:4px;
+              border:1px solid rgba(255,255,255,0.03);background:rgba(255,255,255,0.01);opacity:0.45;">
+              <div style="font-size:13px;color:{info['color']};font-weight:600;display:flex;align-items:center;gap:6px;">
+                <span style="font-size:9px;border:1px solid rgba(255,255,255,0.15);border-radius:3px;
+                  padding:1px 4px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;">FROZEN</span>
+                {cat}
+              </div>
+              <div>{frozen_bar}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,0.4);">₹{curr_val:,.0f}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,0.25);">—</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,0.25);">—</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,0.25);">— FROZEN</div>
+            </div>""", unsafe_allow_html=True)
+            continue
+
+        # Active row
+        tgt_p   = target_allocs.get(cat, 0) or 0
+        tgt_val = rebal_total * tgt_p / 100
+        diff    = tgt_val - curr_val
+        curr_p_active = curr_val / active_current * 100 if active_current > 0 else 0
 
         if diff > 500:
-            action_html = f'<span class="action-buy">▲ BUY ₹{abs(diff):,.0f}</span>'
+            action_html = f'<span style="color:#69F0AE;font-weight:600;font-size:12px;font-family:\'JetBrains Mono\',monospace;">▲ BUY ₹{abs(diff):,.0f}</span>'
             total_buy  += diff
         elif diff < -500:
-            action_html = f'<span class="action-sell">▼ SELL ₹{abs(diff):,.0f}</span>'
+            action_html = f'<span style="color:#FF6B6B;font-weight:600;font-size:12px;font-family:\'JetBrains Mono\',monospace;">▼ SELL ₹{abs(diff):,.0f}</span>'
             total_sell += abs(diff)
         else:
-            action_html = '<span class="action-hold">— HOLD</span>'
+            action_html = '<span style="color:rgba(255,255,255,0.3);font-size:12px;font-family:\'JetBrains Mono\',monospace;">— HOLD</span>'
 
-        bar_curr = f'<div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;"><div style="width:{min(curr_p,100):.1f}%;height:100%;background:{info["color"]};opacity:0.5;border-radius:2px;"></div></div>'
+        bar_curr = f'<div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;"><div style="width:{min(curr_p_active,100):.1f}%;height:100%;background:{info["color"]};opacity:0.5;border-radius:2px;"></div></div>'
         bar_tgt  = f'<div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;margin-top:3px;"><div style="width:{min(tgt_p,100):.1f}%;height:100%;background:{info["color"]};border-radius:2px;"></div></div>'
 
         st.markdown(f"""
-        <div class="calc-row">
+        <div style="display:grid;grid-template-columns:140px 1fr 110px 90px 110px 120px;
+          gap:10px;align-items:center;padding:10px 12px;border-radius:8px;margin-bottom:4px;
+          border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);">
           <div style="font-size:13px;color:{info['color']};font-weight:600;">{cat}</div>
           <div>{bar_curr}{bar_tgt}</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;">
-            <span style="color:rgba(255,255,255,0.7);">₹{curr_val:,.0f}</span>
-          </div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,0.5);">
-            {curr_p:.1f}% → {tgt_p}%
-          </div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,0.8);">
-            ₹{tgt_val:,.0f}
-          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,0.7);">₹{curr_val:,.0f}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,0.5);">{curr_p_active:.1f}% → {tgt_p}%</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,0.8);">₹{tgt_val:,.0f}</div>
           <div>{action_html}</div>
         </div>""", unsafe_allow_html=True)
 
@@ -796,16 +881,17 @@ with tab_calc:
         st.markdown(f"""
         <div class="result-card" style="background:rgba(79,195,247,0.06);border:1px solid rgba(79,195,247,0.15);">
           <div class="result-val" style="color:#4FC3F7;">₹{rebal_total:,.0f}</div>
-          <div class="result-lbl">Rebalancing Base</div>
+          <div class="result-lbl">Active Rebal Base</div>
         </div>""", unsafe_allow_html=True)
 
-    # ── Fund-level buy/sell guidance ──────────────────────────────────────────
+    # ── Fund-level guidance — only active categories ──────────────────────────
     if tgt_valid:
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<div class="section-label">▸ Fund-level Guidance (proportional within category)</div>', unsafe_allow_html=True)
 
-        for cat, info in category_data.items():
-            tgt_p    = target_allocs[cat]
+        for cat in selected_cats:
+            info     = category_data[cat]
+            tgt_p    = target_allocs.get(cat, 0) or 0
             tgt_val  = rebal_total * tgt_p / 100
             curr_val = info["current_value"]
             diff     = tgt_val - curr_val
@@ -826,13 +912,12 @@ with tab_calc:
                 <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{action_color};margin-left:auto;">
                   {action_word} ₹{abs(diff):,.0f} &nbsp;·&nbsp; ≈ ₹{per_fund:,.0f} / fund
                 </div>
-              </div>
-            """, unsafe_allow_html=True)
+              </div>""", unsafe_allow_html=True)
 
             for f in info["funds"]:
                 fund_curr  = f["current_value"]
                 fund_share = fund_curr / curr_val if curr_val > 0 else 1 / n_funds
-                fund_diff  = diff * fund_share   # proportional to each fund's current weight
+                fund_diff  = diff * fund_share
                 act_c      = "#69F0AE" if fund_diff > 0 else "#FF6B6B"
                 act_txt    = f"▲ +₹{fund_diff:,.0f}" if fund_diff > 0 else f"▼ -₹{abs(fund_diff):,.0f}"
 
@@ -845,12 +930,11 @@ with tab_calc:
                   </div>
                   <div style="font-family:'JetBrains Mono',monospace;font-size:12px;
                     font-weight:600;color:{act_c};min-width:120px;text-align:right;">{act_txt}</div>
-                </div>
-                """, unsafe_allow_html=True)
+                </div>""", unsafe_allow_html=True)
 
             st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── SIP Split ─────────────────────────────────────────────────────────────
+    # ── SIP Split — only active categories ───────────────────────────────────
     if monthly_sip > 0 and tgt_valid:
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(f"""
@@ -859,13 +943,14 @@ with tab_calc:
           <div class="section-label" style="margin-bottom:14px;">▸ Monthly SIP Split — ₹{monthly_sip:,}</div>
         """, unsafe_allow_html=True)
 
-        for cat, info in category_data.items():
-            tgt  = target_allocs[cat]
-            amt  = monthly_sip * tgt / 100
+        for cat in selected_cats:
+            info     = category_data[cat]
+            tgt      = target_allocs.get(cat, 0) or 0
+            amt      = monthly_sip * tgt / 100
             if amt <= 0:
                 continue
-            n_funds    = len(info["funds"])
-            per_fund   = amt / n_funds if n_funds > 0 else 0
+            n_funds  = len(info["funds"])
+            per_fund = amt / n_funds if n_funds > 0 else 0
 
             st.markdown(f"""
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
@@ -874,7 +959,7 @@ with tab_calc:
                 <div style="width:{tgt}%;height:100%;background:{info['color']};border-radius:2px;"></div>
               </div>
               <div style="font-family:'JetBrains Mono',monospace;font-size:12px;
-                color:{info['color']};width:160px;text-align:right;">
+                color:{info['color']};width:200px;text-align:right;">
                 ₹{amt:,.0f} / mo &nbsp;<span style="color:rgba(255,255,255,0.3);font-size:10px;">(≈₹{per_fund:,.0f}/fund)</span>
               </div>
             </div>""", unsafe_allow_html=True)
