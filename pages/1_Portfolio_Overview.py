@@ -57,6 +57,55 @@ PALETTE = [
 ]
 
 
+ICON_FUND = """
+<svg width="36" height="36" viewBox="0 0 36 36">
+  <rect x="4" y="6" width="28" height="24" rx="3" fill="none" stroke="#1D9E75" stroke-width="1.5"/>
+  <line x1="4" y1="13" x2="32" y2="13" stroke="#1D9E75" stroke-width="1.5"/>
+  <rect x="9"  y="18" width="6"  height="2" rx="1" fill="#69F0AE"/>
+  <rect x="9"  y="23" width="10" height="2" rx="1" fill="rgba(105,240,174,0.4)"/>
+  <rect x="21" y="18" width="6"  height="2" rx="1" fill="rgba(105,240,174,0.4)"/>
+  <rect x="21" y="23" width="4"  height="2" rx="1" fill="rgba(105,240,174,0.4)"/>
+</svg>"""
+
+ICON_DAILY_SUMMARY = """
+<svg width="36" height="36" viewBox="0 0 36 36">
+  <rect x="5"  y="8"  width="5" height="20" rx="2" fill="rgba(29,158,117,0.35)"/>
+  <rect x="13" y="13" width="5" height="15" rx="2" fill="rgba(29,158,117,0.55)"/>
+  <rect x="21" y="10" width="5" height="18" rx="2" fill="rgba(29,158,117,0.75)"/>
+  <rect x="29" y="16" width="5" height="12" rx="2" fill="#1D9E75"/>
+  <line x1="3" y1="29" x2="36" y2="29" stroke="rgba(105,240,174,0.3)" stroke-width="1"/>
+</svg>"""
+
+ICON_MONTHLY = """
+<svg width="36" height="36" viewBox="0 0 36 36">
+  <rect x="4"  y="6"  width="28" height="26" rx="3" fill="none" stroke="#534AB7" stroke-width="1.5"/>
+  <line x1="4"  y1="13" x2="32" y2="13" stroke="#534AB7" stroke-width="1.5"/>
+  <circle cx="12" cy="9.5" r="2" fill="#534AB7"/>
+  <circle cx="24" cy="9.5" r="2" fill="#534AB7"/>
+  <line x1="12" y1="7" x2="12" y2="4" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="24" y1="7" x2="24" y2="4" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/>
+  <rect x="9"  y="17" width="4" height="4" rx="1" fill="rgba(83,74,183,0.5)"/>
+  <rect x="16" y="17" width="4" height="4" rx="1" fill="#534AB7"/>
+  <rect x="23" y="17" width="4" height="4" rx="1" fill="rgba(83,74,183,0.3)"/>
+  <rect x="9"  y="24" width="4" height="4" rx="1" fill="rgba(83,74,183,0.3)"/>
+  <rect x="16" y="24" width="4" height="4" rx="1" fill="rgba(83,74,183,0.5)"/>
+  <rect x="23" y="24" width="4" height="4" rx="1" fill="#534AB7"/>
+</svg>"""
+
+ICON_DAILY_CHANGE = """
+<svg width="36" height="36" viewBox="0 0 36 36">
+  <polyline points="4,26 10,18 16,22 22,12 28,16 34,8"
+    fill="none" stroke="#1D9E75" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="34" cy="8"  r="3"   fill="#69F0AE"/>
+  <circle cx="22" cy="12" r="2"   fill="rgba(105,240,174,0.6)"/>
+  <line   x1="4" y1="30" x2="34" y2="30"
+    stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+</svg>"""
+
+
+
+
 # =========================================================
 # GOOGLE FONTS + MINIMAL SAFE CSS
 # =========================================================
@@ -135,12 +184,17 @@ def kpi_card(icon, label, value, value_color, sub, bottom_color):
     </div>"""
 
 
-def sec_header(icon, title):
+def sec_header(icon_svg, title, subtitle=""):
+    icon_part = f'<div style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;">{icon_svg}</div>' if icon_svg else ""
+    sub_part  = f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.15em;text-transform:uppercase;margin-top:3px;">{subtitle}</div>' if subtitle else ""
     st.markdown(f"""
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:1rem; margin-top:0.5rem;">
-        <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.2em;
-            text-transform:uppercase; color:rgba(255,255,255,0.3);">▸ {title}</div>
-        <div style="flex:1; height:1px; background:rgba(255,255,255,0.06);"></div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.6rem;margin-top:0.4rem;">
+        {icon_part}
+        <div>
+            <div style="font-size:17px;font-weight:700;color:#F0F4FF;font-family:'Space Grotesk',sans-serif;line-height:1.1;">{title}</div>
+            {sub_part}
+        </div>
+        <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);margin-left:6px;"></div>
     </div>""", unsafe_allow_html=True)
 
 
@@ -290,10 +344,10 @@ st.divider()
 # TABS
 # =========================================================
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📋  Fund Details",
-    "📊  Daily Summary",
-    "📅  Monthly Investment",
-    "💹  Daily Change",
+    "≡  Fund Details",
+    "▐  Daily Summary",
+    "⊞  Monthly Investment",
+    "∧  Daily Change",
 ])
 
 
@@ -301,7 +355,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # TAB 1 — FUND DETAILS + PORTFOLIO ALLOCATION
 # =========================================================
 with tab1:
-    sec_header("📋", "Fund Details")
+    sec_header(ICON_FUND,         "Fund Details",          "live NAV · invested · P&L · XIRR")
 
     df = pd.DataFrame(summary, columns=[
         "Fund", "SchemeCode", "Invested", "Current",
@@ -344,7 +398,7 @@ with tab1:
         st.plotly_chart(fig_donut, use_container_width=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    sec_header("🌳", "Portfolio Allocation")
+    sec_header(None,              "Portfolio Allocation",  "treemap by current value")
 
     fig_tree = px.treemap(
         df, path=["Fund"], values="Current",
@@ -369,7 +423,7 @@ with tab1:
 # TAB 2 — DAILY PORTFOLIO SUMMARY + PERFORMANCE CHART
 # =========================================================
 with tab2:
-    sec_header("📊", "Daily Portfolio Summary")
+    sec_header(ICON_DAILY_SUMMARY, "Daily Portfolio Summary",  "sorted by date · all funds")
 
     daily_path = "data/portfolio_daily.csv"
     daily_df   = pd.read_csv(daily_path)
@@ -381,7 +435,7 @@ with tab2:
     st.dataframe(display_daily, use_container_width=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    sec_header("📈", "Portfolio Performance")
+    sec_header(ICON_DAILY_SUMMARY, "Portfolio Performance",    "daily change · total value")
 
     chart_df = daily_df.sort_values("Date")
     chart_df["OneDayChangePct_val"] = (
@@ -427,7 +481,7 @@ with tab2:
 # TAB 3 — MONTHLY INVESTMENT SUMMARY + BAR CHART
 # =========================================================
 with tab3:
-    sec_header("📅", "Monthly Investment Summary")
+    sec_header(ICON_MONTHLY,      "Monthly Investment Summary", "SIP breakdown by fund & month")
 
     monthly_data = []
     month_map    = {1:"Jan",2:"Feb",3:"Mar",4:"Apr",5:"May",6:"Jun",
@@ -510,7 +564,7 @@ with tab3:
 # TAB 4 — DAILY CHANGE ACROSS FUNDS
 # =========================================================
 with tab4:
-    sec_header("💹", "Daily Change Across Funds")
+    sec_header(ICON_DAILY_CHANGE, "Daily Change Across Funds",  "NAV movement · single date")
 
     latest_nav_date  = nav_df["Date"].max().date()
     selected_date    = st.date_input("Select Date", value=latest_nav_date)
