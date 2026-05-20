@@ -378,14 +378,15 @@ with tab1:
         display_df["P&L"]        = display_df["P&L"].map(lambda x: f"₹{x:,.0f}")
         display_df["Latest NAV"] = display_df["Latest NAV"].map(lambda x: f"{x:.2f}")
         def make_fund_row(f_name, invested, current, pl, nav, xirr):
+            xirr_val = float(str(xirr).replace("%", ""))  # ← parse string to float
             pl_pct = (pl / invested * 100) if invested else 0
             is_gain = pl >= 0
             pl_color = "#0F6E56" if is_gain else "#993C1D"
             pl_bg = "#E1F5EE" if is_gain else "#FAECE7"
             arrow = "▲" if is_gain else "▼"
-            xirr_color = "#0F6E56" if xirr >= 0 else "#993C1D"
+            xirr_color = "#0F6E56" if xirr_val >= 0 else "#993C1D"
             return f"""
-            <tr style="border-bottom:1px solid #e5e7eb;">
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
               <td style="padding:10px 12px">
                 <div style="font-weight:500;font-size:13px">{f_name}</div>
               </td>
@@ -397,7 +398,7 @@ with tab1:
                 </span>
               </td>
               <td style="padding:10px 12px;text-align:right;color:#6b7280;font-size:12px">{nav:.2f}</td>
-              <td style="padding:10px 12px;text-align:right;font-weight:500;color:{xirr_color};font-size:13px">{xirr:.2f}%</td>
+              <td style="padding:10px 12px;text-align:right;font-weight:500;color:{xirr_color};font-size:13px">{xirr_val:.2f}%</td>
             </tr>"""
         
         rows_html = "".join(
