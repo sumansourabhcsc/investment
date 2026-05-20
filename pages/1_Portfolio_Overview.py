@@ -411,27 +411,9 @@ with tab1:
         total_pl = total_cur - total_inv
         pl_pct = total_pl / total_inv * 100
         
-        summary_html = f"""
-        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
-          <div style="flex:1;min-width:120px;background:#f9fafb;border-radius:8px;padding:10px 16px">
-            <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Invested</div>
-            <div style="font-size:18px;font-weight:500">₹{total_inv:,.0f}</div>
-          </div>
-          <div style="flex:1;min-width:120px;background:#f9fafb;border-radius:8px;padding:10px 16px">
-            <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Current</div>
-            <div style="font-size:18px;font-weight:500">₹{total_cur:,.0f}</div>
-          </div>
-          <div style="flex:1;min-width:120px;background:#f9fafb;border-radius:8px;padding:10px 16px">
-            <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Total P&L</div>
-            <div style="font-size:18px;font-weight:500;color:{'#0F6E56' if total_pl>=0 else '#993C1D'}">
-              {'+' if total_pl>=0 else ''}₹{total_pl:,.0f} ({pl_pct:+.1f}%)
-            </div>
-          </div>
-        </div>"""
-        
+               
         table_html = f"""
-        {summary_html}
-        <table style="width:100%;border-collapse:collapse;font-family:sans-serif">
+          <table style="width:100%;border-collapse:collapse;font-family:sans-serif">
           <thead>
             <tr style="border-bottom:2px solid #e5e7eb">
               <th style="text-align:left;padding:8px 12px;font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em">Fund</th>
