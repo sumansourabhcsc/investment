@@ -552,7 +552,7 @@ with tab3:
             legend=dict(
                 font=dict(size=11, color="rgba(255,255,255,0.55)"),
                 bgcolor="rgba(0,0,0,0)", orientation="h",
-                yanchor="bottom", y=1.02, xanchor="left", x=0
+                yanchor="top", y=-0.2, xanchor="left", x=0
             ),
             bargap=0.25,
             xaxis=dict(
