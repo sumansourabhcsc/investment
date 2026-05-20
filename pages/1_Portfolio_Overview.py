@@ -103,7 +103,14 @@ ICON_DAILY_CHANGE = """
     stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
 </svg>"""
 
-
+ICON_TREEMAP = """
+<svg width="36" height="36" viewBox="0 0 36 36">
+  <rect x="4"  y="4"  width="13" height="13" rx="2" fill="none" stroke="#1D9E75" stroke-width="1.5"/>
+  <rect x="19" y="4"  width="13" height="8"  rx="2" fill="none" stroke="rgba(29,158,117,0.5)" stroke-width="1.5"/>
+  <rect x="19" y="14" width="13" height="3"  rx="1" fill="rgba(29,158,117,0.3)" stroke="rgba(29,158,117,0.3)" stroke-width="1"/>
+  <rect x="4"  y="19" width="8"  height="13" rx="2" fill="none" stroke="rgba(29,158,117,0.5)" stroke-width="1.5"/>
+  <rect x="14" y="19" width="18" height="13" rx="2" fill="none" stroke="rgba(29,158,117,0.4)" stroke-width="1.5"/>
+</svg>"""
 
 
 # =========================================================
@@ -397,8 +404,8 @@ with tab1:
         )
         st.plotly_chart(fig_donut, use_container_width=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    sec_header(None,              "Portfolio Allocation",  "treemap by current value")
+    st.divider()
+    sec_header(ICON_TREEMAP, "Portfolio Allocation", "treemap by current value")
 
     fig_tree = px.treemap(
         df, path=["Fund"], values="Current",
