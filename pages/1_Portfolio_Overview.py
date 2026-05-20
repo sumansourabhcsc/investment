@@ -377,57 +377,11 @@ with tab1:
         display_df["Current"]    = display_df["Current"].map(lambda x: f"₹{x:,.0f}")
         display_df["P&L"]        = display_df["P&L"].map(lambda x: f"₹{x:,.0f}")
         display_df["Latest NAV"] = display_df["Latest NAV"].map(lambda x: f"{x:.2f}")
-        def make_fund_row(f_name, invested, current, pl, nav, xirr):
-            xirr_val = float(str(xirr).replace("%", ""))  # ← parse string to float
-            pl_pct = (pl / invested * 100) if invested else 0
-            is_gain = pl >= 0
-            pl_color = "#0F6E56" if is_gain else "#993C1D"
-            pl_bg = "#E1F5EE" if is_gain else "#FAECE7"
-            arrow = "▲" if is_gain else "▼"
-            xirr_color = "#0F6E56" if xirr_val >= 0 else "#993C1D"
-            return f"""
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
-              <td style="padding:10px 12px">
-                <div style="font-weight:500;font-size:13px">{f_name}</div>
-              </td>
-              <td style="padding:10px 12px;text-align:right;color:#6b7280;font-size:13px">₹{invested:,.0f}</td>
-              <td style="padding:10px 12px;text-align:right;font-weight:500;font-size:13px">₹{current:,.0f}</td>
-              <td style="padding:10px 12px;text-align:right">
-                <span style="background:{pl_bg};color:{pl_color};padding:3px 8px;border-radius:20px;font-size:12px;font-weight:500">
-                  {arrow} ₹{abs(pl):,.0f} ({'+' if is_gain else ''}{pl_pct:.1f}%)
-                </span>
-              </td>
-              <td style="padding:10px 12px;text-align:right;color:#6b7280;font-size:12px">{nav:.2f}</td>
-              <td style="padding:10px 12px;text-align:right;font-weight:500;color:{xirr_color};font-size:13px">{xirr_val:.2f}%</td>
-            </tr>"""
-        
-        rows_html = "".join(
-            make_fund_row(r["Fund"], r["Invested"], r["Current"], r["P&L"], r["Latest NAV"], r["XIRR"])
-            for _, r in df.iterrows()
+        st.dataframe(
+            display_df,
+            use_container_width=True,
+            height=min((len(display_df) + 1) * 45, 520)
         )
-        
-        total_inv = df["Invested"].sum()
-        total_cur = df["Current"].sum()
-        total_pl = total_cur - total_inv
-        pl_pct = total_pl / total_inv * 100
-        
-               
-        table_html = f"""
-          <table style="width:100%;border-collapse:collapse;font-family:sans-serif">
-          <thead>
-            <tr style="border-bottom:2px solid #e5e7eb">
-              <th style="text-align:left;padding:8px 12px;font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em">Fund</th>
-              <th style="text-align:right;padding:8px 12px;font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em">Invested</th>
-              <th style="text-align:right;padding:8px 12px;font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em">Current</th>
-              <th style="text-align:right;padding:8px 12px;font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em">P&L</th>
-              <th style="text-align:right;padding:8px 12px;font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em">NAV</th>
-              <th style="text-align:right;padding:8px 12px;font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em">XIRR</th>
-            </tr>
-          </thead>
-          <tbody>{rows_html}</tbody>
-        </table>"""
-        
-        st.markdown(table_html, unsafe_allow_html=True)
 
     with col_donut:
         fig_donut = go.Figure(go.Pie(
