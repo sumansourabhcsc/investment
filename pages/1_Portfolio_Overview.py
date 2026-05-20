@@ -1,3 +1,4 @@
+#new
 import streamlit as st
 import pandas as pd
 import os
@@ -61,17 +62,54 @@ PALETTE = [
 # =========================================================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap');
-html, body, [class*="css"] { font-family: 'Outfit', sans-serif !important; }
-.block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; }
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0A0F1E; }
-::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 6px; }
-section[data-testid="stSidebar"] { background: #0D1526 !important; border-right: 1px solid rgba(255,255,255,0.05); }
-[data-testid="stDataFrame"] { border-radius: 14px !important; overflow: hidden !important; border: 1px solid rgba(255,255,255,0.07) !important; }
-.stSelectbox label, .stDateInput label { color: rgba(255,255,255,0.45) !important; font-size: 11px !important; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500 !important; }
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+html, body, [class*="css"] { font-family: 'Space Grotesk', sans-serif !important; }
+.stApp { background: #060910 !important; }
+.block-container { padding-top: 2.5rem !important; padding-bottom: 3rem !important; max-width: 1400px !important; }
+section[data-testid="stSidebar"] { background: #0A0E17 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
+[data-testid="stDataFrame"] { border-radius: 12px !important; overflow: hidden !important; border: 1px solid rgba(255,255,255,0.06) !important; }
+.stSelectbox label, .stDateInput label {
+    color: rgba(255,255,255,0.3) !important; font-size: 9px !important;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    font-weight: 500 !important; font-family: 'JetBrains Mono', monospace !important;
+}
 hr { border-color: rgba(255,255,255,0.06) !important; margin: 2rem 0 !important; }
 @keyframes livepulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
+
+/* DataFrames to match theme */
+[data-testid="stDataFrame"] thead tr th {
+    background: rgba(255,255,255,0.02) !important;
+    color: rgba(255,255,255,0.3) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 9px !important; letter-spacing: 0.12em !important; text-transform: uppercase !important;
+}
+[data-testid="stDataFrame"] tbody tr td {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    color: rgba(220,230,245,0.75) !important;
+}
+[data-testid="stDataFrame"] tbody tr:hover td { background: rgba(255,255,255,0.02) !important; }
+
+/* selectbox/date input */
+.stSelectbox > div > div, .stDateInput input {
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 8px !important; color: #F0F4FF !important;
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* bg grid animation */
+.stApp::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridShift 25s linear infinite;
+}
+@keyframes gridShift { 0% { background-position: 0 0; } 100% { background-position: 60px 60px; } }
 </style>
 """, unsafe_allow_html=True)
 
@@ -81,48 +119,44 @@ hr { border-color: rgba(255,255,255,0.06) !important; margin: 2rem 0 !important;
 # =========================================================
 
 def kpi_card(icon, label, value, value_color, sub, bottom_color):
-    """KPI card with every style attribute inlined — renders correctly in st.markdown."""
     return f"""
-    <div style="background:#0F1629; border:1px solid rgba(255,255,255,0.08);
-        border-radius:16px; padding:20px 20px 16px; position:relative;
+    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+        border-radius:14px; padding:18px 18px 14px; position:relative;
         overflow:hidden; box-sizing:border-box; height:100%;">
         <div style="position:absolute; bottom:0; left:0; right:0; height:3px;
-            background:{bottom_color}; border-radius:0 0 16px 16px;"></div>
-        <div style="font-size:18px; margin-bottom:10px; line-height:1;">{icon}</div>
-        <div style="font-size:11px; color:rgba(255,255,255,0.4); text-transform:uppercase;
-            letter-spacing:0.08em; font-weight:500; margin-bottom:8px;
-            font-family:'Outfit',sans-serif;">{label}</div>
-        <div style="font-size:26px; font-weight:700; font-family:'DM Mono',monospace;
+            background:{bottom_color}; border-radius:0 0 14px 14px;"></div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9px;
+            color:rgba(255,255,255,0.3); text-transform:uppercase;
+            letter-spacing:0.15em; font-weight:500; margin-bottom:8px;">{label}</div>
+        <div style="font-size:1.35rem; font-weight:700; font-family:'JetBrains Mono',monospace;
             line-height:1.1; color:{value_color};">{value}</div>
-        <div style="font-size:11px; color:rgba(255,255,255,0.3); margin-top:5px;
-            font-family:'DM Mono',monospace;">{sub}</div>
+        <div style="font-size:9px; color:rgba(255,255,255,0.25); margin-top:5px;
+            font-family:'JetBrains Mono',monospace;">{sub}</div>
     </div>"""
 
 
 def sec_header(icon, title):
     st.markdown(f"""
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:1rem; margin-top:0.5rem;">
-        <div style="width:32px; height:32px; border-radius:8px; background:#1E293B;
-            display:flex; align-items:center; justify-content:center;
-            font-size:15px; flex-shrink:0;">{icon}</div>
-        <div style="font-size:16px; font-weight:600; color:#F1F5F9;
-            font-family:'Outfit',sans-serif;">{title}</div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.2em;
+            text-transform:uppercase; color:rgba(255,255,255,0.3);">▸ {title}</div>
         <div style="flex:1; height:1px; background:rgba(255,255,255,0.06);"></div>
     </div>""", unsafe_allow_html=True)
 
 
 def change_summary_box(total_change):
     sign  = "+" if total_change >= 0 else ""
-    color = SUCCESS if total_change >= 0 else DANGER
-    icon  = "📈" if total_change >= 0 else "📉"
+    color = "#69F0AE" if total_change >= 0 else "#FF6B6B"
+    icon  = "▲" if total_change >= 0 else "▼"
     st.markdown(f"""
-    <div style="margin-top:14px; background:#0F1629; padding:18px 24px;
-        border-radius:14px; border:1px solid rgba(255,255,255,0.07);
-        display:flex; align-items:center; justify-content:space-between;
-        flex-wrap:wrap; gap:10px;">
-        <div style="font-size:13px; color:rgba(255,255,255,0.45); font-weight:500;
-            font-family:'Outfit',sans-serif;">{icon} Total Daily Change Across All Funds</div>
-        <div style="font-size:24px; font-weight:700; font-family:'DM Mono',monospace;
+    <div style="margin-top:14px; background:rgba(255,255,255,0.02); padding:16px 22px;
+        border-radius:12px; border:1px solid rgba(255,255,255,0.06);
+        display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px;
+            color:rgba(255,255,255,0.4); letter-spacing:0.12em; text-transform:uppercase;">
+            {icon} Total Daily Change Across All Funds
+        </div>
+        <div style="font-size:1.4rem; font-weight:700; font-family:'JetBrains Mono',monospace;
             color:{color};">{sign}₹{abs(total_change):,.2f}</div>
     </div>""", unsafe_allow_html=True)
 
@@ -131,25 +165,25 @@ def change_summary_box(total_change):
 # PAGE HERO
 # =========================================================
 st.markdown("""
-<div style="display:flex; align-items:center; justify-content:space-between;
+<div style="display:flex; align-items:flex-start; justify-content:space-between;
     margin-bottom:1.8rem; flex-wrap:wrap; gap:12px;">
     <div>
-        <div style="font-size:28px; font-weight:700; color:#F1F5F9;
-            letter-spacing:-0.5px; font-family:'Outfit',sans-serif;">
-            📊 Portfolio Dashboard
+        <div style="font-size:2rem; font-weight:700; color:#F0F4FF;
+            letter-spacing:-0.02em; font-family:'Space Grotesk',sans-serif;">
+            Portfolio Dashboard
         </div>
-        <div style="font-size:13px; color:rgba(255,255,255,0.35); margin-top:4px;
-            font-family:'DM Mono',monospace;">
-            Taurus · Mutual Fund Tracker · Live NAV
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px;
+            color:rgba(255,255,255,0.3); margin-top:5px; letter-spacing:0.2em; text-transform:uppercase;">
+            ◈ Taurus · Mutual Fund Tracker · Live NAV
         </div>
-    </div>
-    <div style="display:inline-flex; align-items:center; gap:7px;
-        background:rgba(29,158,117,0.12); border:1px solid rgba(29,158,117,0.3);
-        border-radius:20px; padding:6px 14px; font-size:12px; font-weight:500;
-        color:#1D9E75; font-family:'Outfit',sans-serif;">
-        <div style="width:7px; height:7px; border-radius:50%; background:#1D9E75;
-            animation:livepulse 2s ease-in-out infinite;"></div>
-        Live NAV
+        <div style="display:inline-flex; align-items:center; gap:6px; margin-top:10px;
+            background:rgba(29,158,117,0.1); border:1px solid rgba(29,158,117,0.25);
+            border-radius:20px; padding:5px 12px; font-size:11px; font-weight:500;
+            color:#1D9E75; font-family:'JetBrains Mono',monospace;">
+            <div style="width:6px; height:6px; border-radius:50%; background:#1D9E75;
+                animation:livepulse 2s ease-in-out infinite;"></div>
+            Live NAV
+        </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
