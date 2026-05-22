@@ -5,6 +5,7 @@ import requests
 from datetime import date, timedelta
 import base64
 import os
+import math
 
 from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
@@ -34,7 +35,6 @@ html, body, [class*="css"] { font-family: 'Outfit', sans-serif !important; }
     font-size: 13px; color: rgba(255,255,255,0.45);
     font-family: 'DM Mono', monospace; margin-bottom: 1.5rem;
 }
-
 .fund-header {
     display: flex; align-items: center; gap: 14px; margin-bottom: 2px;
 }
@@ -44,12 +44,8 @@ html, body, [class*="css"] { font-family: 'Outfit', sans-serif !important; }
     display: flex; align-items: center; justify-content: center;
     overflow: hidden; flex-shrink: 0;
 }
-.fund-logo-wrap img {
-    width: 100%; height: 100%; object-fit: contain; padding: 4px;
-}
-.fund-logo-fallback {
-    font-size: 26px; line-height: 1;
-}
+.fund-logo-wrap img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+.fund-logo-fallback { font-size: 26px; line-height: 1; }
 
 .nav-badge {
     background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
@@ -105,13 +101,55 @@ html, body, [class*="css"] { font-family: 'Outfit', sans-serif !important; }
     flex: 1; height: 1px; background: rgba(255,255,255,0.08); display: inline-block;
 }
 
+/* Tax Harvesting specific */
+.harvest-result-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 10px;
+}
+.harvest-result-card.highlight {
+    background: rgba(29,158,117,0.08);
+    border-color: rgba(29,158,117,0.3);
+}
+.harvest-result-card.warn {
+    background: rgba(239,159,39,0.08);
+    border-color: rgba(239,159,39,0.3);
+}
+.harvest-label {
+    font-size: 11px; color: rgba(255,255,255,0.4);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 6px;
+}
+.harvest-value {
+    font-size: 22px; font-weight: 600;
+    font-family: 'DM Mono', monospace; color: #ffffff;
+}
+.harvest-sub {
+    font-size: 11px; color: rgba(255,255,255,0.3);
+    margin-top: 4px; font-family: 'DM Mono', monospace;
+}
+.lot-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px;
+}
+.lot-row:last-child { border-bottom: none; }
+.lot-tag {
+    font-size: 10px; padding: 2px 8px; border-radius: 20px;
+    font-family: 'DM Mono', monospace; font-weight: 500;
+}
+.lot-tag.ltcg { background: rgba(29,158,117,0.15); color: #1D9E75; border: 1px solid rgba(29,158,117,0.3); }
+.lot-tag.stcg { background: rgba(239,159,39,0.15); color: #EF9F27; border: 1px solid rgba(239,159,39,0.3); }
+.lot-tag.sell { background: rgba(79,139,249,0.15); color: #4F8BF9; border: 1px solid rgba(79,139,249,0.3); }
+
 [data-testid="stDataFrame"] {
     border-radius: 10px; overflow: hidden;
     border: 1px solid rgba(255,255,255,0.08) !important;
 }
-
 hr { border-color: rgba(255,255,255,0.07) !important; }
-
 [data-testid="stSelectbox"] label {
     font-size: 12px !important; color: rgba(255,255,255,0.45) !important;
     text-transform: uppercase; letter-spacing: 0.07em;
@@ -241,7 +279,7 @@ xirr_pct        = fund_xirr * 100
 
 
 # =========================
-# HEADER — Fund logo + name + NAV badge
+# HEADER
 # =========================
 col_title, col_nav = st.columns([3, 1])
 
@@ -267,7 +305,7 @@ with col_nav:
 
 
 # =========================
-# METRIC CARDS — 7 KPIs
+# METRIC CARDS
 # =========================
 pnl_accent = "c-green" if profit >= 0 else "c-red"
 pnl_color  = "pos"     if profit >= 0 else "neg"
@@ -301,7 +339,11 @@ st.divider()
 # =========================
 # TABS
 # =========================
-tab_overview, tab_nav_history = st.tabs(["📋 Overview", "📈 NAV History"])
+tab_overview, tab_nav_history, tab_harvest = st.tabs([
+    "📋 Overview",
+    "📈 NAV History",
+    "🌾 Tax Harvesting"
+])
 
 
 # ─────────────────────────
@@ -309,7 +351,6 @@ tab_overview, tab_nav_history = st.tabs(["📋 Overview", "📈 NAV History"])
 # ─────────────────────────
 with tab_overview:
 
-    # SIP History + Daily NAV — side by side
     col_sip, col_daily = st.columns(2)
 
     with col_sip:
@@ -332,8 +373,6 @@ with tab_overview:
             st.dataframe(df_display, use_container_width=True, height=280)
 
     st.divider()
-
-    # Portfolio Value Trend
     section_header("📊 Portfolio Value Trend")
 
     if daily_df.empty:
@@ -344,48 +383,29 @@ with tab_overview:
         chart_df = chart_df.sort_values("date")
 
         fig2 = go.Figure()
-
         fig2.add_trace(go.Scatter(
-            x=chart_df["date"],
-            y=chart_df["current_value"],
-            mode="lines+markers",
-            name="Portfolio Value",
+            x=chart_df["date"], y=chart_df["current_value"],
+            mode="lines+markers", name="Portfolio Value",
             line=dict(color="#1D9E75", width=2.5),
             marker=dict(size=5, color="#1D9E75"),
-            fill="tozeroy",
-            fillcolor="rgba(29,158,117,0.07)",
+            fill="tozeroy", fillcolor="rgba(29,158,117,0.07)",
             hovertemplate="<b>%{x|%d %b %Y}</b><br>Value: ₹%{y:,.2f}<extra></extra>"
         ))
-
         if "invested" in chart_df.columns:
             fig2.add_trace(go.Scatter(
-                x=chart_df["date"],
-                y=chart_df["invested"],
-                mode="lines",
-                name="Invested",
+                x=chart_df["date"], y=chart_df["invested"],
+                mode="lines", name="Invested",
                 line=dict(color="#4F8BF9", width=1.5, dash="dot"),
                 hovertemplate="<b>%{x|%d %b %Y}</b><br>Invested: ₹%{y:,.2f}<extra></extra>"
             ))
-
         fig2.update_layout(
-            template="plotly_dark",
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
+            template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
             font=dict(family="Outfit, sans-serif", color="rgba(255,255,255,0.6)"),
-            margin=dict(l=10, r=10, t=20, b=10),
-            height=380,
-            hovermode="x unified",
-            legend=dict(
-                orientation="h", yanchor="bottom", y=1.02,
-                xanchor="left", x=0, font=dict(size=12),
-            ),
+            margin=dict(l=10, r=10, t=20, b=10), height=380, hovermode="x unified",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0, font=dict(size=12)),
             xaxis=dict(showgrid=False, zeroline=False, title="Date"),
-            yaxis=dict(
-                showgrid=True, gridcolor="rgba(255,255,255,0.06)",
-                zeroline=False, title="Value (₹)", tickprefix="₹"
-            ),
+            yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.06)", zeroline=False, title="Value (₹)", tickprefix="₹"),
         )
-
         st.plotly_chart(fig2, use_container_width=True)
 
 
@@ -396,14 +416,9 @@ with tab_nav_history:
 
     section_header("📈 NAV History")
 
-    # Quick-range radio
     range_choice = st.radio(
-        "Quick Range",
-        options=["Custom", "1M", "3M", "6M", "1Y", "3Y", "All"],
-        index=4,
-        horizontal=True,
-        label_visibility="collapsed",
-        key="nav_range_choice"
+        "Quick Range", options=["Custom", "1M", "3M", "6M", "1Y", "3Y", "All"],
+        index=4, horizontal=True, label_visibility="collapsed", key="nav_range_choice"
     )
 
     range_map = {"1M": 30, "3M": 90, "6M": 180, "1Y": 365, "3Y": 1095, "All": 9999}
@@ -420,15 +435,9 @@ with tab_nav_history:
 
     if range_choice == "Custom":
         with col_d1:
-            start_date = st.date_input(
-                "Start Date", value=default_start,
-                max_value=date.today(), key="start_date"
-            )
+            start_date = st.date_input("Start Date", value=default_start, max_value=date.today(), key="start_date")
         with col_d2:
-            end_date = st.date_input(
-                "End Date", value=default_end,
-                min_value=start_date, max_value=date.today(), key="end_date"
-            )
+            end_date = st.date_input("End Date", value=default_end, min_value=start_date, max_value=date.today(), key="end_date")
     else:
         start_date = default_start
         end_date   = default_end
@@ -440,8 +449,7 @@ with tab_nav_history:
                 font-size:13px;color:rgba(255,255,255,0.5);">
                 <span style="color:rgba(255,255,255,0.3);font-size:11px;">FROM</span>
                 <span style="color:rgba(255,255,255,0.85);">{start_date.strftime("%d %b %Y")}</span>
-            </div>
-            """, unsafe_allow_html=True)
+            </div>""", unsafe_allow_html=True)
         with col_d2:
             st.markdown(f"""
             <div style="display:inline-flex;align-items:center;gap:8px;
@@ -450,10 +458,8 @@ with tab_nav_history:
                 font-size:13px;color:rgba(255,255,255,0.5);">
                 <span style="color:rgba(255,255,255,0.3);font-size:11px;">TO</span>
                 <span style="color:rgba(255,255,255,0.85);">{end_date.strftime("%d %b %Y")}</span>
-            </div>
-            """, unsafe_allow_html=True)
+            </div>""", unsafe_allow_html=True)
 
-    # Fetch NAV history (cached per fund)
     @st.cache_data(ttl=3600)
     def fetch_nav_history(fund_code):
         url = f"https://api.mfapi.in/mf/{fund_code}"
@@ -473,20 +479,16 @@ with tab_nav_history:
             st.error(f"Failed to fetch NAV history: {e}")
             return pd.DataFrame()
 
-    nav_df_full = fetch_nav_history(scheme_code)
+    nav_df_full  = fetch_nav_history(scheme_code)
 
-    # Filter
     if not nav_df_full.empty:
-        start_ts     = pd.Timestamp(start_date)
-        end_ts       = pd.Timestamp(end_date)
         nav_filtered = nav_df_full[
-            (nav_df_full["Date"] >= start_ts) &
-            (nav_df_full["Date"] <= end_ts)
+            (nav_df_full["Date"] >= pd.Timestamp(start_date)) &
+            (nav_df_full["Date"] <= pd.Timestamp(end_date))
         ].reset_index(drop=True)
     else:
         nav_filtered = pd.DataFrame()
 
-    # Stats + table + chart
     if nav_filtered.empty:
         st.warning("No NAV data for the selected date range.")
     else:
@@ -495,89 +497,334 @@ with tab_nav_history:
         nav_start = nav_filtered["NAV"].iloc[0]
         nav_end   = nav_filtered["NAV"].iloc[-1]
         range_chg = (nav_end - nav_start) / nav_start * 100
-
         chg_color = "#1D9E75" if range_chg >= 0 else "#E24B4A"
         chg_sign  = "+" if range_chg >= 0 else ""
 
         st.markdown(f"""
         <div style="display:flex;gap:10px;margin:14px 0 18px 0;flex-wrap:wrap;">
-            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
-                        border-radius:8px;padding:10px 16px;min-width:130px;">
-                <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
-                            letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
-                    Highest NAV
-                </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:10px 16px;min-width:130px;">
+                <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Highest NAV</div>
                 <div style="font-size:15px;color:#fff;font-family:'DM Mono';">₹{max_row['NAV']:.4f}</div>
-                <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:'Outfit';margin-top:2px;">
-                    {max_row['Date'].strftime("%d %b %Y")}
-                </div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:2px;">{max_row['Date'].strftime("%d %b %Y")}</div>
             </div>
-            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
-                        border-radius:8px;padding:10px 16px;min-width:130px;">
-                <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
-                            letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
-                    Lowest NAV
-                </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:10px 16px;min-width:130px;">
+                <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Lowest NAV</div>
                 <div style="font-size:15px;color:#fff;font-family:'DM Mono';">₹{min_row['NAV']:.4f}</div>
-                <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:'Outfit';margin-top:2px;">
-                    {min_row['Date'].strftime("%d %b %Y")}
-                </div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:2px;">{min_row['Date'].strftime("%d %b %Y")}</div>
             </div>
-            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
-                        border-radius:8px;padding:10px 16px;min-width:130px;">
-                <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
-                            letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
-                    Range Change
-                </div>
-                <div style="font-size:15px;color:{chg_color};font-family:'DM Mono';">
-                    {chg_sign}{range_chg:.2f}%
-                </div>
-                <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:'Outfit';margin-top:2px;">
-                    {start_date.strftime("%d %b")} → {end_date.strftime("%d %b %Y")}
-                </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:10px 16px;min-width:130px;">
+                <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Range Change</div>
+                <div style="font-size:15px;color:{chg_color};font-family:'DM Mono';">{chg_sign}{range_chg:.2f}%</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:2px;">{start_date.strftime("%d %b")} → {end_date.strftime("%d %b %Y")}</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
         col_tbl, col_cht = st.columns([1, 2])
-
         with col_tbl:
             display_df = nav_filtered.copy()
             display_df = display_df.sort_values("Date", ascending=False).reset_index(drop=True)
             display_df["Date"] = display_df["Date"].dt.date
             display_df["NAV"]  = display_df["NAV"].round(4)
             st.dataframe(display_df, use_container_width=True, height=360)
-
         with col_cht:
             fig = go.Figure()
             fig.add_trace(go.Scatter(
-                x=nav_filtered["Date"],
-                y=nav_filtered["NAV"],
-                mode="lines",
-                name="NAV",
+                x=nav_filtered["Date"], y=nav_filtered["NAV"],
+                mode="lines", name="NAV",
                 line=dict(color="#4F8BF9", width=2),
-                fill="tozeroy",
-                fillcolor="rgba(79,139,249,0.08)",
+                fill="tozeroy", fillcolor="rgba(79,139,249,0.08)",
                 hovertemplate="<b>%{x|%d %b %Y}</b><br>NAV: ₹%{y:.4f}<extra></extra>"
             ))
             fig.update_layout(
-                template="plotly_dark",
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
+                template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
                 font=dict(family="Outfit, sans-serif", color="rgba(255,255,255,0.6)"),
-                margin=dict(l=10, r=10, t=20, b=10),
-                height=360,
-                hovermode="x unified",
-                showlegend=False,
+                margin=dict(l=10, r=10, t=20, b=10), height=360, hovermode="x unified", showlegend=False,
                 xaxis=dict(showgrid=False, zeroline=False),
-                yaxis=dict(
-                    showgrid=True,
-                    gridcolor="rgba(255,255,255,0.06)",
-                    zeroline=False,
-                    tickprefix="₹"
-                ),
+                yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.06)", zeroline=False, tickprefix="₹"),
             )
             st.plotly_chart(fig, use_container_width=True)
+
+
+# ─────────────────────────
+# TAB 3 — TAX HARVESTING
+# ─────────────────────────
+with tab_harvest:
+
+    section_header("🌾 Tax Harvesting Calculator")
+
+    # ── Helpers ──
+    def holding_period_days(buy_date):
+        return (date.today() - buy_date.date()).days
+
+    def classify_lot(buy_date):
+        """Equity MF: LTCG if held > 365 days, else STCG."""
+        return "LTCG" if holding_period_days(buy_date) > 365 else "STCG"
+
+    def tax_rate(gain_type):
+        """Equity MF tax rates post-2024 budget: LTCG 12.5% (above ₹1.25L exempt), STCG 20%."""
+        return 0.125 if gain_type == "LTCG" else 0.20
+
+    # ── Build lot-wise breakdown (FIFO) ──
+    lots = fund_df.copy().sort_values("Date").reset_index(drop=True)
+    lots["Gain Type"]        = lots["Date"].apply(classify_lot)
+    lots["Current Value"]    = lots["Units"] * latest_nav
+    lots["Gain"]             = lots["Current Value"] - lots["Amount"]
+    lots["Gain %"]           = (lots["Gain"] / lots["Amount"] * 100).round(2)
+    lots["Tax Rate"]         = lots["Gain Type"].apply(tax_rate)
+    lots["Approx Tax"]       = (lots["Gain"].clip(lower=0) * lots["Tax Rate"]).round(2)
+    lots["Holding Days"]     = lots["Date"].apply(holding_period_days)
+
+    total_ltcg = lots.loc[lots["Gain Type"] == "LTCG", "Gain"].clip(lower=0).sum()
+    total_stcg = lots.loc[lots["Gain Type"] == "STCG", "Gain"].clip(lower=0).sum()
+
+    # LTCG exemption: ₹1,25,000 per year (across all equity instruments)
+    LTCG_EXEMPTION = 125000.0
+
+    st.markdown("""
+    <div style="background:rgba(79,139,249,0.07);border:1px solid rgba(79,139,249,0.2);
+        border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:12.5px;
+        color:rgba(255,255,255,0.6);line-height:1.7;">
+        <b style="color:rgba(255,255,255,0.85);">How this works:</b>
+        Equity MF gains held &gt;1 year are <b style="color:#1D9E75;">LTCG (12.5%)</b> with ₹1.25L annual exemption.
+        Gains held ≤1 year are <b style="color:#EF9F27;">STCG (20%)</b>. Tax harvesting means realising gains
+        up to the LTCG exemption limit each year to reset your cost basis — reducing future tax.
+        Enter a <b style="color:#fff;">target profit</b> below to see exactly how many units to redeem.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Inputs ──
+    col_inp1, col_inp2, col_inp3 = st.columns([1, 1, 1])
+
+    with col_inp1:
+        target_profit = st.number_input(
+            "Target Profit to Harvest (₹)",
+            min_value=0.0,
+            max_value=float(max(profit, 0)),
+            value=min(LTCG_EXEMPTION, float(max(profit, 0))),
+            step=1000.0,
+            format="%.2f",
+            help="The profit amount you want to realise. Default is set to the LTCG exemption limit (₹1,25,000)."
+        )
+
+    with col_inp2:
+        prefer_type = st.selectbox(
+            "Prefer to sell",
+            options=["LTCG lots first (tax-efficient)", "STCG lots first", "Mixed (oldest first)"],
+            index=0,
+            help="Which lots to redeem first. LTCG-first is typically more tax-efficient."
+        )
+
+    with col_inp3:
+        sell_nav = st.number_input(
+            "Expected Sell NAV (₹)",
+            min_value=0.01,
+            value=latest_nav,
+            step=0.01,
+            format="%.4f",
+            help="Defaults to today's NAV. Adjust if you expect to sell at a different price."
+        )
+
+    st.divider()
+
+    # ── Sort lots per preference ──
+    if "LTCG" in prefer_type:
+        sorted_lots = lots.sort_values(["Gain Type", "Date"], ascending=[False, True]).reset_index(drop=True)
+    elif "STCG" in prefer_type:
+        sorted_lots = lots.sort_values(["Gain Type", "Date"], ascending=[True, True]).reset_index(drop=True)
+    else:
+        sorted_lots = lots.sort_values("Date", ascending=True).reset_index(drop=True)
+
+    # ── FIFO allocation to hit target profit ──
+    remaining_target  = target_profit
+    sell_plan         = []
+    total_units_sell  = 0.0
+    total_sell_value  = 0.0
+    total_sell_cost   = 0.0
+    total_sell_gain   = 0.0
+    ltcg_gain_realised = 0.0
+    stcg_gain_realised = 0.0
+
+    for _, lot in sorted_lots.iterrows():
+        if remaining_target <= 0:
+            break
+
+        lot_buy_nav     = lot["Amount"] / lot["Units"]
+        lot_gain_per_u  = sell_nav - lot_buy_nav
+
+        if lot_gain_per_u <= 0:
+            continue  # skip lots with no gain at sell NAV
+
+        # units needed from this lot to get remaining_target profit
+        units_needed = remaining_target / lot_gain_per_u
+        units_to_sell = min(units_needed, lot["Units"])
+
+        gain_from_lot  = units_to_sell * lot_gain_per_u
+        cost_from_lot  = units_to_sell * lot_buy_nav
+        value_from_lot = units_to_sell * sell_nav
+
+        sell_plan.append({
+            "SIP Date":        lot["Date"].date(),
+            "Gain Type":       lot["Gain Type"],
+            "Holding Days":    lot["Holding Days"],
+            "Buy NAV":         round(lot_buy_nav, 4),
+            "Units Available": round(lot["Units"], 4),
+            "Units to Sell":   round(units_to_sell, 4),
+            "Cost Basis":      round(cost_from_lot, 2),
+            "Sell Value":      round(value_from_lot, 2),
+            "Gain Realised":   round(gain_from_lot, 2),
+        })
+
+        total_units_sell  += units_to_sell
+        total_sell_value  += value_from_lot
+        total_sell_cost   += cost_from_lot
+        total_sell_gain   += gain_from_lot
+
+        if lot["Gain Type"] == "LTCG":
+            ltcg_gain_realised += gain_from_lot
+        else:
+            stcg_gain_realised += gain_from_lot
+
+        remaining_target -= gain_from_lot
+
+    # ── Tax estimate ──
+    taxable_ltcg = max(0, ltcg_gain_realised - LTCG_EXEMPTION)
+    ltcg_tax     = taxable_ltcg * 0.125
+    stcg_tax     = stcg_gain_realised * 0.20
+    total_tax    = ltcg_tax + stcg_tax
+
+    # ── Summary Cards ──
+    col_r1, col_r2, col_r3, col_r4 = st.columns(4)
+
+    with col_r1:
+        st.markdown(f"""
+        <div class="harvest-result-card highlight">
+            <div class="harvest-label">Units to Redeem</div>
+            <div class="harvest-value">{total_units_sell:,.4f}</div>
+            <div class="harvest-sub">of {total_units:,.4f} total units</div>
+        </div>""", unsafe_allow_html=True)
+
+    with col_r2:
+        st.markdown(f"""
+        <div class="harvest-result-card highlight">
+            <div class="harvest-label">Redemption Amount</div>
+            <div class="harvest-value">₹{total_sell_value:,.2f}</div>
+            <div class="harvest-sub">at NAV ₹{sell_nav:,.4f}</div>
+        </div>""", unsafe_allow_html=True)
+
+    with col_r3:
+        st.markdown(f"""
+        <div class="harvest-result-card highlight">
+            <div class="harvest-label">Profit Realised</div>
+            <div class="harvest-value" style="color:#1D9E75;">₹{total_sell_gain:,.2f}</div>
+            <div class="harvest-sub">LTCG ₹{ltcg_gain_realised:,.2f} · STCG ₹{stcg_gain_realised:,.2f}</div>
+        </div>""", unsafe_allow_html=True)
+
+    with col_r4:
+        tax_color = "#EF9F27" if total_tax > 0 else "#1D9E75"
+        st.markdown(f"""
+        <div class="harvest-result-card warn">
+            <div class="harvest-label">Estimated Tax</div>
+            <div class="harvest-value" style="color:{tax_color};">₹{total_tax:,.2f}</div>
+            <div class="harvest-sub">LTCG ₹{ltcg_tax:,.2f} · STCG ₹{stcg_tax:,.2f}</div>
+        </div>""", unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Lot-wise Sell Plan table ──
+    if sell_plan:
+        section_header("📑 Lot-wise Sell Plan")
+
+        plan_df = pd.DataFrame(sell_plan)
+
+        # Styled display
+        def style_gain_type(val):
+            if val == "LTCG":
+                return "color: #1D9E75; font-weight: 600;"
+            return "color: #EF9F27; font-weight: 600;"
+
+        styled = (
+            plan_df.style
+            .applymap(style_gain_type, subset=["Gain Type"])
+            .format({
+                "Buy NAV":         "₹{:.4f}",
+                "Units Available": "{:.4f}",
+                "Units to Sell":   "{:.4f}",
+                "Cost Basis":      "₹{:,.2f}",
+                "Sell Value":      "₹{:,.2f}",
+                "Gain Realised":   "₹{:,.2f}",
+            })
+        )
+        st.dataframe(styled, use_container_width=True, height=260)
+
+    st.divider()
+
+    # ── Full lot overview ──
+    section_header("🗂️ All Lots Overview")
+
+    lots_display = lots[[
+        "Date", "Units", "Amount", "Gain Type", "Holding Days",
+        "Current Value", "Gain", "Gain %", "Approx Tax"
+    ]].copy()
+    lots_display["Date"]          = lots_display["Date"].dt.date
+    lots_display["Current Value"] = lots_display["Current Value"].round(2)
+    lots_display["Gain"]          = lots_display["Gain"].round(2)
+    lots_display["Approx Tax"]    = lots_display["Approx Tax"].round(2)
+
+    def color_gain(val):
+        if isinstance(val, (int, float)):
+            return "color: #1D9E75;" if val >= 0 else "color: #E24B4A;"
+        return ""
+
+    lots_styled = (
+        lots_display.style
+        .applymap(color_gain, subset=["Gain", "Gain %"])
+        .applymap(style_gain_type, subset=["Gain Type"])
+        .format({
+            "Amount":        "₹{:,.2f}",
+            "Current Value": "₹{:,.2f}",
+            "Gain":          "₹{:,.2f}",
+            "Gain %":        "{:+.2f}%",
+            "Approx Tax":    "₹{:,.2f}",
+            "Units":         "{:.4f}",
+        })
+    )
+    st.dataframe(lots_styled, use_container_width=True, height=300)
+
+    # ── LTCG Exemption usage bar ──
+    st.divider()
+    section_header("📊 LTCG Exemption Utilisation")
+
+    used_pct = min(ltcg_gain_realised / LTCG_EXEMPTION * 100, 100)
+    bar_color = "#1D9E75" if used_pct <= 100 else "#E24B4A"
+
+    st.markdown(f"""
+    <div style="margin-bottom:8px;display:flex;justify-content:space-between;
+        font-size:12px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace;">
+        <span>₹0</span>
+        <span style="color:rgba(255,255,255,0.8);">
+            ₹{ltcg_gain_realised:,.0f} of ₹{LTCG_EXEMPTION:,.0f} exempt limit used
+        </span>
+        <span>₹1,25,000</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.07);border-radius:6px;height:10px;overflow:hidden;">
+        <div style="width:{used_pct:.1f}%;background:{bar_color};height:100%;
+            border-radius:6px;transition:width 0.4s ease;"></div>
+    </div>
+    <div style="margin-top:6px;font-size:11px;color:rgba(255,255,255,0.3);font-family:'DM Mono',monospace;">
+        {used_pct:.1f}% of annual LTCG exemption consumed by this harvest plan
+    </div>
+    """, unsafe_allow_html=True)
+
+    remaining_exempt = max(0, LTCG_EXEMPTION - ltcg_gain_realised)
+    if remaining_exempt > 0:
+        st.markdown(f"""
+        <div style="margin-top:12px;background:rgba(29,158,117,0.07);border:1px solid rgba(29,158,117,0.2);
+            border-radius:8px;padding:10px 14px;font-size:12px;color:rgba(255,255,255,0.55);">
+            💡 <b style="color:#1D9E75;">₹{remaining_exempt:,.2f}</b> of your LTCG exemption is still unused this year.
+            Consider harvesting more across other equity funds to fully utilise the ₹1.25L limit.
+        </div>
+        """, unsafe_allow_html=True)
 
 
 # =========================
