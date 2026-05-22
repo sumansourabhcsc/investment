@@ -11,38 +11,6 @@ from utils.data_loader import load_fund, load_nav
 from utils.xirr_helper import compute_fund_xirr
 
 
-
-# =========================================================
-# PAGE HERO
-# =========================================================
-st.markdown("""
-<div style="display:flex; align-items:flex-start; justify-content:space-between;
-    margin-bottom:1.8rem; flex-wrap:wrap; gap:12px;">
-    <div>
-        <div style="font-size:2rem; font-weight:700; color:#F0F4FF;
-            letter-spacing:-0.02em; font-family:'Space Grotesk',sans-serif;">
-            Individual Funds
-        </div>
-        <div style="font-family:'JetBrains Mono',monospace; font-size:10px;
-            color:rgba(255,255,255,0.3); margin-top:5px; letter-spacing:0.2em; text-transform:uppercase;">
-            ◈ Taurus · Mutual Fund Tracker
-        </div>
-        <div style="display:inline-flex; align-items:center; gap:6px; margin-top:10px;
-            background:rgba(29,158,117,0.1); border:1px solid rgba(29,158,117,0.25);
-            border-radius:20px; padding:5px 12px; font-size:11px; font-weight:500;
-            color:#1D9E75; font-family:'JetBrains Mono',monospace;">
-            <div style="width:6px; height:6px; border-radius:50%; background:#1D9E75;
-                animation:livepulse 2s ease-in-out infinite;"></div>
-            Live NAV
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-
-
-st.divider()
-
 # =========================
 # PAGE CONFIG
 # =========================
@@ -152,13 +120,34 @@ hr { border-color: rgba(255,255,255,0.07) !important; }
 """, unsafe_allow_html=True)
 
 
+# =========================================================
+# PAGE HERO
+# =========================================================
+st.markdown("""
+<div style="display:flex; align-items:flex-start; justify-content:space-between;
+    margin-bottom:1.8rem; flex-wrap:wrap; gap:12px;">
+    <div>
+        <div style="font-size:2rem; font-weight:700; color:#F0F4FF;
+            letter-spacing:-0.02em; font-family:'Space Grotesk',sans-serif;">
+            Individual Funds
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px;
+            color:rgba(255,255,255,0.3); margin-top:5px; letter-spacing:0.2em; text-transform:uppercase;">
+            ◈ Taurus · Mutual Fund Tracker
+        </div>
+        <div style="display:inline-flex; align-items:center; gap:6px; margin-top:10px;
+            background:rgba(29,158,117,0.1); border:1px solid rgba(29,158,117,0.25);
+            border-radius:20px; padding:5px 12px; font-size:11px; font-weight:500;
+            color:#1D9E75; font-family:'JetBrains Mono',monospace;">
+            <div style="width:6px; height:6px; border-radius:50%; background:#1D9E75;
+                animation:livepulse 2s ease-in-out infinite;"></div>
+            Live NAV
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-
-
-
-
-
-
+st.divider()
 
 
 # =========================
@@ -174,7 +163,6 @@ def pct(val, decimals=2):
 def section_header(title):
     st.markdown(f'<div class="section-header">{title} <span></span></div>', unsafe_allow_html=True)
 
-# Map fund name keywords → logo filename (order matters: more specific first)
 LOGO_MAP = {
     "mirae":        "mirae.png",
     "axis":         "axis.png",
@@ -192,7 +180,6 @@ LOGO_MAP = {
 }
 
 def get_logo_base64(fund_name: str) -> str | None:
-    """Return base64-encoded PNG for the fund house logo, or None if not found."""
     name_lower = fund_name.lower()
     for keyword, filename in LOGO_MAP.items():
         if keyword in name_lower:
@@ -203,7 +190,6 @@ def get_logo_base64(fund_name: str) -> str | None:
     return None
 
 def fund_logo_html(fund_name: str) -> str:
-    """Return an <img> tag with embedded base64 logo, or a folder emoji fallback."""
     b64 = get_logo_base64(fund_name)
     if b64:
         return f'<img src="data:image/png;base64,{b64}" alt="{fund_name} logo">'
@@ -219,7 +205,7 @@ fund_options  = list(mutual_funds.keys())
 selected_fund = st.selectbox("Select Fund", fund_options)
 
 scheme_code = mutual_funds[selected_fund]["code"]
-folio_no = mutual_funds[selected_fund]["folio"]
+folio_no    = mutual_funds[selected_fund]["folio"]
 folder      = mutual_funds[selected_fund]["folder"]
 fund_df     = load_fund(folder)
 
@@ -313,284 +299,287 @@ st.divider()
 
 
 # =========================
-# SIP HISTORY + DAILY NAV — side by side
+# TABS
 # =========================
-col_sip, col_daily = st.columns(2)
+tab_overview, tab_nav_history = st.tabs(["📋 Overview", "📈 NAV History"])
 
-with col_sip:
-    section_header("📋 SIP History")
-    fund_df_sorted = fund_df.sort_values(by="Date", ascending=False).reset_index(drop=True)
-    fund_df_sorted["Date"] = fund_df_sorted["Date"].dt.date
-    st.dataframe(fund_df_sorted, use_container_width=True, height=280)
 
-with col_daily:
-    section_header("📅 Daily NAV Movement")
+# ─────────────────────────
+# TAB 1 — OVERVIEW
+# ─────────────────────────
+with tab_overview:
+
+    # SIP History + Daily NAV — side by side
+    col_sip, col_daily = st.columns(2)
+
+    with col_sip:
+        section_header("📋 SIP History")
+        fund_df_sorted = fund_df.sort_values(by="Date", ascending=False).reset_index(drop=True)
+        fund_df_sorted["Date"] = fund_df_sorted["Date"].dt.date
+        st.dataframe(fund_df_sorted, use_container_width=True, height=280)
+
+    with col_daily:
+        section_header("📅 Daily NAV Movement")
+        if daily_df.empty:
+            st.info("No daily snapshot data available for this fund.")
+        else:
+            df_display = daily_df.copy()
+            df_display["Date"] = df_display["Date"].dt.date
+            if "NAV" in df_display.columns:
+                df_display["Daily Change %"] = (
+                    df_display["NAV"].pct_change(-1) * 100
+                ).round(2)
+            st.dataframe(df_display, use_container_width=True, height=280)
+
+    st.divider()
+
+    # Portfolio Value Trend
+    section_header("📊 Portfolio Value Trend")
+
     if daily_df.empty:
-        st.info("No daily snapshot data available for this fund.")
+        st.info("No daily snapshot data available to plot.")
     else:
-        df_display = daily_df.copy()
-        df_display["Date"] = df_display["Date"].dt.date
-        if "NAV" in df_display.columns:
-            df_display["Daily Change %"] = (
-                df_display["NAV"].pct_change(-1) * 100
-            ).round(2)
-        st.dataframe(df_display, use_container_width=True, height=280)
+        chart_df = daily_df.copy()
+        chart_df["date"] = pd.to_datetime(chart_df["date"], format="%d-%m-%Y")
+        chart_df = chart_df.sort_values("date")
 
-st.divider()
+        fig2 = go.Figure()
 
-
-# =========================
-# NAV HISTORY — range picker + chart
-# =========================
-section_header("📈 NAV History")
-
-# ── Quick-range radio ──
-range_choice = st.radio(
-    "Quick Range",
-    options=["Custom", "1M", "3M", "6M", "1Y", "3Y", "All"],
-    index=4,
-    horizontal=True,
-    label_visibility="collapsed",
-    key="nav_range_choice"
-)
-
-range_map = {"1M": 30, "3M": 90, "6M": 180, "1Y": 365, "3Y": 1095, "All": 9999}
-
-if range_choice != "Custom":
-    days          = range_map[range_choice]
-    default_start = date.today() - timedelta(days=days)
-    default_end   = date.today()
-else:
-    default_start = date.today() - timedelta(days=365)
-    default_end   = date.today()
-
-# ── Date pickers (Custom) or read-only chips (quick range) ──
-col_d1, col_d2, col_spacer = st.columns([1, 1, 3])
-
-if range_choice == "Custom":
-    with col_d1:
-        start_date = st.date_input(
-            "Start Date", value=default_start,
-            max_value=date.today(), key="start_date"
-        )
-    with col_d2:
-        end_date = st.date_input(
-            "End Date", value=default_end,
-            min_value=start_date, max_value=date.today(), key="end_date"
-        )
-else:
-    start_date = default_start
-    end_date   = default_end
-    with col_d1:
-        st.markdown(f"""
-        <div style="display:inline-flex;align-items:center;gap:8px;
-            background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
-            border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;
-            font-size:13px;color:rgba(255,255,255,0.5);">
-            <span style="color:rgba(255,255,255,0.3);font-size:11px;">FROM</span>
-            <span style="color:rgba(255,255,255,0.85);">{start_date.strftime("%d %b %Y")}</span>
-        </div>
-        """, unsafe_allow_html=True)
-    with col_d2:
-        st.markdown(f"""
-        <div style="display:inline-flex;align-items:center;gap:8px;
-            background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
-            border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;
-            font-size:13px;color:rgba(255,255,255,0.5);">
-            <span style="color:rgba(255,255,255,0.3);font-size:11px;">TO</span>
-            <span style="color:rgba(255,255,255,0.85);">{end_date.strftime("%d %b %Y")}</span>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-# ── Fetch NAV history (cached per fund) ──
-@st.cache_data(ttl=3600)
-def fetch_nav_history(fund_code):
-    url = f"https://api.mfapi.in/mf/{fund_code}"
-    try:
-        response = requests.get(url, timeout=180)
-        response.raise_for_status()
-        data = response.json()
-        if "data" in data and data["data"]:
-            df = pd.DataFrame(data["data"])
-            df["date"] = pd.to_datetime(df["date"], format="%d-%m-%Y")
-            df["nav"]  = pd.to_numeric(df["nav"], errors="coerce")
-            df = df.sort_values("date").reset_index(drop=True)
-            df.rename(columns={"date": "Date", "nav": "NAV"}, inplace=True)
-            return df
-        return pd.DataFrame()
-    except Exception as e:
-        st.error(f"Failed to fetch NAV history: {e}")
-        return pd.DataFrame()
-
-
-nav_df_full = fetch_nav_history(scheme_code)
-
-# ── Filter ──
-if not nav_df_full.empty:
-    start_ts     = pd.Timestamp(start_date)
-    end_ts       = pd.Timestamp(end_date)
-    nav_filtered = nav_df_full[
-        (nav_df_full["Date"] >= start_ts) &
-        (nav_df_full["Date"] <= end_ts)
-    ].reset_index(drop=True)
-else:
-    nav_filtered = pd.DataFrame()
-
-# ── Stats + table + chart ──
-if nav_filtered.empty:
-    st.warning("No NAV data for the selected date range.")
-else:
-    max_row   = nav_filtered.loc[nav_filtered["NAV"].idxmax()]
-    min_row   = nav_filtered.loc[nav_filtered["NAV"].idxmin()]
-    nav_start = nav_filtered["NAV"].iloc[0]
-    nav_end   = nav_filtered["NAV"].iloc[-1]
-    range_chg = (nav_end - nav_start) / nav_start * 100
-
-    chg_color = "#1D9E75" if range_chg >= 0 else "#E24B4A"
-    chg_sign  = "+" if range_chg >= 0 else ""
-
-    st.markdown(f"""
-    <div style="display:flex;gap:10px;margin:14px 0 18px 0;flex-wrap:wrap;">
-        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
-                    border-radius:8px;padding:10px 16px;min-width:130px;">
-            <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
-                        letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
-                Highest NAV
-            </div>
-            <div style="font-size:15px;color:#fff;font-family:'DM Mono';">₹{max_row['NAV']:.4f}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:'Outfit';margin-top:2px;">
-                {max_row['Date'].strftime("%d %b %Y")}
-            </div>
-        </div>
-        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
-                    border-radius:8px;padding:10px 16px;min-width:130px;">
-            <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
-                        letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
-                Lowest NAV
-            </div>
-            <div style="font-size:15px;color:#fff;font-family:'DM Mono';">₹{min_row['NAV']:.4f}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:'Outfit';margin-top:2px;">
-                {min_row['Date'].strftime("%d %b %Y")}
-            </div>
-        </div>
-        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
-                    border-radius:8px;padding:10px 16px;min-width:130px;">
-            <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
-                        letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
-                Range Change
-            </div>
-            <div style="font-size:15px;color:{chg_color};font-family:'DM Mono';">
-                {chg_sign}{range_chg:.2f}%
-            </div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:'Outfit';margin-top:2px;">
-                {start_date.strftime("%d %b")} → {end_date.strftime("%d %b %Y")}
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    col_tbl, col_cht = st.columns([1, 2])
-
-    with col_tbl:
-        display_df = nav_filtered.copy()
-        display_df = display_df.sort_values("Date", ascending=False).reset_index(drop=True)
-        display_df["Date"] = display_df["Date"].dt.date
-        display_df["NAV"]  = display_df["NAV"].round(4)
-        st.dataframe(display_df, use_container_width=True, height=360)
-
-    with col_cht:
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=nav_filtered["Date"],
-            y=nav_filtered["NAV"],
-            mode="lines",
-            name="NAV",
-            line=dict(color="#4F8BF9", width=2),
+        fig2.add_trace(go.Scatter(
+            x=chart_df["date"],
+            y=chart_df["current_value"],
+            mode="lines+markers",
+            name="Portfolio Value",
+            line=dict(color="#1D9E75", width=2.5),
+            marker=dict(size=5, color="#1D9E75"),
             fill="tozeroy",
-            fillcolor="rgba(79,139,249,0.08)",
-            hovertemplate="<b>%{x|%d %b %Y}</b><br>NAV: ₹%{y:.4f}<extra></extra>"
+            fillcolor="rgba(29,158,117,0.07)",
+            hovertemplate="<b>%{x|%d %b %Y}</b><br>Value: ₹%{y:,.2f}<extra></extra>"
         ))
-        fig.update_layout(
+
+        if "invested" in chart_df.columns:
+            fig2.add_trace(go.Scatter(
+                x=chart_df["date"],
+                y=chart_df["invested"],
+                mode="lines",
+                name="Invested",
+                line=dict(color="#4F8BF9", width=1.5, dash="dot"),
+                hovertemplate="<b>%{x|%d %b %Y}</b><br>Invested: ₹%{y:,.2f}<extra></extra>"
+            ))
+
+        fig2.update_layout(
             template="plotly_dark",
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
             font=dict(family="Outfit, sans-serif", color="rgba(255,255,255,0.6)"),
             margin=dict(l=10, r=10, t=20, b=10),
-            height=360,
+            height=380,
             hovermode="x unified",
-            showlegend=False,
-            xaxis=dict(showgrid=False, zeroline=False),
+            legend=dict(
+                orientation="h", yanchor="bottom", y=1.02,
+                xanchor="left", x=0, font=dict(size=12),
+            ),
+            xaxis=dict(showgrid=False, zeroline=False, title="Date"),
             yaxis=dict(
-                showgrid=True,
-                gridcolor="rgba(255,255,255,0.06)",
-                zeroline=False,
-                tickprefix="₹"
+                showgrid=True, gridcolor="rgba(255,255,255,0.06)",
+                zeroline=False, title="Value (₹)", tickprefix="₹"
             ),
         )
-        st.plotly_chart(fig, use_container_width=True)
 
-st.divider()
+        st.plotly_chart(fig2, use_container_width=True)
 
 
-# =========================
-# PORTFOLIO VALUE TREND
-# =========================
-section_header("📊 Portfolio Value Trend")
+# ─────────────────────────
+# TAB 2 — NAV HISTORY
+# ─────────────────────────
+with tab_nav_history:
 
-if daily_df.empty:
-    st.info("No daily snapshot data available to plot.")
-else:
-    chart_df = daily_df.copy()
-    chart_df["date"] = pd.to_datetime(chart_df["date"], format="%d-%m-%Y")
-    chart_df = chart_df.sort_values("date")
+    section_header("📈 NAV History")
 
-    fig2 = go.Figure()
-
-    fig2.add_trace(go.Scatter(
-        x=chart_df["date"],
-        y=chart_df["current_value"],
-        mode="lines+markers",
-        name="Portfolio Value",
-        line=dict(color="#1D9E75", width=2.5),
-        marker=dict(size=5, color="#1D9E75"),
-        fill="tozeroy",
-        fillcolor="rgba(29,158,117,0.07)",
-        hovertemplate="<b>%{x|%d %b %Y}</b><br>Value: ₹%{y:,.2f}<extra></extra>"
-    ))
-
-    if "invested" in chart_df.columns:
-        fig2.add_trace(go.Scatter(
-            x=chart_df["date"],
-            y=chart_df["invested"],
-            mode="lines",
-            name="Invested",
-            line=dict(color="#4F8BF9", width=1.5, dash="dot"),
-            hovertemplate="<b>%{x|%d %b %Y}</b><br>Invested: ₹%{y:,.2f}<extra></extra>"
-        ))
-
-    fig2.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Outfit, sans-serif", color="rgba(255,255,255,0.6)"),
-        margin=dict(l=10, r=10, t=20, b=10),
-        height=380,
-        hovermode="x unified",
-        legend=dict(
-            orientation="h", yanchor="bottom", y=1.02,
-            xanchor="left", x=0, font=dict(size=12),
-        ),
-        xaxis=dict(showgrid=False, zeroline=False, title="Date"),
-        yaxis=dict(
-            showgrid=True, gridcolor="rgba(255,255,255,0.06)",
-            zeroline=False, title="Value (₹)", tickprefix="₹"
-        ),
+    # Quick-range radio
+    range_choice = st.radio(
+        "Quick Range",
+        options=["Custom", "1M", "3M", "6M", "1Y", "3Y", "All"],
+        index=4,
+        horizontal=True,
+        label_visibility="collapsed",
+        key="nav_range_choice"
     )
 
-    st.plotly_chart(fig2, use_container_width=True)
+    range_map = {"1M": 30, "3M": 90, "6M": 180, "1Y": 365, "3Y": 1095, "All": 9999}
 
-st.divider()
+    if range_choice != "Custom":
+        days          = range_map[range_choice]
+        default_start = date.today() - timedelta(days=days)
+        default_end   = date.today()
+    else:
+        default_start = date.today() - timedelta(days=365)
+        default_end   = date.today()
+
+    col_d1, col_d2, col_spacer = st.columns([1, 1, 3])
+
+    if range_choice == "Custom":
+        with col_d1:
+            start_date = st.date_input(
+                "Start Date", value=default_start,
+                max_value=date.today(), key="start_date"
+            )
+        with col_d2:
+            end_date = st.date_input(
+                "End Date", value=default_end,
+                min_value=start_date, max_value=date.today(), key="end_date"
+            )
+    else:
+        start_date = default_start
+        end_date   = default_end
+        with col_d1:
+            st.markdown(f"""
+            <div style="display:inline-flex;align-items:center;gap:8px;
+                background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
+                border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;
+                font-size:13px;color:rgba(255,255,255,0.5);">
+                <span style="color:rgba(255,255,255,0.3);font-size:11px;">FROM</span>
+                <span style="color:rgba(255,255,255,0.85);">{start_date.strftime("%d %b %Y")}</span>
+            </div>
+            """, unsafe_allow_html=True)
+        with col_d2:
+            st.markdown(f"""
+            <div style="display:inline-flex;align-items:center;gap:8px;
+                background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
+                border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;
+                font-size:13px;color:rgba(255,255,255,0.5);">
+                <span style="color:rgba(255,255,255,0.3);font-size:11px;">TO</span>
+                <span style="color:rgba(255,255,255,0.85);">{end_date.strftime("%d %b %Y")}</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+    # Fetch NAV history (cached per fund)
+    @st.cache_data(ttl=3600)
+    def fetch_nav_history(fund_code):
+        url = f"https://api.mfapi.in/mf/{fund_code}"
+        try:
+            response = requests.get(url, timeout=180)
+            response.raise_for_status()
+            data = response.json()
+            if "data" in data and data["data"]:
+                df = pd.DataFrame(data["data"])
+                df["date"] = pd.to_datetime(df["date"], format="%d-%m-%Y")
+                df["nav"]  = pd.to_numeric(df["nav"], errors="coerce")
+                df = df.sort_values("date").reset_index(drop=True)
+                df.rename(columns={"date": "Date", "nav": "NAV"}, inplace=True)
+                return df
+            return pd.DataFrame()
+        except Exception as e:
+            st.error(f"Failed to fetch NAV history: {e}")
+            return pd.DataFrame()
+
+    nav_df_full = fetch_nav_history(scheme_code)
+
+    # Filter
+    if not nav_df_full.empty:
+        start_ts     = pd.Timestamp(start_date)
+        end_ts       = pd.Timestamp(end_date)
+        nav_filtered = nav_df_full[
+            (nav_df_full["Date"] >= start_ts) &
+            (nav_df_full["Date"] <= end_ts)
+        ].reset_index(drop=True)
+    else:
+        nav_filtered = pd.DataFrame()
+
+    # Stats + table + chart
+    if nav_filtered.empty:
+        st.warning("No NAV data for the selected date range.")
+    else:
+        max_row   = nav_filtered.loc[nav_filtered["NAV"].idxmax()]
+        min_row   = nav_filtered.loc[nav_filtered["NAV"].idxmin()]
+        nav_start = nav_filtered["NAV"].iloc[0]
+        nav_end   = nav_filtered["NAV"].iloc[-1]
+        range_chg = (nav_end - nav_start) / nav_start * 100
+
+        chg_color = "#1D9E75" if range_chg >= 0 else "#E24B4A"
+        chg_sign  = "+" if range_chg >= 0 else ""
+
+        st.markdown(f"""
+        <div style="display:flex;gap:10px;margin:14px 0 18px 0;flex-wrap:wrap;">
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+                        border-radius:8px;padding:10px 16px;min-width:130px;">
+                <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
+                            letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
+                    Highest NAV
+                </div>
+                <div style="font-size:15px;color:#fff;font-family:'DM Mono';">₹{max_row['NAV']:.4f}</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:'Outfit';margin-top:2px;">
+                    {max_row['Date'].strftime("%d %b %Y")}
+                </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+                        border-radius:8px;padding:10px 16px;min-width:130px;">
+                <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
+                            letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
+                    Lowest NAV
+                </div>
+                <div style="font-size:15px;color:#fff;font-family:'DM Mono';">₹{min_row['NAV']:.4f}</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:'Outfit';margin-top:2px;">
+                    {min_row['Date'].strftime("%d %b %Y")}
+                </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+                        border-radius:8px;padding:10px 16px;min-width:130px;">
+                <div style="font-size:10px;color:rgba(255,255,255,0.35);font-family:'Outfit';
+                            letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">
+                    Range Change
+                </div>
+                <div style="font-size:15px;color:{chg_color};font-family:'DM Mono';">
+                    {chg_sign}{range_chg:.2f}%
+                </div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:'Outfit';margin-top:2px;">
+                    {start_date.strftime("%d %b")} → {end_date.strftime("%d %b %Y")}
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        col_tbl, col_cht = st.columns([1, 2])
+
+        with col_tbl:
+            display_df = nav_filtered.copy()
+            display_df = display_df.sort_values("Date", ascending=False).reset_index(drop=True)
+            display_df["Date"] = display_df["Date"].dt.date
+            display_df["NAV"]  = display_df["NAV"].round(4)
+            st.dataframe(display_df, use_container_width=True, height=360)
+
+        with col_cht:
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=nav_filtered["Date"],
+                y=nav_filtered["NAV"],
+                mode="lines",
+                name="NAV",
+                line=dict(color="#4F8BF9", width=2),
+                fill="tozeroy",
+                fillcolor="rgba(79,139,249,0.08)",
+                hovertemplate="<b>%{x|%d %b %Y}</b><br>NAV: ₹%{y:.4f}<extra></extra>"
+            ))
+            fig.update_layout(
+                template="plotly_dark",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="Outfit, sans-serif", color="rgba(255,255,255,0.6)"),
+                margin=dict(l=10, r=10, t=20, b=10),
+                height=360,
+                hovermode="x unified",
+                showlegend=False,
+                xaxis=dict(showgrid=False, zeroline=False),
+                yaxis=dict(
+                    showgrid=True,
+                    gridcolor="rgba(255,255,255,0.06)",
+                    zeroline=False,
+                    tickprefix="₹"
+                ),
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+
 # =========================
 # FOOTER
 # =========================
