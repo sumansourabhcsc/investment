@@ -494,11 +494,14 @@ show_add_units()
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ── Update Portfolio Button ──
-col_btn, col_spacer = st.columns([1, 4])
+# ── Buttons Row ──
+col_btn, col_btn2, col_spacer = st.columns([1, 1, 3])
 
 with col_btn:
     clicked = st.button("▶  Update Portfolio", type="primary", use_container_width=True)
+
+with col_btn2:
+    nav_clicked = st.button("📥  Fetch NAV History", type="primary", use_container_width=True)
 
 # ── Execution Log ──
 if clicked:
@@ -537,6 +540,27 @@ if clicked:
     else:
         st.warning("⚠️  Pipeline stopped early — check errors above.")
 
+
+# ── Fetch NAV History Execution Log ──
+if nav_clicked:
+    st.divider()
+
+    st.markdown(
+        '<p style="font-family:\'DM Mono\',monospace;font-size:0.72rem;letter-spacing:0.2em;'
+        'color:rgba(0,245,212,0.6);text-transform:uppercase;margin-bottom:0.8rem;">⬡ execution log</p>',
+        unsafe_allow_html=True
+    )
+
+    with st.spinner("[ 01 ] Triggering Fetch NAV History ..."):
+        result = trigger_workflow("fetch_nav_history.yml")
+
+    if result["success"]:
+        st.success(f"**01 · Fetch NAV History** → {result['message']}")
+        st.info("⏱  Workflow running in background — NAVHistory/*.json files will update in ~1–2 min.")
+    else:
+        st.error(f"**01 · Fetch NAV History** → {result['message']}")
+
+    st.divider()
 st.divider()
 
 from utils.footer import show_footer
