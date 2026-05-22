@@ -745,7 +745,7 @@ with tab_harvest:
 
         styled = (
             plan_df.style
-            .applymap(style_gain_type, subset=["Gain Type"])
+            .map(style_gain_type, subset=["Gain Type"])
             .format({
                 "Buy NAV":         "₹{:.4f}",
                 "Units Available": "{:.4f}",
@@ -778,8 +778,8 @@ with tab_harvest:
 
     lots_styled = (
         lots_display.style
-        .applymap(color_gain, subset=["Gain", "Gain %"])
-        .applymap(style_gain_type, subset=["Gain Type"])
+        .map(color_gain, subset=["Gain", "Gain %"])
+        .map(style_gain_type, subset=["Gain Type"])
         .format({
             "Amount":        "₹{:,.2f}",
             "Current Value": "₹{:,.2f}",
