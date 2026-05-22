@@ -611,8 +611,8 @@ with tab_harvest:
         target_profit = st.number_input(
             "Target Profit to Harvest (₹)",
             min_value=0.0,
-            max_value=float(current_value),   # ← was max(profit, 0) — wrong cap
-            value=float(LTCG_EXEMPTION),      # default ₹1,25,000
+            max_value=float(max(profit, 0)),
+            value=float(min(LTCG_EXEMPTION, max(profit, 0))),
             step=1000.0,
             format="%.2f",
             help="How much profit you want to realise. Default is the LTCG exemption limit ₹1,25,000."
@@ -682,15 +682,6 @@ with tab_harvest:
             stcg_gain_realised += gain_from_lot
 
         remaining_target -= gain_from_lot
-
-
-    # ── Check if target was fully met ──
-    if remaining_target > 0.01:
-        st.warning(
-            f"⚠️ Target of ₹{target_profit:,.2f} could not be fully met. "
-            f"Maximum harvestable profit from all in-gain lots is ₹{total_sell_gain:,.2f}. "
-            f"Recent loss-making lots are excluded from the sell plan."
-        )
 
     # ── Tax estimate ──
     taxable_ltcg = max(0.0, ltcg_gain_realised - LTCG_EXEMPTION)
