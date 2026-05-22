@@ -121,6 +121,40 @@ hr { border-color: rgba(255,255,255,0.07) !important; }
 """, unsafe_allow_html=True)
 
 
+
+
+
+
+# =========================================================
+# PAGE HERO
+# =========================================================
+st.markdown("""
+<div style="display:flex; align-items:flex-start; justify-content:space-between;
+    margin-bottom:1.8rem; flex-wrap:wrap; gap:12px;">
+    <div>
+        <div style="font-size:2rem; font-weight:700; color:#F0F4FF;
+            letter-spacing:-0.02em; font-family:'Space Grotesk',sans-serif;">
+            Portfolio Dashboard
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px;
+            color:rgba(255,255,255,0.3); margin-top:5px; letter-spacing:0.2em; text-transform:uppercase;">
+            ◈ Taurus · Mutual Fund Tracker · Live NAV
+        </div>
+        <div style="display:inline-flex; align-items:center; gap:6px; margin-top:10px;
+            background:rgba(29,158,117,0.1); border:1px solid rgba(29,158,117,0.25);
+            border-radius:20px; padding:5px 12px; font-size:11px; font-weight:500;
+            color:#1D9E75; font-family:'JetBrains Mono',monospace;">
+            <div style="width:6px; height:6px; border-radius:50%; background:#1D9E75;
+                animation:livepulse 2s ease-in-out infinite;"></div>
+            Live NAV
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+
+
+
 # =========================
 # HELPERS
 # =========================
