@@ -549,6 +549,9 @@ with tab_nav_history:
 # ─────────────────────────
 # TAB 3 — TAX HARVESTING
 # ─────────────────────────
+# ─────────────────────────
+# TAB 3 — TAX HARVESTING
+# ─────────────────────────
 with tab_harvest:
 
     section_header("🌾 Tax Harvesting Calculator")
@@ -558,27 +561,34 @@ with tab_harvest:
         return (date.today() - buy_date.date()).days
 
     def classify_lot(buy_date):
-        """Equity MF: LTCG if held > 365 days, else STCG."""
         return "LTCG" if holding_period_days(buy_date) > 365 else "STCG"
 
     def tax_rate(gain_type):
-        """Equity MF tax rates post-2024 budget: LTCG 12.5% (above ₹1.25L exempt), STCG 20%."""
         return 0.125 if gain_type == "LTCG" else 0.20
 
-    # ── Build lot-wise breakdown (FIFO) ──
+    def style_gain_type(val):
+        if val == "LTCG":
+            return "color: #1D9E75; font-weight: 600;"
+        return "color: #EF9F27; font-weight: 600;"
+
+    def color_gain(val):
+        if isinstance(val, (int, float)):
+            return "color: #1D9E75;" if val >= 0 else "color: #E24B4A;"
+        return ""
+
+    # ── Build lot-wise breakdown ──
     lots = fund_df.copy().sort_values("Date").reset_index(drop=True)
-    lots["Gain Type"]        = lots["Date"].apply(classify_lot)
-    lots["Current Value"]    = lots["Units"] * latest_nav
-    lots["Gain"]             = lots["Current Value"] - lots["Amount"]
-    lots["Gain %"]           = (lots["Gain"] / lots["Amount"] * 100).round(2)
-    lots["Tax Rate"]         = lots["Gain Type"].apply(tax_rate)
-    lots["Approx Tax"]       = (lots["Gain"].clip(lower=0) * lots["Tax Rate"]).round(2)
-    lots["Holding Days"]     = lots["Date"].apply(holding_period_days)
+    lots["Gain Type"]     = lots["Date"].apply(classify_lot)
+    lots["Current Value"] = lots["Units"] * latest_nav
+    lots["Gain"]          = lots["Current Value"] - lots["Amount"]
+    lots["Gain %"]        = (lots["Gain"] / lots["Amount"] * 100).round(2)
+    lots["Tax Rate"]      = lots["Gain Type"].apply(tax_rate)
+    lots["Approx Tax"]    = (lots["Gain"].clip(lower=0) * lots["Tax Rate"]).round(2)
+    lots["Holding Days"]  = lots["Date"].apply(holding_period_days)
 
     total_ltcg = lots.loc[lots["Gain Type"] == "LTCG", "Gain"].clip(lower=0).sum()
     total_stcg = lots.loc[lots["Gain Type"] == "STCG", "Gain"].clip(lower=0).sum()
 
-    # LTCG exemption: ₹1,25,000 per year (across all equity instruments)
     LTCG_EXEMPTION = 125000.0
 
     st.markdown("""
@@ -589,37 +599,30 @@ with tab_harvest:
         Equity MF gains held &gt;1 year are <b style="color:#1D9E75;">LTCG (12.5%)</b> with ₹1.25L annual exemption.
         Gains held ≤1 year are <b style="color:#EF9F27;">STCG (20%)</b>. Tax harvesting means realising gains
         up to the LTCG exemption limit each year to reset your cost basis — reducing future tax.
-        Enter a <b style="color:#fff;">target profit</b> below to see exactly how many units to redeem.
+        Units are sold <b style="color:#fff;">oldest first (FIFO)</b>. Enter a target profit below to see
+        exactly how many units to redeem.
     </div>
     """, unsafe_allow_html=True)
 
     # ── Inputs ──
-    col_inp1, col_inp2, col_inp3 = st.columns([1, 1, 1])
+    col_inp1, col_inp2 = st.columns([1, 1])
 
     with col_inp1:
         target_profit = st.number_input(
             "Target Profit to Harvest (₹)",
             min_value=0.0,
             max_value=float(max(profit, 0)),
-            value=min(LTCG_EXEMPTION, float(max(profit, 0))),
+            value=float(min(LTCG_EXEMPTION, max(profit, 0))),
             step=1000.0,
             format="%.2f",
-            help="The profit amount you want to realise. Default is set to the LTCG exemption limit (₹1,25,000)."
+            help="How much profit you want to realise. Default is the LTCG exemption limit ₹1,25,000."
         )
 
     with col_inp2:
-        prefer_type = st.selectbox(
-            "Prefer to sell",
-            options=["LTCG lots first (tax-efficient)", "STCG lots first", "Mixed (oldest first)"],
-            index=0,
-            help="Which lots to redeem first. LTCG-first is typically more tax-efficient."
-        )
-
-    with col_inp3:
         sell_nav = st.number_input(
             "Expected Sell NAV (₹)",
             min_value=0.01,
-            value=latest_nav,
+            value=float(latest_nav),
             step=0.01,
             format="%.4f",
             help="Defaults to today's NAV. Adjust if you expect to sell at a different price."
@@ -627,21 +630,15 @@ with tab_harvest:
 
     st.divider()
 
-    # ── Sort lots per preference ──
-    if "LTCG" in prefer_type:
-        sorted_lots = lots.sort_values(["Gain Type", "Date"], ascending=[False, True]).reset_index(drop=True)
-    elif "STCG" in prefer_type:
-        sorted_lots = lots.sort_values(["Gain Type", "Date"], ascending=[True, True]).reset_index(drop=True)
-    else:
-        sorted_lots = lots.sort_values("Date", ascending=True).reset_index(drop=True)
+    # ── FIFO: oldest lots first ──
+    sorted_lots = lots.sort_values("Date", ascending=True).reset_index(drop=True)
 
-    # ── FIFO allocation to hit target profit ──
-    remaining_target  = target_profit
-    sell_plan         = []
-    total_units_sell  = 0.0
-    total_sell_value  = 0.0
-    total_sell_cost   = 0.0
-    total_sell_gain   = 0.0
+    remaining_target   = target_profit
+    sell_plan          = []
+    total_units_sell   = 0.0
+    total_sell_value   = 0.0
+    total_sell_cost    = 0.0
+    total_sell_gain    = 0.0
     ltcg_gain_realised = 0.0
     stcg_gain_realised = 0.0
 
@@ -649,17 +646,16 @@ with tab_harvest:
         if remaining_target <= 0:
             break
 
-        lot_buy_nav     = lot["Amount"] / lot["Units"]
-        lot_gain_per_u  = sell_nav - lot_buy_nav
+        lot_buy_nav   = lot["Amount"] / lot["Units"]   # cost per unit for this lot
+        gain_per_unit = sell_nav - lot_buy_nav          # profit per unit at sell NAV
 
-        if lot_gain_per_u <= 0:
-            continue  # skip lots with no gain at sell NAV
+        if gain_per_unit <= 0:
+            continue  # lot is at loss at sell NAV, skip
 
-        # units needed from this lot to get remaining_target profit
-        units_needed = remaining_target / lot_gain_per_u
-        units_to_sell = min(units_needed, lot["Units"])
+        units_needed  = remaining_target / gain_per_unit        # units required to hit remaining profit
+        units_to_sell = min(units_needed, lot["Units"])         # cap at available units in this lot
 
-        gain_from_lot  = units_to_sell * lot_gain_per_u
+        gain_from_lot  = units_to_sell * gain_per_unit
         cost_from_lot  = units_to_sell * lot_buy_nav
         value_from_lot = units_to_sell * sell_nav
 
@@ -675,10 +671,10 @@ with tab_harvest:
             "Gain Realised":   round(gain_from_lot, 2),
         })
 
-        total_units_sell  += units_to_sell
-        total_sell_value  += value_from_lot
-        total_sell_cost   += cost_from_lot
-        total_sell_gain   += gain_from_lot
+        total_units_sell   += units_to_sell
+        total_sell_value   += value_from_lot
+        total_sell_cost    += cost_from_lot
+        total_sell_gain    += gain_from_lot
 
         if lot["Gain Type"] == "LTCG":
             ltcg_gain_realised += gain_from_lot
@@ -688,7 +684,7 @@ with tab_harvest:
         remaining_target -= gain_from_lot
 
     # ── Tax estimate ──
-    taxable_ltcg = max(0, ltcg_gain_realised - LTCG_EXEMPTION)
+    taxable_ltcg = max(0.0, ltcg_gain_realised - LTCG_EXEMPTION)
     ltcg_tax     = taxable_ltcg * 0.125
     stcg_tax     = stcg_gain_realised * 0.20
     total_tax    = ltcg_tax + stcg_tax
@@ -731,18 +727,10 @@ with tab_harvest:
 
     st.divider()
 
-    # ── Lot-wise Sell Plan table ──
+    # ── Lot-wise Sell Plan ──
     if sell_plan:
         section_header("📑 Lot-wise Sell Plan")
-
         plan_df = pd.DataFrame(sell_plan)
-
-        # Styled display
-        def style_gain_type(val):
-            if val == "LTCG":
-                return "color: #1D9E75; font-weight: 600;"
-            return "color: #EF9F27; font-weight: 600;"
-
         styled = (
             plan_df.style
             .map(style_gain_type, subset=["Gain Type"])
@@ -756,10 +744,12 @@ with tab_harvest:
             })
         )
         st.dataframe(styled, use_container_width=True, height=260)
+    else:
+        st.info("No lots with gains found at the selected sell NAV.")
 
     st.divider()
 
-    # ── Full lot overview ──
+    # ── All Lots Overview ──
     section_header("🗂️ All Lots Overview")
 
     lots_display = lots[[
@@ -770,11 +760,6 @@ with tab_harvest:
     lots_display["Current Value"] = lots_display["Current Value"].round(2)
     lots_display["Gain"]          = lots_display["Gain"].round(2)
     lots_display["Approx Tax"]    = lots_display["Approx Tax"].round(2)
-
-    def color_gain(val):
-        if isinstance(val, (int, float)):
-            return "color: #1D9E75;" if val >= 0 else "color: #E24B4A;"
-        return ""
 
     lots_styled = (
         lots_display.style
@@ -791,11 +776,11 @@ with tab_harvest:
     )
     st.dataframe(lots_styled, use_container_width=True, height=300)
 
-    # ── LTCG Exemption usage bar ──
+    # ── LTCG Exemption Bar ──
     st.divider()
     section_header("📊 LTCG Exemption Utilisation")
 
-    used_pct = min(ltcg_gain_realised / LTCG_EXEMPTION * 100, 100)
+    used_pct  = min(ltcg_gain_realised / LTCG_EXEMPTION * 100, 100)
     bar_color = "#1D9E75" if used_pct <= 100 else "#E24B4A"
 
     st.markdown(f"""
@@ -816,7 +801,7 @@ with tab_harvest:
     </div>
     """, unsafe_allow_html=True)
 
-    remaining_exempt = max(0, LTCG_EXEMPTION - ltcg_gain_realised)
+    remaining_exempt = max(0.0, LTCG_EXEMPTION - ltcg_gain_realised)
     if remaining_exempt > 0:
         st.markdown(f"""
         <div style="margin-top:12px;background:rgba(29,158,117,0.07);border:1px solid rgba(29,158,117,0.2);
