@@ -6,6 +6,7 @@ from datetime import date, timedelta
 import base64
 import os
 import math
+import json
 
 from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
@@ -462,11 +463,15 @@ with tab_nav_history:
 
     @st.cache_data(ttl=3600)
     def fetch_nav_history(fund_code):
-        url = f"https://api.mfapi.in/mf/{fund_code}"
+        nav_file = os.path.normpath(
+            os.path.join(os.path.dirname(__file__), "..", "NAVHistory", f"{fund_code}.json")
+        )
         try:
-            response = requests.get(url, timeout=180)
-            response.raise_for_status()
-            data = response.json()
+            if not os.path.exists(nav_file):
+                st.warning(f"NAV history file not found: NAVHistory/{fund_code}.json")
+                return pd.DataFrame()
+            with open(nav_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
             if "data" in data and data["data"]:
                 df = pd.DataFrame(data["data"])
                 df["date"] = pd.to_datetime(df["date"], format="%d-%m-%Y")
@@ -476,7 +481,7 @@ with tab_nav_history:
                 return df
             return pd.DataFrame()
         except Exception as e:
-            st.error(f"Failed to fetch NAV history: {e}")
+            st.error(f"Failed to load NAV history: {e}")
             return pd.DataFrame()
 
     nav_df_full  = fetch_nav_history(scheme_code)
