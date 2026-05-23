@@ -14,7 +14,7 @@ render_sidebar("home")          # ← change the key per page
 # Page Config — MUST be first, only once
 # ─────────────────────────────────────────────
 st.set_page_config(
-    page_title="Taurus | Home",
+    page_title="Taurus: Home",
     page_icon="🐂",
     layout="wide",
     initial_sidebar_state="expanded"
