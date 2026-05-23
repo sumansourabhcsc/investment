@@ -18,7 +18,7 @@ render_sidebar("fund_details")
 # =========================
 # PAGE CONFIG
 # =========================
-st.set_page_config(page_title="Taurus | Fund Details", layout="wide", page_icon="🐂")
+st.set_page_config(page_title="Taurus: Funds", layout="wide", page_icon="🐂")
 
 
 # =========================
