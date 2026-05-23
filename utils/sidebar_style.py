@@ -5,7 +5,17 @@ def apply_sidebar_style():
     st.markdown("""
     <style>
 
-    [data-testid="stSidebarNav"] { display: none; }
+    /* Hide ALL native Streamlit sidebar nav elements */
+    [data-testid="stSidebarNav"],
+    [data-testid="stSidebarNavItems"],
+    [data-testid="stSidebarNavSeparator"],
+    [data-testid="stSidebarNavLink"],
+    section[data-testid="stSidebarNav"] {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        overflow: hidden !important;
+    }
 
     [data-testid="stSidebar"] {
         background: rgba(10, 14, 26, 0.92) !important;
