@@ -4,6 +4,9 @@ import json
 from datetime import datetime, timedelta, timezone
 from config import mutual_funds
 
+# pages/9_Fund_News.py  (renamed file)
+from utils.sidebar_style import render_sidebar
+render_sidebar("news")
 # ─────────────────────────────────────────────
 # Page Config
 # ─────────────────────────────────────────────
