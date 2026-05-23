@@ -158,8 +158,5 @@ def render_sidebar(current_page: str):
                     style="width:80%; max-width:180px; opacity:0.85; filter: drop-shadow(0 0 10px rgba(0,245,212,0.4));"
                 />
             </div>
-            # <div class="ticker-wrap">
-            #     <div class="ticker-label">📰 market pulse</div>
-            #     <span class="ticker-text">Markets live · NAV updated daily · SIP auto-tracked · 16 funds monitored</span>
-            # </div>
+            
         """, unsafe_allow_html=True)
