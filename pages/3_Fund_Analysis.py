@@ -8,7 +8,7 @@ from utils.sidebar_style import render_sidebar
 render_sidebar("analysis")
 
 st.set_page_config(
-    page_title="Portfolio",
+    page_title="Analysis",
     page_icon="🐂",
     layout="wide",
     initial_sidebar_state="expanded"
