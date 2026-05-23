@@ -149,14 +149,7 @@ def render_sidebar(current_page: str):
         st.page_link("pages/5_Fund_News.py", label="Fund News", icon="📰")
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Ticker
-        st.markdown("""
-            <div class="ticker-wrap">
-                <div class="ticker-label">📰 market pulse</div>
-                <span class="ticker-text">Markets live · NAV updated daily · SIP auto-tracked · 16 funds monitored</span>
-            </div>
-        """, unsafe_allow_html=True)
-
+       
         # Taurus logo + Ticker at bottom
         st.markdown("""
             <div style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:0.5rem;">
