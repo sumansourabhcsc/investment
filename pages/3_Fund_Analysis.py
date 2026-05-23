@@ -386,7 +386,7 @@ html, body, [class*="css"] {
 
 # ── Header ──────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="page-title">My Portfolio</div>
+<div class="page-title">Fund Analysis</div>
 <div class="page-sub">◈ Category Overview &amp; Rebalancing · Live NAV</div>
 """, unsafe_allow_html=True)
 
