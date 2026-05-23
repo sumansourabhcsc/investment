@@ -6,7 +6,9 @@ import requests
 import time
 
 from utils.add_units import show_add_units
-
+# app.py
+from utils.sidebar_style import render_sidebar
+render_sidebar("home")          # ← change the key per page
 
 # ─────────────────────────────────────────────
 # Page Config — MUST be first, only once
