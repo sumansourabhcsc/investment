@@ -128,10 +128,13 @@ def render_sidebar(current_page: str):
     with st.sidebar:
         # Brand header
         st.markdown("""
-            <div class="taurus-brand">
-                <span class="bull">🐂</span>
-                <span class="name">TAURUS</span>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:0.5rem;">
+                <img 
+                    src="https://raw.githubusercontent.com/sumansourabhcsc/investment/main/tauruss.png"
+                    style="width:80%; max-width:180px; opacity:0.85; filter: drop-shadow(0 0 10px rgba(0,245,212,0.4));"
+                />
             </div>
+            
         """, unsafe_allow_html=True)
 
         # Main nav — use st.page_link so Streamlit handles routing (no new tab)
