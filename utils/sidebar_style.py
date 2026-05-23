@@ -152,14 +152,6 @@ def render_sidebar(current_page: str):
         st.page_link("pages/5_Fund_News.py", label="Fund News", icon="📰")
         #st.markdown('</div>', unsafe_allow_html=True)
 
-       
-        # Taurus logo + Ticker at bottom
-        st.markdown("""
-            <div style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:0.5rem;">
-                <img 
-                    src="https://raw.githubusercontent.com/sumansourabhcsc/investment/main/tauruss.png"
-                    style="width:80%; max-width:180px; opacity:0.85; filter: drop-shadow(0 0 10px rgba(0,245,212,0.4));"
-                />
-            </div>
+
             
         """, unsafe_allow_html=True)
