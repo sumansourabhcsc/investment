@@ -3,6 +3,10 @@ import math
 import os
 import pandas as pd
 
+# pages/3_Fund_Analysis.py
+from utils.sidebar_style import render_sidebar
+render_sidebar("analysis")
+
 st.set_page_config(
     page_title="Portfolio",
     page_icon="🐂",
