@@ -137,6 +137,8 @@ def render_sidebar(current_page: str):
             
         """, unsafe_allow_html=True)
 
+        st.markdown("<div style='flex:1; min-height:40px'></div>", unsafe_allow_html=True)
+
         # Main nav — use st.page_link so Streamlit handles routing (no new tab)
         st.page_link("app.py",                          label="Home",             icon="🏠")
         st.page_link("pages/1_Portfolio_Overview.py",   label="Portfolio Dashboard", icon="📊")
