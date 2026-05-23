@@ -12,7 +12,9 @@ from config import mutual_funds
 from utils.data_loader import load_fund, load_nav
 from utils.xirr_helper import compute_fund_xirr
 
-
+# pages/2_Fund_Details.py
+from utils.sidebar_style import render_sidebar
+render_sidebar("fund_details")
 # =========================
 # PAGE CONFIG
 # =========================
