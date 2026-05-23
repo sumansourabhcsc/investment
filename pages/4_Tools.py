@@ -19,7 +19,7 @@ render_sidebar("tools")
 # Page Config
 # ─────────────────────────────────────────────
 st.set_page_config(
-    page_title="Taurus – Tools",
+    page_title="Taurus: Tools",
     page_icon="🐂",
     layout="wide"
 )
