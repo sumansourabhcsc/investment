@@ -32,7 +32,7 @@ render_sidebar("portfolio")
 # PAGE CONFIG
 # =========================================================
 st.set_page_config(
-    page_title="Taurus | Dashboard",
+    page_title="Taurus: Dashboard",
     layout="wide",
     page_icon="🐂"
 )
