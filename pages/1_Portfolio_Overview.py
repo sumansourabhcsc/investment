@@ -24,7 +24,9 @@ st.divider()
 #     "https://raw.githubusercontent.com/sumansourabhcsc/investment/main/music.mp3",
 #     volume=0.02
 # )
-
+# pages/1_Portfolio_Overview.py  — add at top
+from utils.sidebar_style import render_sidebar
+render_sidebar("portfolio")
 
 # =========================================================
 # PAGE CONFIG
