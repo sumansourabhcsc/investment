@@ -128,13 +128,15 @@ def render_sidebar(current_page: str):
     with st.sidebar:
         # Brand header
         st.markdown("""
-            <div style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:0.5rem;">
+            <div style="display:flex; justify-content:center; padding: 0.5rem 0 1rem;">
                 <img 
                     src="https://raw.githubusercontent.com/sumansourabhcsc/investment/main/tauruss.png"
-                    style="width:80%; max-width:180px; opacity:0.85; filter: drop-shadow(0 0 10px rgba(0,245,212,0.4));"
+                    style="width:75%; max-width:160px; 
+                           mix-blend-mode: screen;
+                           filter: drop-shadow(0 0 10px rgba(0,245,212,0.4)) brightness(1.1);"
                 />
             </div>
-            
+            <hr style="border:none; border-top:1px solid rgba(0,245,212,0.12); margin-bottom:0.8rem;">
         """, unsafe_allow_html=True)
 
         st.markdown("<div style='flex:1; min-height:40px'></div>", unsafe_allow_html=True)
