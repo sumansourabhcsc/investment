@@ -142,7 +142,7 @@ def render_sidebar(current_page: str):
         st.page_link("pages/4_Tools.py",                label="Tools",            icon="🔧")
 
         # Spacer to push news to bottom
-        st.markdown("<div style='flex:1; min-height:40px'></div>", unsafe_allow_html=True)
+        #st.markdown("<div style='flex:1; min-height:40px'></div>", unsafe_allow_html=True)
 
         # Fund News pinned at bottom with gold wrapper
         st.markdown('<div class="news-page">', unsafe_allow_html=True)
