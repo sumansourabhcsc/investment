@@ -463,7 +463,7 @@ with tab_nav_history:
                 <span style="color:rgba(255,255,255,0.85);">{end_date.strftime("%d %b %Y")}</span>
             </div>""", unsafe_allow_html=True)
 
-    @st.cache_data(ttl=3600)
+    #@st.cache_data(ttl=3600)
     def fetch_nav_history(fund_code):
         nav_file = os.path.normpath(
             os.path.join(os.path.dirname(__file__), "..", "NAVHistory", f"{fund_code}.json")
