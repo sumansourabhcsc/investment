@@ -12,6 +12,9 @@ import requests
 from utils.fund_prediction import show_fund_prediction
 from utils.fund_comparison import show_fund_comparison
 
+# pages/4_Tools.py
+from utils.sidebar_style import render_sidebar
+render_sidebar("tools")
 # ─────────────────────────────────────────────
 # Page Config
 # ─────────────────────────────────────────────
