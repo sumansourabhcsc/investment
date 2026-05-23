@@ -12,7 +12,7 @@ render_sidebar("news")
 # ─────────────────────────────────────────────
 st.set_page_config(
     page_title="Taurus – Fund News",
-    page_icon="📰",
+    page_icon="🐂",
     layout="wide",
     initial_sidebar_state="expanded",
 )
