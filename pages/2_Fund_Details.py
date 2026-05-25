@@ -104,85 +104,68 @@ html, body, [class*="css"] { font-family: 'Outfit', sans-serif !important; }
     flex: 1; height: 1px; background: rgba(255,255,255,0.08); display: inline-block;
 }
 
-/* ── Fund Selector ── */
-.fund-selector-wrap { margin-bottom: 1.5rem; }
-
-.cat-tabs-wrap {
-    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;
-}
-.cat-tab-btn {
+/* ── Category pill buttons ── */
+div[data-testid="stButton"].cat-pill > button,
+div[data-testid="stButton"].cat-pill-active > button {
     font-family: 'DM Mono', monospace !important;
     font-size: 11px !important;
     font-weight: 500 !important;
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.06em !important;
     text-transform: uppercase !important;
-    padding: 4px 14px !important;
+    padding: 5px 14px !important;
     border-radius: 20px !important;
-    border: 1px solid rgba(255,255,255,0.15) !important;
-    background: rgba(255,255,255,0.04) !important;
-    color: rgba(255,255,255,0.5) !important;
-    cursor: pointer !important;
-    transition: all 0.18s !important;
+    min-height: 0 !important;
+    height: auto !important;
+    line-height: 1.5 !important;
     white-space: nowrap !important;
 }
-.cat-tab-btn:hover {
-    border-color: rgba(0,245,212,0.4) !important;
-    color: rgba(0,245,212,0.8) !important;
-    background: rgba(0,245,212,0.05) !important;
+div[data-testid="stButton"].cat-pill > button {
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    background: rgba(255,255,255,0.04) !important;
+    color: rgba(255,255,255,0.5) !important;
 }
-.cat-tab-btn.active {
-    background: rgba(0,245,212,0.12) !important;
-    border-color: rgba(0,245,212,0.55) !important;
+div[data-testid="stButton"].cat-pill > button:hover {
+    border-color: rgba(0,245,212,0.4) !important;
+    color: rgba(0,245,212,0.85) !important;
+    background: rgba(0,245,212,0.06) !important;
+}
+div[data-testid="stButton"].cat-pill-active > button {
+    border: 1px solid rgba(0,245,212,0.6) !important;
+    background: rgba(0,245,212,0.13) !important;
     color: #00f5d4 !important;
 }
 
-.fund-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-    gap: 8px;
+/* ── Fund card buttons ── */
+div[data-testid="stButton"].fund-card > button,
+div[data-testid="stButton"].fund-card-active > button {
+    text-align: left !important;
+    width: 100% !important;
+    min-height: 82px !important;
+    height: auto !important;
+    padding: 12px 14px !important;
+    border-radius: 10px !important;
+    line-height: 1.4 !important;
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    font-family: 'DM Mono', monospace !important;
 }
-.fund-card-btn {
+div[data-testid="stButton"].fund-card > button {
     background: rgba(255,255,255,0.04) !important;
     border: 1px solid rgba(255,255,255,0.09) !important;
-    border-radius: 10px !important;
-    padding: 10px 13px !important;
-    cursor: pointer !important;
-    text-align: left !important;
-    transition: all 0.18s !important;
-    width: 100% !important;
+    color: rgba(255,255,255,0.75) !important;
 }
-.fund-card-btn:hover {
+div[data-testid="stButton"].fund-card > button:hover {
     background: rgba(0,245,212,0.06) !important;
-    border-color: rgba(0,245,212,0.3) !important;
-    transform: translateY(-1px) !important;
+    border-color: rgba(0,245,212,0.35) !important;
 }
-.fund-card-btn.selected {
-    background: rgba(0,245,212,0.1) !important;
-    border: 2px solid rgba(0,245,212,0.55) !important;
-}
-.fc-cat {
-    font-size: 9px; color: rgba(255,255,255,0.35);
-    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px;
-    font-family: 'DM Mono', monospace;
-}
-.fc-name {
-    font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.88);
-    line-height: 1.35; margin-bottom: 5px;
-}
-.fc-code {
-    font-size: 10px; color: rgba(255,255,255,0.3);
-    font-family: 'DM Mono', monospace;
-}
-.fund-card-btn.selected .fc-cat  { color: rgba(0,245,212,0.55); }
-.fund-card-btn.selected .fc-name { color: #ffffff; }
-.fund-card-btn.selected .fc-code { color: rgba(0,245,212,0.4); }
-
-/* hide default streamlit button styling inside fund card grid */
-.fund-grid-container div[data-testid="stButton"] > button {
-    all: unset !important;
-    display: block !important;
-    width: 100% !important;
-    cursor: pointer !important;
+div[data-testid="stButton"].fund-card-active > button {
+    background: rgba(0,245,212,0.10) !important;
+    border: 2px solid rgba(0,245,212,0.6) !important;
+    color: #ffffff !important;
 }
 
 /* Tax Harvesting specific */
@@ -342,42 +325,34 @@ if "active_category" not in st.session_state:
 # =========================
 section_header("🗂️ Select Fund")
 
-# ── Category tab pills ──
-tab_cols = st.columns(len(all_categories))
+# ── Category pill buttons ──
+# Inject per-button class via a wrapping div keyed to each button
+pill_cols = st.columns(len(all_categories))
 for i, cat in enumerate(all_categories):
-    with tab_cols[i]:
-        is_active = st.session_state.active_category == cat
-        btn_style = (
-            "background:rgba(0,245,212,0.12);border:1px solid rgba(0,245,212,0.55);"
-            "color:#00f5d4;" if is_active else
-            "background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.15);"
-            "color:rgba(255,255,255,0.5);"
-        )
-        if st.button(
-            cat,
-            key=f"cat_{cat}",
-            use_container_width=True,
-        ):
+    is_active = st.session_state.active_category == cat
+    css_class = "cat-pill-active" if is_active else "cat-pill"
+    with pill_cols[i]:
+        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
+        if st.button(cat, key=f"cat_{cat}", use_container_width=True):
             st.session_state.active_category = cat
-            # if current fund not in new category, reset to first in that category
             filtered = [
-                name for name, v in mutual_funds.items()
+                n for n, v in mutual_funds.items()
                 if cat == "All" or v["category"] == cat
             ]
             if st.session_state.selected_fund not in filtered:
                 st.session_state.selected_fund = filtered[0]
             st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown("<div style='margin-bottom:10px'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-bottom:8px'></div>", unsafe_allow_html=True)
 
-# ── Fund cards grid ──
+# ── Fund card buttons ──
 filtered_funds = [
     (name, info) for name, info in mutual_funds.items()
     if st.session_state.active_category == "All"
     or info["category"] == st.session_state.active_category
 ]
 
-# Render in rows of 4
 cards_per_row = 4
 rows = [filtered_funds[i:i+cards_per_row] for i in range(0, len(filtered_funds), cards_per_row)]
 
@@ -385,53 +360,17 @@ for row in rows:
     cols = st.columns(cards_per_row)
     for col, (name, info) in zip(cols, row):
         is_selected = st.session_state.selected_fund == name
-        card_border = (
-            "border:2px solid rgba(0,245,212,0.55);background:rgba(0,245,212,0.09);"
-            if is_selected else
-            "border:1px solid rgba(255,255,255,0.09);background:rgba(255,255,255,0.04);"
-        )
-        cat_color   = "rgba(0,245,212,0.55)" if is_selected else "rgba(255,255,255,0.35)"
-        name_color  = "#ffffff"               if is_selected else "rgba(255,255,255,0.88)"
-        code_color  = "rgba(0,245,212,0.4)"   if is_selected else "rgba(255,255,255,0.3)"
+        css_class = "fund-card-active" if is_selected else "fund-card"
+        # Multi-line label: category / name / code — rendered as plain text inside the button
+        label = f"{info['category'].upper()}\n{name}\n{info['code']}"
         with col:
-            st.markdown(f"""
-            <div style="{card_border}border-radius:10px;padding:10px 13px;
-                margin-bottom:2px;transition:all 0.18s;">
-                <div style="font-size:9px;color:{cat_color};text-transform:uppercase;
-                    letter-spacing:0.1em;margin-bottom:5px;font-family:'DM Mono',monospace;">
-                    {info['category']}
-                </div>
-                <div style="font-size:12px;font-weight:500;color:{name_color};
-                    line-height:1.35;margin-bottom:5px;">
-                    {name}
-                </div>
-                <div style="font-size:10px;color:{code_color};font-family:'DM Mono',monospace;">
-                    {info['code']}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            if st.button("select", key=f"fund_{info['code']}", use_container_width=True):
+            st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
+            if st.button(label, key=f"fund_{info['code']}", use_container_width=True):
                 st.session_state.selected_fund = name
                 st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("<div style='margin-bottom:4px'></div>", unsafe_allow_html=True)
-
-# ── Hide the "select" button text — show card as the clickable surface ──
-st.markdown("""
-<style>
-/* make the select buttons invisible — the card visuals above act as the UI */
-div[data-testid="stButton"] > button[kind="secondary"] {
-    opacity: 0 !important;
-    height: 4px !important;
-    min-height: 0 !important;
-    padding: 0 !important;
-    margin-top: -6px !important;
-    pointer-events: auto !important;
-    border: none !important;
-    background: transparent !important;
-}
-</style>
-""", unsafe_allow_html=True)
 
 st.divider()
 
