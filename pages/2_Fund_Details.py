@@ -104,70 +104,6 @@ html, body, [class*="css"] { font-family: 'Outfit', sans-serif !important; }
     flex: 1; height: 1px; background: rgba(255,255,255,0.08); display: inline-block;
 }
 
-/* ── Category pill buttons ── */
-div[data-testid="stButton"].cat-pill > button,
-div[data-testid="stButton"].cat-pill-active > button {
-    font-family: 'DM Mono', monospace !important;
-    font-size: 11px !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.06em !important;
-    text-transform: uppercase !important;
-    padding: 5px 14px !important;
-    border-radius: 20px !important;
-    min-height: 0 !important;
-    height: auto !important;
-    line-height: 1.5 !important;
-    white-space: nowrap !important;
-}
-div[data-testid="stButton"].cat-pill > button {
-    border: 1px solid rgba(255,255,255,0.18) !important;
-    background: rgba(255,255,255,0.04) !important;
-    color: rgba(255,255,255,0.5) !important;
-}
-div[data-testid="stButton"].cat-pill > button:hover {
-    border-color: rgba(0,245,212,0.4) !important;
-    color: rgba(0,245,212,0.85) !important;
-    background: rgba(0,245,212,0.06) !important;
-}
-div[data-testid="stButton"].cat-pill-active > button {
-    border: 1px solid rgba(0,245,212,0.6) !important;
-    background: rgba(0,245,212,0.13) !important;
-    color: #00f5d4 !important;
-}
-
-/* ── Fund card buttons ── */
-div[data-testid="stButton"].fund-card > button,
-div[data-testid="stButton"].fund-card-active > button {
-    text-align: left !important;
-    width: 100% !important;
-    min-height: 82px !important;
-    height: auto !important;
-    padding: 12px 14px !important;
-    border-radius: 10px !important;
-    line-height: 1.4 !important;
-    white-space: pre-wrap !important;
-    word-break: break-word !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    font-family: 'DM Mono', monospace !important;
-}
-div[data-testid="stButton"].fund-card > button {
-    background: rgba(255,255,255,0.04) !important;
-    border: 1px solid rgba(255,255,255,0.09) !important;
-    color: rgba(255,255,255,0.75) !important;
-}
-div[data-testid="stButton"].fund-card > button:hover {
-    background: rgba(0,245,212,0.06) !important;
-    border-color: rgba(0,245,212,0.35) !important;
-}
-div[data-testid="stButton"].fund-card-active > button {
-    background: rgba(0,245,212,0.10) !important;
-    border: 2px solid rgba(0,245,212,0.6) !important;
-    color: #ffffff !important;
-}
-
 /* Tax Harvesting specific */
 .harvest-result-card {
     background: rgba(255,255,255,0.04);
@@ -306,80 +242,13 @@ def fund_logo_html(fund_name: str) -> str:
 # =========================
 nav_df = load_nav()
 
-fund_options = list(mutual_funds.keys())
+fund_options  = list(mutual_funds.keys())
+selected_fund = st.selectbox("Select Fund", fund_options)
 
-# ── Derive all unique categories in config order ──
-all_categories = ["All"] + sorted(
-    list(dict.fromkeys(v["category"] for v in mutual_funds.values()))
-)
-
-# ── Session state: active category + selected fund ──
-if "selected_fund" not in st.session_state:
-    st.session_state.selected_fund = fund_options[0]
-if "active_category" not in st.session_state:
-    st.session_state.active_category = "All"
-
-
-# =========================
-# FUND SELECTOR — Option A
-# =========================
-section_header("🗂️ Select Fund")
-
-# ── Category pill buttons ──
-# Inject per-button class via a wrapping div keyed to each button
-pill_cols = st.columns(len(all_categories))
-for i, cat in enumerate(all_categories):
-    is_active = st.session_state.active_category == cat
-    css_class = "cat-pill-active" if is_active else "cat-pill"
-    with pill_cols[i]:
-        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button(cat, key=f"cat_{cat}", use_container_width=True):
-            st.session_state.active_category = cat
-            filtered = [
-                n for n, v in mutual_funds.items()
-                if cat == "All" or v["category"] == cat
-            ]
-            if st.session_state.selected_fund not in filtered:
-                st.session_state.selected_fund = filtered[0]
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown("<div style='margin-bottom:8px'></div>", unsafe_allow_html=True)
-
-# ── Fund card buttons ──
-filtered_funds = [
-    (name, info) for name, info in mutual_funds.items()
-    if st.session_state.active_category == "All"
-    or info["category"] == st.session_state.active_category
-]
-
-cards_per_row = 4
-rows = [filtered_funds[i:i+cards_per_row] for i in range(0, len(filtered_funds), cards_per_row)]
-
-for row in rows:
-    cols = st.columns(cards_per_row)
-    for col, (name, info) in zip(cols, row):
-        is_selected = st.session_state.selected_fund == name
-        css_class = "fund-card-active" if is_selected else "fund-card"
-        # Multi-line label: category / name / code — rendered as plain text inside the button
-        label = f"{info['category'].upper()}\n{name}\n{info['code']}"
-        with col:
-            st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-            if st.button(label, key=f"fund_{info['code']}", use_container_width=True):
-                st.session_state.selected_fund = name
-                st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown("<div style='margin-bottom:4px'></div>", unsafe_allow_html=True)
-
-st.divider()
-
-# ── Resolve selected fund ──
-selected_fund = st.session_state.selected_fund
-scheme_code   = mutual_funds[selected_fund]["code"]
-folio_no      = mutual_funds[selected_fund]["folio"]
-folder        = mutual_funds[selected_fund]["folder"]
-fund_df       = load_fund(folder)
+scheme_code = mutual_funds[selected_fund]["code"]
+folio_no    = mutual_funds[selected_fund]["folio"]
+folder      = mutual_funds[selected_fund]["folder"]
+fund_df     = load_fund(folder)
 
 daily_path = f"mutualfund/{folder}/daily_{scheme_code}.csv"
 try:
@@ -594,6 +463,7 @@ with tab_nav_history:
                 <span style="color:rgba(255,255,255,0.85);">{end_date.strftime("%d %b %Y")}</span>
             </div>""", unsafe_allow_html=True)
 
+    #@st.cache_data(ttl=3600)
     def fetch_nav_history(fund_code):
         nav_file = os.path.normpath(
             os.path.join(os.path.dirname(__file__), "..", "NAVHistory", f"{fund_code}.json")
@@ -616,7 +486,7 @@ with tab_nav_history:
             st.error(f"Failed to load NAV history: {e}")
             return pd.DataFrame()
 
-    nav_df_full = fetch_nav_history(scheme_code)
+    nav_df_full  = fetch_nav_history(scheme_code)
 
     if not nav_df_full.empty:
         nav_filtered = nav_df_full[
@@ -683,6 +553,9 @@ with tab_nav_history:
             st.plotly_chart(fig, use_container_width=True)
 
 
+# ─────────────────────────
+# TAB 3 — TAX HARVESTING
+# ─────────────────────────
 # ─────────────────────────
 # TAB 3 — TAX HARVESTING
 # ─────────────────────────
@@ -780,14 +653,14 @@ with tab_harvest:
         if remaining_target <= 0:
             break
 
-        lot_buy_nav   = lot["Amount"] / lot["Units"]
-        gain_per_unit = sell_nav - lot_buy_nav
+        lot_buy_nav   = lot["Amount"] / lot["Units"]   # cost per unit for this lot
+        gain_per_unit = sell_nav - lot_buy_nav          # profit per unit at sell NAV
 
         if gain_per_unit <= 0:
-            continue
+            continue  # lot is at loss at sell NAV, skip
 
-        units_needed  = remaining_target / gain_per_unit
-        units_to_sell = min(units_needed, lot["Units"])
+        units_needed  = remaining_target / gain_per_unit        # units required to hit remaining profit
+        units_to_sell = min(units_needed, lot["Units"])         # cap at available units in this lot
 
         gain_from_lot  = units_to_sell * gain_per_unit
         cost_from_lot  = units_to_sell * lot_buy_nav
