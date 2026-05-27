@@ -124,7 +124,7 @@ st.markdown("""
 
 html, body, [class*="css"] { font-family: 'Space Grotesk', sans-serif !important; }
 .stApp { background: #060910 !important; }
-.block-container { padding-top: 2.5rem !important; padding-bottom: 3rem !important; max-width: 1400px !important; }
+.block-container { padding-top: 2.5rem !important; padding-bottom: 3rem !important; max-width: 1600px !important; }
 section[data-testid="stSidebar"] { background: #0A0E17 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
 [data-testid="stDataFrame"] { border-radius: 12px !important; overflow: hidden !important; border: 1px solid rgba(255,255,255,0.06) !important; }
 .stSelectbox label, .stDateInput label {
@@ -372,7 +372,7 @@ with tab1:
         "P&L", "Latest NAV", "NAV Date", "XIRR"
     ])
 
-    col_tbl, col_donut = st.columns([8, 2])
+    col_tbl, col_donut = st.columns([6, 4])
 
     with col_tbl:
         display_df = df.copy()
@@ -398,6 +398,7 @@ with tab1:
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
             font=dict(color="white", family="Space Grotesk"), showlegend=False,
             margin=dict(t=10, b=10, l=10, r=10),
+            height=320,
             annotations=[dict(
                 text=f"<b>₹{total_current/1e5:.1f}L</b>",
                 x=0.5, y=0.5,
