@@ -372,7 +372,7 @@ with tab1:
         "P&L", "Latest NAV", "NAV Date", "XIRR"
     ])
 
-    col_tbl, col_donut = st.columns([7, 3])
+    col_tbl, col_donut = st.columns([8, 2])
 
     with col_tbl:
         display_df = df.copy()
