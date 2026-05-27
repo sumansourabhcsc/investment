@@ -124,7 +124,7 @@ st.markdown("""
 
 html, body, [class*="css"] { font-family: 'Space Grotesk', sans-serif !important; }
 .stApp { background: #060910 !important; }
-.block-container { padding-top: 2.5rem !important; padding-bottom: 3rem !important; max-width: 1600px !important; }
+.block-container { padding-top: 2.5rem !important; padding-bottom: 3rem !important; max-width: 1800px !important; }
 section[data-testid="stSidebar"] { background: #0A0E17 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
 [data-testid="stDataFrame"] { border-radius: 12px !important; overflow: hidden !important; border: 1px solid rgba(255,255,255,0.06) !important; }
 .stSelectbox label, .stDateInput label {
