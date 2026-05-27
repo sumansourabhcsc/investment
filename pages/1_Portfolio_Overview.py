@@ -274,11 +274,12 @@ for fund_name, meta in mutual_funds.items():
         latest_date = latest_row["Date"].date()
         invested    = calculate_invested_amount(fund_df)
         current     = calculate_current_value(fund_df, latest_nav)
+        total_units = fund_df["Units"].sum()
         fund_xirr   = compute_fund_xirr(fund_df, latest_nav)
         total_invested += invested
         total_current  += current
         summary.append([
-            fund_name, code, invested, current,
+            fund_name, code, total_units, invested, current,
             current - invested, latest_nav, latest_date,
             f"{fund_xirr * 100:.2f}%"
         ])
@@ -367,7 +368,7 @@ with tab1:
     sec_header(ICON_FUND,         "Fund Details",          "live NAV · invested · P&L · XIRR")
 
     df = pd.DataFrame(summary, columns=[
-        "Fund", "SchemeCode", "Invested", "Current",
+        "Fund", "SchemeCode", "TotalUnits", "Invested", "Current",
         "P&L", "Latest NAV", "NAV Date", "XIRR"
     ])
 
