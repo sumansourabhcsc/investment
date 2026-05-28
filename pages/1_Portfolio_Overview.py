@@ -508,7 +508,7 @@ with tab1:
 # TAB 2 — DAILY PORTFOLIO SUMMARY + PERFORMANCE CHART
 # =========================================================
 with tab2:
-    sec_header(ICON_DAILY_SUMMARY, "Daily Portfolio Summary",  "sorted by date · all funds")
+    sec_header(ICON_DAILY_SUMMARY, "Daily Portfolio Summary", "sorted by date · all funds")
 
     daily_path = "data/portfolio_daily.csv"
     daily_df   = pd.read_csv(daily_path)
@@ -520,9 +520,56 @@ with tab2:
     st.dataframe(display_daily, use_container_width=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    sec_header(ICON_DAILY_SUMMARY, "Portfolio Performance",    "daily change · total value")
+    sec_header(ICON_DAILY_SUMMARY, "Portfolio Performance", "daily change · total value")
 
-    chart_df = daily_df.sort_values("Date")
+    # ── Time-period filter ──────────────────────────────────────────────────
+    chart_df_full = daily_df.sort_values("Date")
+
+    PERIODS = {"1M": 30, "3M": 90, "6M": 180, "All": None, "Custom": -1}
+
+    col_btns, col_custom = st.columns([3, 2])
+
+    with col_btns:
+        selected_period = st.radio(
+            "Period",
+            options=list(PERIODS.keys()),
+            index=3,          # default → All
+            horizontal=True,
+            label_visibility="collapsed",
+        )
+
+    # Custom date range (only shown when "Custom" is selected)
+    min_date = chart_df_full["Date"].min().date()
+    max_date = chart_df_full["Date"].max().date()
+
+    if selected_period == "Custom":
+        with col_custom:
+            custom_range = st.date_input(
+                "Date range",
+                value=(min_date, max_date),
+                min_value=min_date,
+                max_value=max_date,
+                label_visibility="collapsed",
+            )
+        # date_input returns a tuple only when both ends are picked
+        if isinstance(custom_range, (list, tuple)) and len(custom_range) == 2:
+            start_date, end_date = custom_range
+        else:
+            start_date, end_date = min_date, max_date
+
+        chart_df = chart_df_full[
+            (chart_df_full["Date"].dt.date >= start_date) &
+            (chart_df_full["Date"].dt.date <= end_date)
+        ]
+    else:
+        days = PERIODS[selected_period]
+        if days is None:
+            chart_df = chart_df_full.copy()
+        else:
+            cutoff = chart_df_full["Date"].max() - pd.Timedelta(days=days)
+            chart_df = chart_df_full[chart_df_full["Date"] >= cutoff]
+    # ────────────────────────────────────────────────────────────────────────
+
     chart_df["OneDayChangePct_val"] = (
         chart_df["OneDayChangePct"].str.replace("%", "", regex=False).astype(float)
     )
@@ -560,7 +607,6 @@ with tab2:
         showgrid=False, zeroline=False, tickprefix="₹", secondary_y=True
     )
     st.plotly_chart(fig_perf, use_container_width=True)
-
 
 # =========================================================
 # TAB 3 — MONTHLY INVESTMENT SUMMARY + BAR CHART
