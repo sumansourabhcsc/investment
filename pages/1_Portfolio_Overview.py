@@ -378,8 +378,8 @@ with tab1:
         display_df = df.copy()
     
         rows_html = ""
-        for _, row in display_df.iterrows():
-            pnl_val  = row["P&L"]
+        for i, (_, row) in enumerate(display_df.iterrows(), start=1):
+            pnl_val   = row["P&L"]
             pnl_color = "#69F0AE" if pnl_val >= 0 else "#FF6B6B"
             pnl_sign  = "+" if pnl_val >= 0 else ""
             xirr_val  = float(str(row["XIRR"]).replace("%", ""))
@@ -387,6 +387,7 @@ with tab1:
     
             rows_html += f"""
             <tr>
+                <td style="padding:10px 14px; color:rgba(255,255,255,0.25); font-size:10px; text-align:center; width:36px;">{i}</td>
                 <td style="padding:10px 14px; color:#F0F4FF; font-weight:500; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{row['Fund']}">{row['Fund']}</td>
                 <td style="padding:10px 14px; color:rgba(255,255,255,0.4); font-size:10px;">{row['SchemeCode']}</td>
                 <td style="padding:10px 14px; color:rgba(255,255,255,0.6);">{row['TotalUnits']:.3f}</td>
@@ -398,9 +399,9 @@ with tab1:
                 <td style="padding:10px 14px; color:{xirr_col}; font-weight:600;">{row['XIRR']}</td>
             </tr>"""
     
-        headers = ["Fund", "Code", "Units", "Invested", "Current", "P&amp;L", "NAV", "NAV Date", "XIRR"]
+        headers = ["#", "Fund", "Code", "Units", "Invested", "Current", "P&amp;L", "NAV", "NAV Date", "XIRR"]
         header_html = "".join(
-            f'<th style="padding:10px 14px; text-align:left; font-family:JetBrains Mono,monospace; font-size:9px; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.15em; font-weight:500; border-bottom:1px solid rgba(255,255,255,0.06); white-space:nowrap;">{h}</th>'
+            f'<th style="padding:10px 14px; text-align:left; font-family:JetBrains Mono,monospace; font-size:9px; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.15em; font-weight:500; white-space:nowrap;">{h}</th>'
             for h in headers
         )
     
@@ -411,11 +412,36 @@ with tab1:
         <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
         <style>
             * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-            body {{ background: transparent; }}
-            .wrap {{ overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.02); }}
-            table {{ width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 12px; }}
-            thead tr {{ background: rgba(255,255,255,0.03); }}
-            tbody tr {{ border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }}
+            html, body {{ background: transparent; height: 100%; }}
+            .wrap {{
+                overflow-x: auto;
+                overflow-y: auto;
+                height: 100%;
+                border-radius: 12px;
+                border: 1px solid rgba(255,255,255,0.07);
+                background: rgba(255,255,255,0.02);
+            }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 12px;
+            }}
+            thead tr {{
+                background: #0d1424;
+            }}
+            thead th {{
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                background: #0d1424;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+            }}
+            tbody tr {{
+                border-bottom: 1px solid rgba(255,255,255,0.04);
+                transition: background 0.15s;
+            }}
             tbody tr:last-child {{ border-bottom: none; }}
             tbody tr:hover td {{ background: rgba(255,255,255,0.025); }}
         </style>
@@ -432,6 +458,8 @@ with tab1:
         """
     
         components.html(table_html, height=min((len(display_df) + 1) * 52, 560), scrolling=True)
+
+    
     with col_donut:
         fig_donut = go.Figure(go.Pie(
             labels=df["Fund"], values=df["Current"], hole=0.65,
