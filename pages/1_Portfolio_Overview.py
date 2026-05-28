@@ -431,7 +431,7 @@ with tab1:
         </html>
         """
     
-        components.html(table_html, height=(len(display_df) + 2) * 52, scrolling=False)
+        components.html(table_html, height=(len(display_df) + 1) * 52, scrolling=False)
 
     with col_donut:
         fig_donut = go.Figure(go.Pie(
