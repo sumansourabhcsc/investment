@@ -375,16 +375,60 @@ with tab1:
     col_tbl, col_donut = st.columns([7, 3])
 
     with col_tbl:
-        display_df = df.copy()
-        display_df["Invested"]   = display_df["Invested"].map(lambda x: f"₹{x:,.0f}")
-        display_df["Current"]    = display_df["Current"].map(lambda x: f"₹{x:,.0f}")
-        display_df["P&L"]        = display_df["P&L"].map(lambda x: f"₹{x:,.0f}")
-        display_df["Latest NAV"] = display_df["Latest NAV"].map(lambda x: f"{x:.2f}")
-        st.dataframe(
-            display_df,
-            use_container_width=True,
-            height=min((len(display_df) + 1) * 45, 520)
-        )
+            display_df = df.copy()
+        
+            def pnl_color_hex(v):
+                return "#69F0AE" if v >= 0 else "#FF6B6B"
+        
+            rows_html = ""
+            for _, row in display_df.iterrows():
+                pnl_val   = row["P&L"]
+                pnl_color = "#69F0AE" if pnl_val >= 0 else "#FF6B6B"
+                pnl_sign  = "+" if pnl_val >= 0 else ""
+                xirr_val  = float(str(row["XIRR"]).replace("%", ""))
+                xirr_col  = "#69F0AE" if xirr_val >= 0 else "#FF6B6B"
+        
+                rows_html += f"""
+                <tr>
+                    <td style="padding:10px 14px; color:#F0F4FF; font-weight:500; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{row['Fund']}">{row['Fund']}</td>
+                    <td style="padding:10px 14px; color:rgba(255,255,255,0.4); font-size:10px;">{row['SchemeCode']}</td>
+                    <td style="padding:10px 14px; color:rgba(255,255,255,0.6);">{row['TotalUnits']:.3f}</td>
+                    <td style="padding:10px 14px; color:rgba(200,215,240,0.85);">₹{row['Invested']:,.0f}</td>
+                    <td style="padding:10px 14px; color:#4FC3F7;">₹{row['Current']:,.0f}</td>
+                    <td style="padding:10px 14px; color:{pnl_color}; font-weight:600;">{pnl_sign}₹{abs(pnl_val):,.0f}</td>
+                    <td style="padding:10px 14px; color:rgba(200,215,240,0.7);">{row['Latest NAV']:.2f}</td>
+                    <td style="padding:10px 14px; color:rgba(200,215,240,0.5); font-size:10px;">{row['NAV Date']}</td>
+                    <td style="padding:10px 14px; color:{xirr_col}; font-weight:600;">{row['XIRR']}</td>
+                </tr>"""
+        
+            headers = ["Fund", "Code", "Units", "Invested", "Current", "P&L", "NAV", "NAV Date", "XIRR"]
+            header_html = "".join(
+                f'<th style="padding:10px 14px; text-align:left; font-family:\'JetBrains Mono\',monospace; font-size:9px; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.15em; font-weight:500; border-bottom:1px solid rgba(255,255,255,0.06); white-space:nowrap;">{h}</th>'
+                for h in headers
+            )
+        
+            table_html = f"""
+            <div style="overflow-x:auto; border-radius:12px; border:1px solid rgba(255,255,255,0.07);
+                background:rgba(255,255,255,0.02);">
+                <table style="width:100%; border-collapse:collapse; font-family:'JetBrains Mono',monospace; font-size:12px;">
+                    <thead>
+                        <tr style="background:rgba(255,255,255,0.03);">
+                            {header_html}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows_html}
+                    </tbody>
+                </table>
+            </div>
+            <style>
+                tbody tr:hover td {{ background: rgba(255,255,255,0.025) !important; transition: background 0.15s; }}
+                tbody tr {{ border-bottom: 1px solid rgba(255,255,255,0.04); }}
+                tbody tr:last-child {{ border-bottom: none; }}
+            </style>
+            """
+        
+            st.markdown(table_html, unsafe_allow_html=True)
 
     with col_donut:
         fig_donut = go.Figure(go.Pie(
