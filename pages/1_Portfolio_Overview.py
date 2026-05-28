@@ -533,7 +533,7 @@ with tab2:
         selected_period = st.radio(
             "Period",
             options=list(PERIODS.keys()),
-            index=3,          # default → All
+            index=1,          # default → All
             horizontal=True,
             label_visibility="collapsed",
         )
