@@ -1,4 +1,4 @@
-#new
+##new
 import streamlit as st
 import pandas as pd
 import os
@@ -591,14 +591,15 @@ with tab2:
     fig_perf.update_layout(
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15,22,41,0.6)",
         font=dict(color="rgba(255,255,255,0.6)", family="Space Grotesk"),
-        hovermode="x unified", height=460, margin=dict(t=20, b=10, l=10, r=10),
+        hovermode="x unified", height=460, margin=dict(t=20, b=40, l=10, r=10),
         legend=dict(
-            orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0,
+            orientation="h", yanchor="top", y=-0.12, xanchor="center", x=0.5,
             font=dict(size=12, color="rgba(255,255,255,0.6)"), bgcolor="rgba(0,0,0,0)"
         ),
         bargap=0.3,
         xaxis=dict(showgrid=False, zeroline=False),
     )
+
     fig_perf.update_yaxes(
         showgrid=True, gridcolor="rgba(255,255,255,0.05)",
         zeroline=False, tickprefix="₹", secondary_y=False
