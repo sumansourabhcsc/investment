@@ -566,14 +566,15 @@ def market_ticker():
 
 # ── Date / Time bar ──
 now = datetime.now(ZoneInfo("Asia/Kolkata"))
-components.html(f"""
+# ── Live Clock Bar ──
+components.html("""
 <!DOCTYPE html><html><head>
 <meta charset="utf-8"/>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700&family=DM+Mono:wght@300;400&display=swap');
-  *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{ background: transparent; font-family: 'DM Mono', monospace; padding: 0.2rem 0; }}
-  .datetime-bar {{
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: transparent; font-family: 'DM Mono', monospace; padding: 0.2rem 0; }
+  .datetime-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -581,36 +582,63 @@ components.html(f"""
     background: rgba(0,245,212,0.04);
     border: 1px solid rgba(0,245,212,0.1);
     border-radius: 8px;
-  }}
-  .date-part {{
+  }
+  .date-part {
     font-family: 'Syne', sans-serif;
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     color: rgba(0,245,212,0.7);
     text-transform: uppercase;
-  }}
-  .time-part {{
+  }
+  .time-part {
     font-family: 'DM Mono', monospace;
     font-size: 0.72rem;
     font-weight: 400;
     letter-spacing: 0.14em;
     color: rgba(200,230,225,0.5);
-  }}
-  .separator {{
+  }
+  .separator {
     width: 1px;
     height: 14px;
     background: rgba(0,245,212,0.2);
-  }}
+  }
 </style>
 </head><body>
 <div class="datetime-bar">
-  <span class="date-part">{now.strftime("%A, %d %B %Y")}</span>
+  <span class="date-part" id="date-el">--</span>
   <div class="separator"></div>
-  <span class="time-part">{now.strftime("%H:%M:%S")} IST</span>
+  <span class="time-part" id="time-el">--:--:-- IST</span>
 </div>
+<script>
+  const DAYS   = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
+  const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+
+  function tick() {
+    // Convert current local time to IST (UTC+5:30)
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const ist = new Date(utc + 5.5 * 3600000);
+
+    const day  = DAYS[ist.getDay()];
+    const dd   = String(ist.getDate()).padStart(2, "0");
+    const mon  = MONTHS[ist.getMonth()];
+    const yyyy = ist.getFullYear();
+
+    const hh   = String(ist.getHours()).padStart(2, "0");
+    const mm   = String(ist.getMinutes()).padStart(2, "0");
+    const ss   = String(ist.getSeconds()).padStart(2, "0");
+
+    document.getElementById("date-el").textContent = `${day}, ${dd} ${mon} ${yyyy}`;
+    document.getElementById("time-el").textContent = `${hh}:${mm}:${ss} IST`;
+  }
+
+  tick();
+  setInterval(tick, 1000);
+</script>
 </body></html>
 """, height=50, scrolling=False)
+
 
 
 
