@@ -563,6 +563,56 @@ def market_ticker():
     else:
         st.warning(f"⚠️ Market data unavailable: {mkt['error']}")
 
+# ── Date / Time bar ──
+now = datetime.now()
+components.html(f"""
+<!DOCTYPE html><html><head>
+<meta charset="utf-8"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700&family=DM+Mono:wght@300;400&display=swap');
+  *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ background: transparent; font-family: 'DM Mono', monospace; padding: 0.2rem 0; }}
+  .datetime-bar {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background: rgba(0,245,212,0.04);
+    border: 1px solid rgba(0,245,212,0.1);
+    border-radius: 8px;
+  }}
+  .date-part {{
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: rgba(0,245,212,0.7);
+    text-transform: uppercase;
+  }}
+  .time-part {{
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    color: rgba(200,230,225,0.5);
+  }}
+  .separator {{
+    width: 1px;
+    height: 14px;
+    background: rgba(0,245,212,0.2);
+  }}
+</style>
+</head><body>
+<div class="datetime-bar">
+  <span class="date-part">{now.strftime("%A, %d %B %Y")}</span>
+  <div class="separator"></div>
+  <span class="time-part">{now.strftime("%H:%M:%S")} IST</span>
+</div>
+</body></html>
+""", height=50, scrolling=False)
+
+
+
 market_ticker()  # ← this call auto-reruns every 30s
 
 
