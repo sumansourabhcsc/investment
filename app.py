@@ -7,6 +7,7 @@ import time
 import yfinance as yf          # ← add here
 from datetime import datetime
 from utils.add_units import show_add_units
+from zoneinfo import ZoneInfo
 # app.py
 from utils.sidebar_style import render_sidebar
 render_sidebar("home")          # ← change the key per page
@@ -415,7 +416,7 @@ def market_ticker():
                     "change": round(se.last_price - se.previous_close, 2),
                     "pct":    round((se.last_price - se.previous_close) / se.previous_close * 100, 2),
                 },
-                "timestamp": datetime.now().strftime("%H:%M:%S"),
+                "timestamp": datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%H:%M:%S"),
                 "error": None
             }
         except Exception as e:
@@ -564,7 +565,7 @@ def market_ticker():
         st.warning(f"⚠️ Market data unavailable: {mkt['error']}")
 
 # ── Date / Time bar ──
-now = datetime.now()
+now = datetime.now(ZoneInfo("Asia/Kolkata"))
 components.html(f"""
 <!DOCTYPE html><html><head>
 <meta charset="utf-8"/>
