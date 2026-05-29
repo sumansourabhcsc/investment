@@ -4,7 +4,8 @@ import streamlit as st
 import streamlit.components.v1 as components
 import requests
 import time
-
+import yfinance as yf          # ← add here
+from datetime import datetime
 from utils.add_units import show_add_units
 # app.py
 from utils.sidebar_style import render_sidebar
@@ -390,8 +391,7 @@ components.html("""
 # ─────────────────────────────────────────────
 # Market Ticker — NSE Nifty 50 & BSE Sensex
 # ─────────────────────────────────────────────
-import yfinance as yf
-from datetime import datetime
+
 
 @st.cache_data(ttl=60)  # refresh every 60 seconds
 def get_market_data():
