@@ -431,133 +431,135 @@ def market_ticker():
         def color(v): return "#00f5d4" if v >= 0 else "#ff4d6d"
 
         components.html(f"""
-        <!DOCTYPE html><html><head>
-        <meta charset="utf-8"/>
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@300;400;500&display=swap');
-          *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
-          body {{ background: transparent; font-family: 'DM Mono', monospace; padding: 0.5rem 0; }}
-          .ticker-wrap {{
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-            width: 100%;
-          }}
-          .card {{
-            background: rgba(8,14,20,0.78);
-            border: 1px solid rgba(0,245,212,0.15);
-            border-radius: 12px;
-            padding: 1rem 1.4rem;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(12px);
-          }}
-          .card::before {{
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #00f5d4, #00c9ff);
-            opacity: 0.5;
-          }}
-          .card-header {{
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.55rem;
-          }}
-          .exchange-tag {{
-            font-family: 'Syne', sans-serif;
-            font-size: 0.62rem;
-            font-weight: 700;
-            letter-spacing: 0.18em;
-            color: rgba(0,245,212,0.5);
-            text-transform: uppercase;
-          }}
-          .dot {{
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            background: #00f5d4;
-            animation: pdot 1.8s ease-in-out infinite;
-          }}
-          @keyframes pdot {{
-            0%   {{ box-shadow: 0 0 0 0   rgba(0,245,212,0.7); }}
-            60%  {{ box-shadow: 0 0 0 5px rgba(0,245,212,0);   }}
-            100% {{ box-shadow: 0 0 0 0   rgba(0,245,212,0);   }}
-          }}
-          .index-name {{
-            font-family: 'Syne', sans-serif;
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: rgba(200,230,225,0.6);
-            letter-spacing: 0.06em;
-            margin-bottom: 0.3rem;
-          }}
-          .price {{
-            font-family: 'Syne', sans-serif;
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: #e8f5f2;
-            letter-spacing: -0.02em;
-            line-height: 1;
-          }}
-          .change-row {{
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 0.4rem;
-          }}
-          .change-abs {{
-            font-size: 0.78rem;
-            font-weight: 500;
-            letter-spacing: 0.02em;
-          }}
-          .change-pct {{
-            font-size: 0.72rem;
-            font-weight: 400;
-            opacity: 0.85;
-            letter-spacing: 0.02em;
-          }}
-          .timestamp {{
-            text-align: right;
-            font-size: 0.58rem;
-            color: rgba(0,245,212,0.3);
-            letter-spacing: 0.12em;
-            margin-top: 0.7rem;
-            text-transform: uppercase;
-          }}
-        </style>
-        </head><body>
-        <div class="ticker-wrap">
-          <div class="card">
-            <div class="card-header">
-              <span class="exchange-tag">NSE</span>
-              <div class="dot"></div>
-            </div>
-            <div class="index-name">NIFTY 50</div>
-            <div class="price">{ni['price']:,.2f}</div>
-            <div class="change-row">
-              <span class="change-abs" style="color:{color(ni['change'])}">{arrow(ni['change'])} {abs(ni['change']):,.2f}</span>
-              <span class="change-pct" style="color:{color(ni['pct'])}">({arrow(ni['pct'])}{abs(ni['pct']):.2f}%)</span>
-            </div>
-            <div class="timestamp">as of {mkt['timestamp']} IST</div>
-          </div>
-          <div class="card">
-            <div class="card-header">
-              <span class="exchange-tag">BSE</span>
-              <div class="dot"></div>
-            </div>
-            <div class="index-name">SENSEX</div>
-            <div class="price">{se['price']:,.2f}</div>
-            <div class="change-row">
-              <span class="change-abs" style="color:{color(se['change'])}">{arrow(se['change'])} {abs(se['change']):,.2f}</span>
-              <span class="change-pct" style="color:{color(se['pct'])}">({arrow(se['pct'])}{abs(se['pct']):.2f}%)</span>
-            </div>
-            <div class="timestamp">as of {mkt['timestamp']} IST</div>
-          </div>
-        </div>
-        </body></html>
-        """, height=155, scrolling=False)
+<!DOCTYPE html><html><head>
+<meta charset="utf-8"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@300;400;500&display=swap');
+  *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ background: transparent; font-family: 'DM Mono', monospace; padding: 0.5rem 0; }}
+  .ticker-wrap {{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    width: 100%;
+  }}
+  .card {{
+    background: rgba(8,14,20,0.78);
+    border: 1px solid rgba(0,245,212,0.15);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+  }}
+  .card::before {{
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #00f5d4, #00c9ff);
+    opacity: 0.5;
+  }}
+  .card-header {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+  }}
+  .exchange-tag {{
+    font-family: 'Syne', sans-serif;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: rgba(0,245,212,0.5);
+    text-transform: uppercase;
+  }}
+  .dot {{
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #00f5d4;
+    animation: pdot 1.8s ease-in-out infinite;
+    flex-shrink: 0;
+  }}
+  @keyframes pdot {{
+    0%   {{ box-shadow: 0 0 0 0   rgba(0,245,212,0.7); }}
+    60%  {{ box-shadow: 0 0 0 5px rgba(0,245,212,0);   }}
+    100% {{ box-shadow: 0 0 0 0   rgba(0,245,212,0);   }}
+  }}
+  .index-name {{
+    font-family: 'Syne', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: rgba(200,230,225,0.6);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.25rem;
+  }}
+  .price {{
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.2rem, 5vw, 1.55rem);
+    font-weight: 800;
+    color: #e8f5f2;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    white-space: nowrap;
+  }}
+  .change-row {{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.35rem;
+  }}
+  .change-abs {{
+    font-size: 0.68rem;
+    font-weight: 500;
+  }}
+  .change-pct {{
+    font-size: 0.62rem;
+    font-weight: 400;
+    opacity: 0.85;
+  }}
+  .timestamp {{
+    text-align: right;
+    font-size: 0.5rem;
+    color: rgba(0,245,212,0.3);
+    letter-spacing: 0.1em;
+    margin-top: 0.6rem;
+    text-transform: uppercase;
+  }}
+</style>
+</head><body>
+<div class="ticker-wrap">
+  <div class="card">
+    <div class="card-header">
+      <span class="exchange-tag">NSE</span>
+      <div class="dot"></div>
+    </div>
+    <div class="index-name">NIFTY 50</div>
+    <div class="price">{ni['price']:,.2f}</div>
+    <div class="change-row">
+      <span class="change-abs" style="color:{color(ni['change'])}">{arrow(ni['change'])} {abs(ni['change']):,.2f}</span>
+      <span class="change-pct" style="color:{color(ni['pct'])}">({arrow(ni['pct'])}{abs(ni['pct']):.2f}%)</span>
+    </div>
+    <div class="timestamp">as of {mkt['timestamp']} IST</div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <span class="exchange-tag">BSE</span>
+      <div class="dot"></div>
+    </div>
+    <div class="index-name">SENSEX</div>
+    <div class="price">{se['price']:,.2f}</div>
+    <div class="change-row">
+      <span class="change-abs" style="color:{color(se['change'])}">{arrow(se['change'])} {abs(se['change']):,.2f}</span>
+      <span class="change-pct" style="color:{color(se['pct'])}">({arrow(se['pct'])}{abs(se['pct']):.2f}%)</span>
+    </div>
+    <div class="timestamp">as of {mkt['timestamp']} IST</div>
+  </div>
+</div>
+</body></html>
+""", height=150, scrolling=False)
+
     else:
         st.warning(f"⚠️ Market data unavailable: {mkt['error']}")
 
