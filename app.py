@@ -396,7 +396,7 @@ components.html("""
 # Market Ticker — Auto-refreshing every 30s
 # ─────────────────────────────────────────────
 
-@st.fragment(run_every=1)
+@st.fragment(run_every=30)
 def market_ticker():
 
     @st.cache_data(ttl=25)
