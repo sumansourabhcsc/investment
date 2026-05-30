@@ -359,15 +359,19 @@ if generate or "sip_plan" in st.session_state:
             with st.spinner(f"🤖 AI analysing {cat} funds..."):
                 ai_result = ai_select_best_fund(cat, candidates, amount)
 
-            winner_name = ai_result.get("winner", "")
+            winner_name = ai_result.get("winner", "").strip()
             reasoning   = ai_result.get("reasoning", "")
 
-            # Match winner to fund metrics
-            winner_meta = fund_metrics.get(winner_name)
+            # Match winner back to candidates dict (which always has "name" key)
+            winner_meta = next(
+                (c for c in candidates if c["name"] == winner_name),
+                None
+            )
             if not winner_meta:
-                # fuzzy fallback — pick highest 3Y CAGR
+                # AI returned a name that doesn't match exactly — fallback to highest 3Y CAGR
                 winner_meta = max(candidates, key=lambda c: c["cagr_3y"] or 0)
                 winner_name = winner_meta["name"]
+                reasoning   = reasoning or f"Selected by highest 3Y CAGR: {winner_meta['cagr_3y']}%."
 
             plan.append({
                 "category":  cat,
@@ -382,7 +386,12 @@ if generate or "sip_plan" in st.session_state:
         st.session_state["sip_plan"]   = plan
         st.session_state["sip_budget"] = monthly_budget
 
-    plan    = st.session_state["sip_plan"]
+    plan = st.session_state["sip_plan"]
+    # Guard: invalidate stale session plan that used old fund_metrics format (missing "name" key)
+    if plan and "name" not in plan[0].get("fund", {}):
+        del st.session_state["sip_plan"]
+        st.warning("Plan data was stale — please click Generate again.")
+        st.stop()
     total_m = sum(r["amount"] for r in plan)
     # Projected 1Y using real 3Y CAGR
     proj_1y = sum(r["amount"] * 12 * (1 + (r["fund"]["cagr_3y"] or 0) / 100) for r in plan)
