@@ -223,10 +223,18 @@ PAGES = [
     {
         "name": "Tools",
         "file": "update_fund_snapshots.yml",
-        "description": "sip & fund calculator",
+        "description": "Fund calculator & utilities",
         "num": "03",
-        "link": "https://taurus.streamlit.app/Tools",
+        "link": "https://taurus.streamlit.app/4_Tools",
         "link_label": "Tools"
+    },
+    {
+        "name": "Smart SIP",
+        "file": "update_fund_snapshots.yml",
+        "description": "SIP planner & projections",
+        "num": "04",
+        "link": "https://taurus.streamlit.app/6_smart_sip",
+        "link_label": "Smart SIP"
     }
    
 ]
@@ -658,7 +666,8 @@ market_ticker()  # ← this call auto-reruns every 30s
 PAGE_MAP = {
     "Portfolio_Overview": "pages/1_Portfolio_Overview.py",
     "Fund_Details":       "pages/2_Fund_Details.py",
-    "Tools":              "pages/Tools.py",
+    "4_Tools":            "pages/4_Tools.py",
+    "6_smart_sip":        "pages/6_smart_sip.py",
 }
 
 st.markdown("""
@@ -712,9 +721,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-col_c1, col_c2, col_c3= st.columns(3)
+col_c1, col_c2, col_c3, col_c4 = st.columns(4)
 
-for col, wf in zip([col_c1, col_c2, col_c3], PAGES):
+for col, wf in zip([col_c1, col_c2, col_c3, col_c4], PAGES):
     page_key = wf["link"].rstrip("/").split("/")[-1]
     with col:
         st.markdown(f"""
