@@ -7,3 +7,4 @@ scipy
 prophet
 scikit-learn
 yfinance
+anthropic
