@@ -387,14 +387,14 @@ if generate or "sip_plan" in st.session_state:
         st.session_state["sip_budget"] = monthly_budget
 
     plan = st.session_state["sip_plan"]
-    # Guard: invalidate stale session plan that used old fund_metrics format (missing "name" key)
-    if plan and "name" not in plan[0].get("fund", {}):
+    # Guard: invalidate any stale plan that doesn't have the current fund dict shape (cagr_3y key)
+    if plan and "cagr_3y" not in plan[0].get("fund", {}):
         del st.session_state["sip_plan"]
-        st.warning("Plan data was stale — please click Generate again.")
+        st.info("🔄 Your previous plan used an older format. Click **Generate** to rebuild with real NAV data.")
         st.stop()
     total_m = sum(r["amount"] for r in plan)
-    # Projected 1Y using real 3Y CAGR
-    proj_1y = sum(r["amount"] * 12 * (1 + (r["fund"]["cagr_3y"] or 0) / 100) for r in plan)
+    # Projected 1Y using real 3Y CAGR — use .get() as final safety net
+    proj_1y = sum(r["amount"] * 12 * (1 + (r["fund"].get("cagr_3y") or 0) / 100) for r in plan)
 
     st.divider()
 
@@ -487,10 +487,10 @@ if generate or "sip_plan" in st.session_state:
     df = pd.DataFrame([{
         "Category":    r["category"],
         "AI Pick":     r["fund_name"],
-        "3Y CAGR":     f"{r['fund']['cagr_3y']}%" if r['fund']['cagr_3y'] else "N/A",
-        "5Y CAGR":     f"{r['fund']['cagr_5y']}%" if r['fund']['cagr_5y'] else "N/A",
-        "Latest NAV":  f"₹{r['fund']['latest_nav']}" if r['fund']['latest_nav'] else "N/A",
-        "Risk":        r["fund"]["risk"],
+        "3Y CAGR":     f"{r['fund'].get('cagr_3y')}%" if r['fund'].get('cagr_3y') else "N/A",
+        "5Y CAGR":     f"{r['fund'].get('cagr_5y')}%" if r['fund'].get('cagr_5y') else "N/A",
+        "Latest NAV":  f"₹{r['fund'].get('latest_nav')}" if r['fund'].get('latest_nav') else "N/A",
+        "Risk":        r["fund"].get("risk", "—"),
         "Monthly SIP": fmt_inr(r["amount"]),
         "Annual SIP":  fmt_inr(r["amount"] * 12),
     } for r in plan])
