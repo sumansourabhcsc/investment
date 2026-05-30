@@ -9,16 +9,16 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import mutual_funds
 from utils.sidebar_style import render_sidebar
 
-render_sidebar("smart_sip")
-
 # ─────────────────────────────────────────────
-# Page Config
+# Page Config — MUST be first Streamlit call
 # ─────────────────────────────────────────────
 st.set_page_config(
     page_title="Taurus: Smart SIP",
     page_icon="🐂",
     layout="wide"
 )
+
+render_sidebar("smart_sip")
 
 # ─────────────────────────────────────────────
 # Background + Styling (identical to other pages)
@@ -263,6 +263,10 @@ with col_info:
 # ─────────────────────────────────────────────
 # Allocation customiser
 # ─────────────────────────────────────────────
+# Defaults — always set so they exist even if expander is collapsed
+alloc = dict(DEFAULT_ALLOC)
+total = 100
+
 with st.expander("⚙️  Customise allocation %", expanded=False):
     st.caption("Adjust category weights. Must total 100%.")
     alloc = {}
@@ -273,9 +277,6 @@ with st.expander("⚙️  Customise allocation %", expanded=False):
     total = sum(alloc.values())
     if total != 100:
         st.warning(f"Total = **{total}%** — must be exactly 100%.")
-else:
-    alloc = dict(DEFAULT_ALLOC)
-    total = 100
 
 # ─────────────────────────────────────────────
 # Generate button
