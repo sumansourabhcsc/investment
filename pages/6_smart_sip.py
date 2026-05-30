@@ -1,9 +1,12 @@
-# pages/6_Smart_SIP.py
+# pages/6_smart_sip.py
 
 import streamlit as st
 import math
 import sys
 import os
+import json
+from datetime import datetime, timedelta
+from pathlib import Path
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import mutual_funds
@@ -21,170 +24,107 @@ st.set_page_config(
 render_sidebar("smart_sip")
 
 # ─────────────────────────────────────────────
-# Background + Styling (identical to other pages)
+# Styling
 # ─────────────────────────────────────────────
-st.markdown(
-    """
-    <style>
-    /* ── Base: deep midnight navy ── */
-    .stApp {
-        background-color: #020d1a;
-        background-image: none;
-        position: relative;
-        min-height: 100vh;
-    }
+st.markdown("""
+<style>
+.stApp {
+    background-color: #020d1a;
+    background-image: none;
+    position: relative;
+    min-height: 100vh;
+}
+.stApp::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background:
+        radial-gradient(ellipse 80% 60% at 15% 20%,  rgba(0, 245, 212, 0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 80% at 85% 75%,  rgba(0, 180, 245, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 50% 100%, rgba(0, 245, 212, 0.04) 0%, transparent 55%),
+        radial-gradient(ellipse 100% 100% at 50% 0%,  rgba(2, 20, 40, 0.8)  0%, #020d1a 70%);
+    z-index: 0;
+    pointer-events: none;
+    animation: taurus-pulse 8s ease-in-out infinite;
+}
+.stApp::after {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image: radial-gradient(circle, rgba(0,245,212,0.18) 1px, transparent 1px);
+    background-size: 38px 38px;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.55;
+}
+@keyframes taurus-pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+.stApp > * { position: relative; z-index: 1; }
+[data-testid="stSidebar"] {
+    background: linear-gradient(160deg, rgba(2,22,44,0.97) 0%, rgba(1,14,28,0.98) 100%) !important;
+    border-right: 1px solid rgba(0,245,212,0.1) !important;
+    box-shadow: 4px 0 32px rgba(0,0,0,0.5) !important;
+}
+.sip-card {
+    background: rgba(0,245,212,0.04);
+    border: 1px solid rgba(0,245,212,0.14);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    transition: border 0.2s;
+}
+.sip-card:hover { border-color: rgba(0,245,212,0.35); }
+.stat-box {
+    background: rgba(0,245,212,0.05);
+    border: 1px solid rgba(0,245,212,0.18);
+    border-radius: 10px;
+    padding: 16px 18px;
+}
+.stat-label { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(0,245,212,0.55); margin-bottom:4px; }
+.stat-value { font-size:20px; font-weight:700; color:#00f5d4; font-family:'DM Mono',monospace; }
+.stat-value-purple { font-size:20px; font-weight:700; color:#a78bfa; font-family:'DM Mono',monospace; }
+.cat-label { font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(0,245,212,0.6); margin-bottom:2px; }
+.fund-name { font-size:15px; font-weight:600; color:#e8f4f0; margin-bottom:8px; }
+.pill { display:inline-block; padding:3px 11px; border-radius:20px; font-size:11px; font-weight:600; margin-right:5px; }
+.bar-track { background:rgba(255,255,255,0.07); border-radius:4px; height:8px; overflow:hidden; margin-top:5px; }
+.ai-reasoning {
+    background: rgba(167,139,250,0.06);
+    border: 1px solid rgba(167,139,250,0.2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: rgba(220,210,255,0.75);
+    line-height: 1.7;
+}
+.disclaimer { font-size:11px; color:rgba(255,255,255,0.28); line-height:1.9; margin-top:24px; border-top:1px solid rgba(0,245,212,0.08); padding-top:14px; }
+</style>
+""", unsafe_allow_html=True)
 
-    /* ── Layer 1: radial teal glow orbs ── */
-    .stApp::before {
-        content: "";
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background:
-            radial-gradient(ellipse 80% 60% at 15% 20%,  rgba(0, 245, 212, 0.07) 0%, transparent 65%),
-            radial-gradient(ellipse 60% 80% at 85% 75%,  rgba(0, 180, 245, 0.06) 0%, transparent 60%),
-            radial-gradient(ellipse 50% 40% at 50% 100%, rgba(0, 245, 212, 0.04) 0%, transparent 55%),
-            radial-gradient(ellipse 100% 100% at 50% 0%,  rgba(2, 20, 40, 0.8)  0%, #020d1a 70%);
-        z-index: 0;
-        pointer-events: none;
-    }
-
-    /* ── Layer 2: fine dot-grid pattern ── */
-    .stApp::after {
-        content: "";
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background-image:
-            radial-gradient(circle, rgba(0,245,212,0.18) 1px, transparent 1px);
-        background-size: 38px 38px;
-        z-index: 0;
-        pointer-events: none;
-        opacity: 0.55;
-    }
-
-    .stApp > * { position: relative; z-index: 1; }
-
-    /* ── Sidebar ── */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(160deg, rgba(2,22,44,0.97) 0%, rgba(1,14,28,0.98) 100%) !important;
-        border-right: 1px solid rgba(0,245,212,0.1) !important;
-        box-shadow: 4px 0 32px rgba(0,0,0,0.5) !important;
-    }
-
-    @keyframes taurus-pulse {
-        0%   { opacity: 1; }
-        50%  { opacity: 0.6; }
-        100% { opacity: 1; }
-    }
-    .stApp::before { animation: taurus-pulse 8s ease-in-out infinite; }
-
-    [data-testid="stAppViewContainer"] > section.main > div.block-container {
-        background: rgba(2, 16, 32, 0.45);
-        border-left: 1px solid rgba(0,245,212,0.07);
-        border-right: 1px solid rgba(0,245,212,0.07);
-        backdrop-filter: blur(2px);
-        -webkit-backdrop-filter: blur(2px);
-    }
-
-    /* ── Custom card style ── */
-    .sip-card {
-        background: rgba(0, 245, 212, 0.04);
-        border: 1px solid rgba(0,245,212,0.14);
-        border-radius: 12px;
-        padding: 18px 20px;
-        margin-bottom: 12px;
-        transition: border 0.2s;
-    }
-    .sip-card:hover { border-color: rgba(0,245,212,0.35); }
-
-    .stat-box {
-        background: rgba(0,245,212,0.05);
-        border: 1px solid rgba(0,245,212,0.18);
-        border-radius: 10px;
-        padding: 16px 18px;
-    }
-    .stat-label {
-        font-size: 10px;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-        color: rgba(0,245,212,0.55);
-        margin-bottom: 4px;
-    }
-    .stat-value {
-        font-size: 20px;
-        font-weight: 700;
-        color: #00f5d4;
-        font-family: 'DM Mono', monospace;
-    }
-    .stat-value-purple {
-        font-size: 20px;
-        font-weight: 700;
-        color: #a78bfa;
-        font-family: 'DM Mono', monospace;
-    }
-    .cat-label {
-        font-size: 10px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: rgba(0,245,212,0.6);
-        margin-bottom: 2px;
-    }
-    .fund-name {
-        font-size: 15px;
-        font-weight: 600;
-        color: #e8f4f0;
-        margin-bottom: 8px;
-    }
-    .pill {
-        display: inline-block;
-        padding: 3px 11px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 600;
-        margin-right: 5px;
-    }
-    .bar-track {
-        background: rgba(255,255,255,0.07);
-        border-radius: 4px;
-        height: 8px;
-        overflow: hidden;
-        margin-top: 5px;
-    }
-    .disclaimer {
-        font-size: 11px;
-        color: rgba(255,255,255,0.28);
-        line-height: 1.9;
-        margin-top: 24px;
-        border-top: 1px solid rgba(0,245,212,0.08);
-        padding-top: 14px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 # ─────────────────────────────────────────────
-# Fund universe — your funds from config.py
-# categorised + enriched with metadata
+# NAV CAGR calculator — reads local NAVHistory/
 # ─────────────────────────────────────────────
-FUND_META = {
-    "Mirae Asset FANG+":                          {"category": "Thematic / Global",  "returns_3y": 14.1, "rating": 4, "risk": "Very High",     "risk_color": "#dc2626"},
-    "SBI Magnum Children's Benefit Fund":         {"category": "Hybrid / Children",  "returns_3y": 17.9, "rating": 4, "risk": "Moderate",      "risk_color": "#eab308"},
-    "Bandhan Small Cap Fund":                     {"category": "Small Cap",           "returns_3y": 28.1, "rating": 4, "risk": "Very High",     "risk_color": "#dc2626"},
-    "Motilal Oswal Midcap Fund":                  {"category": "Mid Cap",             "returns_3y": 29.3, "rating": 5, "risk": "High",          "risk_color": "#ef4444"},
-    "Edelweiss Flexi Cap Fund":                   {"category": "Flexi Cap",           "returns_3y": 18.2, "rating": 4, "risk": "Moderate-High", "risk_color": "#f97316"},
-    "Parag Parikh Flexi Cap Fund":                {"category": "Flexi Cap",           "returns_3y": 19.7, "rating": 5, "risk": "Moderate-High", "risk_color": "#f97316"},
-    "Nippon India Large Cap Fund":                {"category": "Large Cap",           "returns_3y": 16.4, "rating": 5, "risk": "Low-Moderate",  "risk_color": "#84cc16"},
-    "Axis Small Cap Fund":                        {"category": "Small Cap",           "returns_3y": 26.1, "rating": 5, "risk": "Very High",     "risk_color": "#dc2626"},
-    "SBI Small Cap Fund":                         {"category": "Small Cap",           "returns_3y": 27.8, "rating": 5, "risk": "Very High",     "risk_color": "#dc2626"},
-    "quant Small Cap Fund":                       {"category": "Small Cap",           "returns_3y": 31.4, "rating": 5, "risk": "Very High",     "risk_color": "#dc2626"},
-    "HSBC Midcap Fund":                           {"category": "Mid Cap",             "returns_3y": 22.4, "rating": 4, "risk": "High",          "risk_color": "#ef4444"},
-    "Kotak Midcap Fund":                          {"category": "Mid Cap",             "returns_3y": 23.1, "rating": 4, "risk": "High",          "risk_color": "#ef4444"},
-    "quant Mid Cap Fund":                         {"category": "Mid Cap",             "returns_3y": 27.6, "rating": 5, "risk": "High",          "risk_color": "#ef4444"},
-    "Edelweiss Nifty Midcap150 Momentum 50 Index Fund": {"category": "Mid Cap",       "returns_3y": 24.8, "rating": 4, "risk": "High",          "risk_color": "#ef4444"},
-    "Kotak Flexicap Fund":                        {"category": "Flexi Cap",           "returns_3y": 17.3, "rating": 4, "risk": "Moderate-High", "risk_color": "#f97316"},
-    "ICICI Pru BHARAT 22 FOF":                    {"category": "Thematic / Global",  "returns_3y": 22.7, "rating": 4, "risk": "Moderate-High", "risk_color": "#f97316"},
+NAV_DIR = Path(__file__).parent.parent / "NAVHistory"
+
+RISK_MAP = {
+    "International":  ("Very High",     "#dc2626"),
+    "Hybrid":         ("Moderate",       "#eab308"),
+    "Small Cap":      ("Very High",     "#dc2626"),
+    "Mid Cap":        ("High",           "#ef4444"),
+    "Flexi Cap":      ("Moderate-High", "#f97316"),
+    "Large Cap":      ("Low-Moderate",  "#84cc16"),
+    "Thematic":       ("Very High",     "#dc2626"),
+}
+
+CATEGORY_DISPLAY = {
+    "International": "Thematic / Global",
+    "Hybrid":        "Hybrid / Children",
+    "Small Cap":     "Small Cap",
+    "Mid Cap":       "Mid Cap",
+    "Flexi Cap":     "Flexi Cap",
+    "Large Cap":     "Large Cap",
 }
 
 DEFAULT_ALLOC = {
@@ -199,23 +139,121 @@ DEFAULT_ALLOC = {
 BAR_COLORS = ["#00f5d4", "#3b82f6", "#a78bfa", "#f59e0b", "#ef4444", "#10b981"]
 
 
-def best_fund_in_category(category: str) -> dict | None:
-    candidates = [
-        {"name": name, **meta}
-        for name, meta in FUND_META.items()
-        if meta["category"] == category
-    ]
-    if not candidates:
-        return None
-    return max(candidates, key=lambda f: f["returns_3y"] * f["rating"])
+@st.cache_data(ttl=3600)
+def load_all_fund_metrics() -> dict:
+    """Load NAV files and compute real 3Y & 5Y CAGR for every fund."""
+    def parse_date(s):
+        return datetime.strptime(s, "%d-%m-%Y")
+
+    def calc_cagr(nav_list, years):
+        if not nav_list:
+            return None
+        today_nav  = float(nav_list[0]["nav"])
+        today_date = parse_date(nav_list[0]["date"])
+        target     = today_date - timedelta(days=int(years * 365.25))
+        for entry in nav_list:
+            d = parse_date(entry["date"])
+            if d <= target:
+                past_nav     = float(entry["nav"])
+                actual_years = (today_date - d).days / 365.25
+                return round(((today_nav / past_nav) ** (1 / actual_years) - 1) * 100, 2)
+        return None  # not enough history
+
+    metrics = {}
+    for fund_name, meta in mutual_funds.items():
+        code     = meta["code"]
+        category = meta.get("category", "")
+        nav_file = NAV_DIR / f"{code}.json"
+
+        cagr_3y = cagr_5y = latest_nav = None
+        if nav_file.exists():
+            try:
+                with open(nav_file) as f:
+                    data = json.load(f)
+                navs = data.get("data", [])
+                if navs:
+                    latest_nav = float(navs[0]["nav"])
+                    cagr_3y    = calc_cagr(navs, 3)
+                    cagr_5y    = calc_cagr(navs, 5)
+            except Exception:
+                pass
+
+        risk, risk_color = RISK_MAP.get(category, ("Unknown", "#888"))
+        display_cat      = CATEGORY_DISPLAY.get(category, category)
+
+        metrics[fund_name] = {
+            "code":         code,
+            "category":     display_cat,
+            "raw_category": category,
+            "cagr_3y":      cagr_3y,
+            "cagr_5y":      cagr_5y,
+            "latest_nav":   latest_nav,
+            "risk":         risk,
+            "risk_color":   risk_color,
+        }
+    return metrics
+
+
+# ─────────────────────────────────────────────
+# AI fund selector — calls Claude API
+# ─────────────────────────────────────────────
+def ai_select_best_fund(category: str, candidates: list, monthly_amount: int) -> dict:
+    """
+    Ask Claude to pick the best fund from candidates for this category.
+    Returns {winner_name, reasoning}
+    """
+    import anthropic
+
+    fund_lines = "\n".join(
+        f"  - {c['name']}: 3Y CAGR={c['cagr_3y']}%, 5Y CAGR={c['cagr_5y']}%, "
+        f"Latest NAV=₹{c['latest_nav']}, Risk={c['risk']}"
+        for c in candidates
+    )
+
+    prompt = f"""You are a mutual fund analyst. A SIP investor wants to invest ₹{monthly_amount:,}/month in the **{category}** category.
+
+Here are the available funds with REAL CAGR calculated from actual NAV history:
+
+{fund_lines}
+
+Pick the SINGLE best fund for a long-term SIP investor. Consider:
+1. 3Y CAGR (primary) and 5Y CAGR (consistency check)
+2. Risk-adjusted returns
+3. Consistency (if 5Y CAGR is significantly lower than 3Y, it may be a recent spike)
+
+Respond in this EXACT JSON format (no markdown, no extra text):
+{{
+  "winner": "<exact fund name from the list>",
+  "reasoning": "<2-3 sentence explanation of why this fund was chosen over the others>"
+}}"""
+
+    try:
+        client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
+        msg = client.messages.create(
+            model="claude-opus-4-5",
+            max_tokens=400,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw = msg.content[0].text.strip()
+        # strip any accidental markdown fences
+        raw = raw.replace("```json", "").replace("```", "").strip()
+        result = json.loads(raw)
+        return result
+    except Exception as e:
+        # Fallback: pick highest 3Y CAGR
+        best = max(candidates, key=lambda c: c["cagr_3y"] or 0)
+        return {
+            "winner": best["name"],
+            "reasoning": f"AI unavailable ({e}). Selected by highest 3Y CAGR: {best['cagr_3y']}%."
+        }
 
 
 def fmt_inr(amount: float) -> str:
     return f"₹{int(amount):,}"
 
-
-def stars(n: int) -> str:
-    return "★" * n + "☆" * (5 - n)
+def stars(r: float) -> str:
+    full = int(round(r))
+    return "★" * full + "☆" * (5 - full)
 
 
 # ─────────────────────────────────────────────
@@ -232,10 +270,20 @@ st.markdown("""
 st.markdown("## ⚡ Smart SIP Planner")
 st.markdown(
     "<p style='color:rgba(255,255,255,0.4);font-size:13px;margin-top:-8px;'>"
-    "Best fund from each category in your portfolio · ₹1,50,000 / month allocation</p>",
+    "AI-powered fund selection · CAGR computed from real NAV history · Best fund per category</p>",
     unsafe_allow_html=True
 )
 st.divider()
+
+# ─────────────────────────────────────────────
+# Load real metrics
+# ─────────────────────────────────────────────
+with st.spinner("Loading NAV history & computing real returns..."):
+    fund_metrics = load_all_fund_metrics()
+
+# Show data freshness
+nav_counts = sum(1 for m in fund_metrics.values() if m["cagr_3y"] is not None)
+st.caption(f"📡 NAV data loaded for **{nav_counts}/{len(fund_metrics)}** funds · Returns computed from actual NAV history")
 
 # ─────────────────────────────────────────────
 # Budget Input
@@ -263,7 +311,6 @@ with col_info:
 # ─────────────────────────────────────────────
 # Allocation customiser
 # ─────────────────────────────────────────────
-# Defaults — always set so they exist even if expander is collapsed
 alloc = dict(DEFAULT_ALLOC)
 total = 100
 
@@ -285,26 +332,60 @@ if total != 100:
     st.error("Fix allocation percentages before generating.")
     st.stop()
 
-generate = st.button("✦  Generate Investment Plan", type="primary", use_container_width=True)
+generate = st.button("✦  Generate AI Investment Plan", type="primary", use_container_width=True)
 
 if generate or "sip_plan" in st.session_state:
 
     if generate:
         plan = []
+        st.session_state.pop("sip_plan", None)  # clear cache on regenerate
+
         for cat, pct in alloc.items():
             if pct == 0:
                 continue
-            pick = best_fund_in_category(cat)
-            if not pick:
+
+            # Get all funds in this display category with valid 3Y CAGR
+            candidates = [
+                {"name": name, **meta}
+                for name, meta in fund_metrics.items()
+                if meta["category"] == cat and meta["cagr_3y"] is not None
+            ]
+            if not candidates:
                 continue
+
             amount = math.floor((monthly_budget * pct / 100) / 100) * 100
-            plan.append({"category": cat, "pct": pct, "fund": pick, "amount": amount})
-        st.session_state["sip_plan"] = plan
+
+            # AI selection
+            with st.spinner(f"🤖 AI analysing {cat} funds..."):
+                ai_result = ai_select_best_fund(cat, candidates, amount)
+
+            winner_name = ai_result.get("winner", "")
+            reasoning   = ai_result.get("reasoning", "")
+
+            # Match winner to fund metrics
+            winner_meta = fund_metrics.get(winner_name)
+            if not winner_meta:
+                # fuzzy fallback — pick highest 3Y CAGR
+                winner_meta = max(candidates, key=lambda c: c["cagr_3y"] or 0)
+                winner_name = winner_meta["name"]
+
+            plan.append({
+                "category":  cat,
+                "pct":       pct,
+                "amount":    amount,
+                "fund_name": winner_name,
+                "fund":      winner_meta,
+                "reasoning": reasoning,
+                "candidates_count": len(candidates),
+            })
+
+        st.session_state["sip_plan"]   = plan
         st.session_state["sip_budget"] = monthly_budget
 
-    plan     = st.session_state["sip_plan"]
-    total_m  = sum(r["amount"] for r in plan)
-    proj_1y  = sum(r["amount"] * 12 * (1 + r["fund"]["returns_3y"] / 100) for r in plan)
+    plan    = st.session_state["sip_plan"]
+    total_m = sum(r["amount"] for r in plan)
+    # Projected 1Y using real 3Y CAGR
+    proj_1y = sum(r["amount"] * 12 * (1 + (r["fund"]["cagr_3y"] or 0) / 100) for r in plan)
 
     st.divider()
 
@@ -348,34 +429,42 @@ if generate or "sip_plan" in st.session_state:
     st.divider()
 
     # ── Fund Cards ──
-    st.markdown("#### 🏆 Best Fund Pick Per Category")
-    st.caption("Ranked by 3Y CAGR × Star Rating across your portfolio funds.")
+    st.markdown("#### 🏆 AI-Selected Best Fund Per Category")
+    st.caption("Claude AI analysed all funds per category using real 3Y & 5Y CAGR from NAV history.")
 
     for i, row in enumerate(plan):
         f     = row["fund"]
         color = BAR_COLORS[i % len(BAR_COLORS)]
+        cagr3 = f.get("cagr_3y") or 0
+        cagr5 = f.get("cagr_5y")
+        cagr5_str = f"{cagr5}%" if cagr5 else "N/A"
+
         st.markdown(f"""
         <div class='sip-card'>
             <div style='display:flex;justify-content:space-between;align-items:flex-start;gap:12px;'>
                 <div style='flex:1;'>
-                    <div class='cat-label'>{row['category']} · {row['pct']}% of budget</div>
-                    <div class='fund-name'>{f['name']}</div>
+                    <div class='cat-label'>{row['category']} · {row['pct']}% of budget · {row['candidates_count']} funds analysed</div>
+                    <div class='fund-name'>{row['fund_name']}</div>
                     <div>
                         <span class='pill' style='background:rgba(0,245,212,0.1);color:#00f5d4;border:1px solid rgba(0,245,212,0.25);'>
-                            📈 {f['returns_3y']}% 3Y CAGR
+                            📈 {cagr3}% 3Y CAGR
                         </span>
-                        <span class='pill' style='background:rgba(255,210,80,0.08);color:#ffd250;border:1px solid rgba(255,210,80,0.2);'>
-                            {stars(f['rating'])}
+                        <span class='pill' style='background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.25);'>
+                            📊 {cagr5_str} 5Y CAGR
                         </span>
                         <span class='pill' style='background:{f["risk_color"]}18;color:{f["risk_color"]};border:1px solid {f["risk_color"]}44;'>
                             {f['risk']}
                         </span>
+                    </div>
+                    <div class='ai-reasoning'>
+                        🤖 <b style='color:rgba(167,139,250,0.9);'>AI Reasoning:</b> {row['reasoning']}
                     </div>
                 </div>
                 <div style='text-align:right;flex-shrink:0;'>
                     <div style='font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;text-transform:uppercase;'>Monthly SIP</div>
                     <div style='font-size:22px;font-weight:700;color:{color};font-family:DM Mono,monospace;'>{fmt_inr(row['amount'])}</div>
                     <div style='font-size:10px;color:rgba(255,255,255,0.25);'>Annual: {fmt_inr(row['amount']*12)}</div>
+                    <div style='font-size:10px;color:rgba(255,255,255,0.2);margin-top:4px;'>NAV: ₹{f.get('latest_nav','—')}</div>
                 </div>
             </div>
         </div>
@@ -388,9 +477,10 @@ if generate or "sip_plan" in st.session_state:
     import pandas as pd
     df = pd.DataFrame([{
         "Category":    r["category"],
-        "Best Fund":   r["fund"]["name"],
-        "3Y CAGR":     f"{r['fund']['returns_3y']}%",
-        "Rating":      stars(r["fund"]["rating"]),
+        "AI Pick":     r["fund_name"],
+        "3Y CAGR":     f"{r['fund']['cagr_3y']}%" if r['fund']['cagr_3y'] else "N/A",
+        "5Y CAGR":     f"{r['fund']['cagr_5y']}%" if r['fund']['cagr_5y'] else "N/A",
+        "Latest NAV":  f"₹{r['fund']['latest_nav']}" if r['fund']['latest_nav'] else "N/A",
         "Risk":        r["fund"]["risk"],
         "Monthly SIP": fmt_inr(r["amount"]),
         "Annual SIP":  fmt_inr(r["amount"] * 12),
@@ -400,8 +490,9 @@ if generate or "sip_plan" in st.session_state:
     # ── Disclaimer ──
     st.markdown("""
     <div class='disclaimer'>
-    * Returns are historical 3Y CAGR estimates. Past performance does not guarantee future results.<br>
-    * Best fund selection is scored by 3Y CAGR × Star Rating from your existing config.py portfolio.<br>
-    * SIP amounts rounded to nearest ₹100. Consult a SEBI-registered advisor before investing.
+    * 3Y & 5Y CAGR figures are computed directly from NAV history files in <code>NAVHistory/</code> — not estimated.<br>
+    * AI fund selection uses Claude to weigh 3Y CAGR, 5Y CAGR consistency, and risk profile.<br>
+    * SIP amounts rounded to nearest ₹100. Past performance does not guarantee future results.<br>
+    * Consult a SEBI-registered advisor before investing.
     </div>
     """, unsafe_allow_html=True)
