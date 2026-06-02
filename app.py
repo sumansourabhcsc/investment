@@ -10,6 +10,9 @@ from utils.add_units import show_add_units
 from zoneinfo import ZoneInfo
 # app.py
 from utils.sidebar_style import render_sidebar
+from utils.market_history_chart import show_market_history_chart
+
+
 render_sidebar("home")          # ← change the key per page
 
 # ─────────────────────────────────────────────
@@ -652,6 +655,9 @@ components.html("""
 
 market_ticker()  # ← this call auto-reruns every 30s
 
+
+st.markdown("<br>", unsafe_allow_html=True)
+show_market_history_chart()
 
 # ── Pipeline navigation ──   ← this line is already in your code, nothing changes below
 
