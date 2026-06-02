@@ -147,9 +147,9 @@ def render_sidebar(current_page: str):
         # Spacer to push news to bottom
         #st.markdown("<div style='flex:1; min-height:40px'></div>", unsafe_allow_html=True)
          # ── Smart SIP — new entry ──
-        st.markdown('<div class="sip-page">', unsafe_allow_html=True)
+        #st.markdown('<div class="sip-page">', unsafe_allow_html=True)
         st.page_link("pages/6_smart_sip.py",            label="Smart SIP",  icon="⚡")
-        st.markdown('</div>', unsafe_allow_html=True)
+        #st.markdown('</div>', unsafe_allow_html=True)
         # Fund News pinned at bottom with gold wrapper
         #st.markdown('<div class="news-page">', unsafe_allow_html=True)
         st.page_link("pages/5_Fund_News.py", label="News", icon="📰")
