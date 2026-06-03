@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 def capture_and_save():
     ist = ZoneInfo("Asia/Kolkata")
     today = datetime.now(ist).strftime("%Y-%m-%d")
-    data_path = "investment/data/market_index_history.json"
+    data_path = "data/market_index_history.json"
 
     # ── Load existing data ──
     if os.path.exists(data_path):
