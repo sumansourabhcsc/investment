@@ -6,7 +6,7 @@ import json
 import os
 
 def show_market_history_chart():
-    data_path = "investment/data/market_index_history.json"
+    data_path = "data/market_index_history.json"
 
     if not os.path.exists(data_path):
         st.info("No market history yet — data will appear after the first capture.")
