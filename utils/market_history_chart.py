@@ -7,6 +7,12 @@ import os
 
 def show_market_history_chart():
     data_path = "data/market_index_history.json"
+    
+    import os
+    st.write("CWD:", os.getcwd())
+    st.write("Path exists:", os.path.exists(data_path))
+    st.write("Files in data/:", os.listdir("data") if os.path.exists("data") else "NO data/ folder")
+
 
     if not os.path.exists(data_path):
         st.info("No market history yet — data will appear after the first capture.")
