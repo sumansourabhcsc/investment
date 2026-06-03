@@ -13,7 +13,7 @@ from utils.sidebar_style import render_sidebar
 from utils.market_history_chart import show_market_history_chart
 
 
-render_sidebar("home")          # ← change the key per page
+
 
 # ─────────────────────────────────────────────
 # Page Config — MUST be first, only once
@@ -24,7 +24,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
+render_sidebar("home")          # ← change the key per page
 # with st.sidebar:
 #     st.markdown("### 🐂 TAURUS")
 #     st.page_link("pages/1_Portfolio_Overview.py", label="📊 Portfolio Overview")
