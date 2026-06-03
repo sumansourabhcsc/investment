@@ -24,7 +24,6 @@ def show_market_history_chart():
     nifty_js  = json.dumps([e["nifty"]  for e in history])
     sensex_js = json.dumps([e["sensex"] for e in history])
 
-    # Inject data via a separate <script> block — no f-string on the HTML template
     data_script = f"<script>const dates={dates_js};const nifty={nifty_js};const sensex={sensex_js};</script>"
 
     html = """
@@ -34,103 +33,145 @@ def show_market_history_chart():
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@300;400&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: transparent; font-family: 'DM Mono', monospace; padding: 0.6rem 0; }
+  body { background: transparent; font-family: 'DM Mono', monospace; padding: 0.4rem 0; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
   .chart-shell {
     background: rgba(8,14,20,0.82);
     border: 1px solid rgba(0,245,212,0.15);
     border-radius: 14px;
-    padding: 1.2rem 1.4rem 1rem;
+    padding: 1rem 1.2rem 0.9rem;
     position: relative;
     overflow: hidden;
+  }
+  .chart-shell.sensex {
+    border-color: rgba(167,139,250,0.2);
   }
   .chart-shell::before {
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, #00f5d4, #00c9ff, #a78bfa);
-    opacity: 0.55;
+    opacity: 0.6;
   }
-  .chart-title {
+  .chart-shell.nifty::before  { background: linear-gradient(90deg, #00f5d4, #00c9ff); }
+  .chart-shell.sensex::before { background: linear-gradient(90deg, #a78bfa, #c084fc); }
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.7rem;
+  }
+  .chart-label {
     font-family: 'Syne', sans-serif;
-    font-size: 0.7rem;
+    font-size: 0.62rem;
     font-weight: 700;
     letter-spacing: 0.2em;
-    color: rgba(0,245,212,0.6);
     text-transform: uppercase;
-    margin-bottom: 0.9rem;
   }
-  .legend-row { display: flex; gap: 1.4rem; margin-bottom: 0.8rem; }
-  .legend-item {
-    display: flex; align-items: center; gap: 0.4rem;
-    font-size: 0.6rem; letter-spacing: 0.1em;
-    color: rgba(200,230,225,0.7); text-transform: uppercase;
+  .nifty  .chart-label { color: rgba(0,245,212,0.6); }
+  .sensex .chart-label { color: rgba(167,139,250,0.7); }
+  .chart-index {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
   }
-  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .nifty  .chart-index { color: rgba(0,245,212,0.35); }
+  .sensex .chart-index { color: rgba(167,139,250,0.35); }
+  .latest-price {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 0.2rem;
+  }
+  .nifty  .latest-price { color: #00f5d4; }
+  .sensex .latest-price { color: #a78bfa; }
+  .change-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.62rem;
+    margin-bottom: 0.8rem;
+  }
   canvas { width: 100% !important; }
 </style>
 </head><body>
 """ + data_script + """
-<div class="chart-shell">
-  <div class="chart-title">&#11043; Market Index History</div>
-  <div class="legend-row">
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#00f5d4;box-shadow:0 0 6px #00f5d488;"></div>Nifty 50
+<div class="grid">
+
+  <!-- Nifty 50 -->
+  <div class="chart-shell nifty">
+    <div class="chart-header">
+      <div>
+        <div class="chart-label">&#11043; NSE</div>
+        <div class="latest-price" id="nifty-price">--</div>
+        <div class="change-row" id="nifty-change"></div>
+      </div>
+      <div class="chart-index">NIFTY 50</div>
     </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#a78bfa;box-shadow:0 0 6px #a78bfa88;"></div>Sensex
-    </div>
+    <canvas id="niftyChart" height="160"></canvas>
   </div>
-  <canvas id="mktChart" height="220"></canvas>
+
+  <!-- Sensex -->
+  <div class="chart-shell sensex">
+    <div class="chart-header">
+      <div>
+        <div class="chart-label">&#11043; BSE</div>
+        <div class="latest-price" id="sensex-price">--</div>
+        <div class="change-row" id="sensex-change"></div>
+      </div>
+      <div class="chart-index">SENSEX</div>
+    </div>
+    <canvas id="sensexChart" height="160"></canvas>
+  </div>
+
 </div>
 
 <script>
-function normalise(arr) {
-  const base = arr[0];
-  return arr.map(v => parseFloat(((v / base) * 100).toFixed(3)));
+function makeGradient(ctx, color) {
+  const g = ctx.createLinearGradient(0, 0, 0, 160);
+  g.addColorStop(0, color.replace("1)", "0.22)"));
+  g.addColorStop(1, color.replace("1)", "0)"));
+  return g;
 }
-const nNifty  = normalise(nifty);
-const nSensex = normalise(sensex);
 
-const ctx = document.getElementById("mktChart").getContext("2d");
+function changeHTML(arr, color) {
+  const first = arr[0], last = arr[arr.length - 1];
+  const diff = (last - first).toFixed(2);
+  const pct  = ((last - first) / first * 100).toFixed(2);
+  const up   = diff >= 0;
+  const arrow = up ? "▲" : "▼";
+  const c     = up ? (color === "teal" ? "#00f5d4" : "#a78bfa") : "#ff4d6d";
+  return `<span style="color:${c};font-weight:500;">${arrow} ${Math.abs(diff).toLocaleString("en-IN")}</span>
+          <span style="color:${c};opacity:0.8;">(${arrow}${Math.abs(pct)}%)</span>
+          <span style="color:rgba(200,230,225,0.35);">vs first</span>`;
+}
 
-const gN = ctx.createLinearGradient(0, 0, 0, 220);
-gN.addColorStop(0, "rgba(0,245,212,0.22)");
-gN.addColorStop(1, "rgba(0,245,212,0)");
+// ── Nifty Chart ──
+const niftyCtx = document.getElementById("niftyChart").getContext("2d");
+document.getElementById("nifty-price").textContent = nifty[nifty.length - 1].toLocaleString("en-IN");
+document.getElementById("nifty-change").innerHTML  = changeHTML(nifty, "teal");
 
-const gS = ctx.createLinearGradient(0, 0, 0, 220);
-gS.addColorStop(0, "rgba(167,139,250,0.18)");
-gS.addColorStop(1, "rgba(167,139,250,0)");
-
-new Chart(ctx, {
+new Chart(niftyCtx, {
   type: "line",
   data: {
     labels: dates,
-    datasets: [
-      {
-        label: "Nifty 50",
-        data: nNifty,
-        borderColor: "#00f5d4",
-        borderWidth: 2,
-        pointRadius: 3,
-        pointBackgroundColor: "#00f5d4",
-        pointHoverRadius: 5,
-        fill: true,
-        backgroundColor: gN,
-        tension: 0.35,
-      },
-      {
-        label: "Sensex",
-        data: nSensex,
-        borderColor: "#a78bfa",
-        borderWidth: 2,
-        pointRadius: 3,
-        pointBackgroundColor: "#a78bfa",
-        pointHoverRadius: 5,
-        fill: true,
-        backgroundColor: gS,
-        tension: 0.35,
-      }
-    ]
+    datasets: [{
+      data: nifty,
+      borderColor: "#00f5d4",
+      borderWidth: 2,
+      pointRadius: 3,
+      pointBackgroundColor: "#00f5d4",
+      pointHoverRadius: 5,
+      fill: true,
+      backgroundColor: makeGradient(niftyCtx, "rgba(0,245,212,1)"),
+      tension: 0.35,
+    }]
   },
   options: {
     responsive: true,
@@ -147,28 +188,75 @@ new Chart(ctx, {
         bodyColor: "#e8f5f2",
         padding: 10,
         callbacks: {
-          label: (ctx) => {
-            const raw = ctx.datasetIndex === 0 ? nifty[ctx.dataIndex] : sensex[ctx.dataIndex];
-            return ` ${ctx.dataset.label}: ${raw.toLocaleString("en-IN")}  (${ctx.parsed.y.toFixed(2)} idx)`;
-          }
+          label: (c) => ` Nifty 50: ${c.parsed.y.toLocaleString("en-IN")}`
         }
       }
     },
     scales: {
       x: {
-        ticks: { font: { family: "'DM Mono', monospace", size: 9 }, color: "rgba(200,230,225,0.4)", maxTicksLimit: 12, maxRotation: 35 },
+        ticks: { font: { family: "'DM Mono', monospace", size: 8 }, color: "rgba(200,230,225,0.35)", maxTicksLimit: 8, maxRotation: 35 },
         grid:   { color: "rgba(0,245,212,0.05)" },
         border: { color: "rgba(0,245,212,0.1)" }
       },
       y: {
-        ticks: {
-          font: { family: "'DM Mono', monospace", size: 9 },
-          color: "rgba(200,230,225,0.4)",
-          callback: (v) => v.toFixed(1) + " idx"
-        },
+        ticks: { font: { family: "'DM Mono', monospace", size: 8 }, color: "rgba(200,230,225,0.35)", callback: (v) => v.toLocaleString("en-IN") },
         grid:   { color: "rgba(0,245,212,0.05)" },
-        border: { color: "rgba(0,245,212,0.1)" },
-        title:  { display: true, text: "Indexed (base = 100)", font: { family: "'DM Mono', monospace", size: 9 }, color: "rgba(0,245,212,0.35)" }
+        border: { color: "rgba(0,245,212,0.1)" }
+      }
+    }
+  }
+});
+
+// ── Sensex Chart ──
+const sensexCtx = document.getElementById("sensexChart").getContext("2d");
+document.getElementById("sensex-price").textContent = sensex[sensex.length - 1].toLocaleString("en-IN");
+document.getElementById("sensex-change").innerHTML  = changeHTML(sensex, "purple");
+
+new Chart(sensexCtx, {
+  type: "line",
+  data: {
+    labels: dates,
+    datasets: [{
+      data: sensex,
+      borderColor: "#a78bfa",
+      borderWidth: 2,
+      pointRadius: 3,
+      pointBackgroundColor: "#a78bfa",
+      pointHoverRadius: 5,
+      fill: true,
+      backgroundColor: makeGradient(sensexCtx, "rgba(167,139,250,1)"),
+      tension: 0.35,
+    }]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: "index", intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: "rgba(8,14,24,0.92)",
+        borderColor: "rgba(167,139,250,0.25)",
+        borderWidth: 1,
+        titleFont: { family: "'Syne', sans-serif", size: 11 },
+        bodyFont:  { family: "'DM Mono', monospace", size: 11 },
+        titleColor: "rgba(167,139,250,0.8)",
+        bodyColor: "#e8f5f2",
+        padding: 10,
+        callbacks: {
+          label: (c) => ` Sensex: ${c.parsed.y.toLocaleString("en-IN")}`
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { font: { family: "'DM Mono', monospace", size: 8 }, color: "rgba(200,230,225,0.35)", maxTicksLimit: 8, maxRotation: 35 },
+        grid:   { color: "rgba(167,139,250,0.05)" },
+        border: { color: "rgba(167,139,250,0.1)" }
+      },
+      y: {
+        ticks: { font: { family: "'DM Mono', monospace", size: 8 }, color: "rgba(200,230,225,0.35)", callback: (v) => v.toLocaleString("en-IN") },
+        grid:   { color: "rgba(167,139,250,0.05)" },
+        border: { color: "rgba(167,139,250,0.1)" }
       }
     }
   }
@@ -177,4 +265,4 @@ new Chart(ctx, {
 </body></html>
 """
 
-    components.html(html, height=420, scrolling=False)
+    components.html(html, height=380, scrolling=False)
