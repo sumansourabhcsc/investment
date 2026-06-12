@@ -226,7 +226,7 @@ PAGES = [
     {
         "name": "Tools",
         "file": "update_fund_snapshots.yml",
-        "description": "Fund calculator & utilities",
+        "description": "calculator & utilities",
         "num": "03",
         "link": "https://taurus.streamlit.app/4_Tools",
         "link_label": "Tools"
