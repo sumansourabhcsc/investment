@@ -2,7 +2,7 @@ name: Capture Market Close
 on:
   schedule:
     # 3:30 PM IST = 10:00 UTC, Mon–Fri
-    - cron: "0 10 * * 1-5"
+    - cron: "0 12 * * 1-5"
   workflow_dispatch:
 
 permissions:
