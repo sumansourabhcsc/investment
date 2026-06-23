@@ -745,6 +745,105 @@ with tab4:
 
     total_change = df_daily_change["Change in Value"].sum() if not df_daily_change.empty else 0
     change_summary_box(total_change)
+    
+        # ── Horizontal Bar Chart ──────────────────────────────────────────
+    if not df_daily_change.empty:
+        import plotly.graph_objects as go
+
+        df_chart = df_daily_change.copy().sort_values("Change in Value", ascending=True)
+
+        colors = [
+            "#2ecc71" if v >= 0 else "#e74c3c"
+            for v in df_chart["Change in Value"]
+        ]
+
+        # Truncate long names for display but keep full name in hover
+        max_label_len = 32
+        short_names = [
+            name if len(name) <= max_label_len else name[:max_label_len - 1] + "…"
+            for name in df_chart["Fund Name"]
+        ]
+
+        fig = go.Figure(go.Bar(
+            x=df_chart["Change in Value"],
+            y=short_names,
+            orientation="h",
+            marker=dict(color=colors),
+            text=[
+                f"₹{v:+,.2f}  ({pct})"
+                for v, pct in zip(df_chart["Change in Value"], df_chart["% Change in NAV"])
+            ],
+            textposition="outside",
+            hovertemplate=(
+                "<b>%{customdata[0]}</b><br>"
+                "Code: %{customdata[1]}<br>"
+                "Change: ₹%{x:+,.2f}<br>"
+                "NAV Change: %{customdata[2]}<extra></extra>"
+            ),
+            customdata=list(zip(
+                df_chart["Fund Name"],
+                df_chart["Fund Code"],
+                df_chart["% Change in NAV"],
+            )),
+        ))
+
+        # Dynamic height: 52px per fund, min 300
+        chart_height = max(300, len(df_chart) * 52 + 120)
+
+        # Legend entries below chart (positive / negative indicator)
+        fig.update_layout(
+            title=dict(
+                text=f"Daily Change in Value — {selected_date.strftime('%d %b %Y')}",
+                font=dict(size=15),
+                x=0,
+            ),
+            xaxis=dict(
+                title="Change in Value (₹)",
+                zeroline=True,
+                zerolinecolor="#555",
+                zerolinewidth=1.5,
+                tickformat=",.0f",
+            ),
+            yaxis=dict(
+                automargin=True,       # prevents label clipping
+                tickfont=dict(size=12),
+            ),
+            height=chart_height,
+            margin=dict(l=20, r=140, t=50, b=120),  # bottom room for legend
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#e0e0e0"),
+            legend=dict(
+                orientation="h",
+                yanchor="top",
+                y=-0.18,              # sits below x-axis
+                xanchor="center",
+                x=0.5,
+                font=dict(size=12),
+            ),
+            # Manual legend via invisible scatter traces
+            annotations=[
+                dict(
+                    x=0.0, y=-0.13,
+                    xref="paper", yref="paper",
+                    text="🟢  Gain (positive change)",
+                    showarrow=False,
+                    font=dict(size=12, color="#2ecc71"),
+                    xanchor="left",
+                ),
+                dict(
+                    x=0.5, y=-0.13,
+                    xref="paper", yref="paper",
+                    text="🔴  Loss (negative change)",
+                    showarrow=False,
+                    font=dict(size=12, color="#e74c3c"),
+                    xanchor="left",
+                ),
+            ],
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
 
 
 # =========================================================
