@@ -774,6 +774,8 @@ with tab4:
                 for v, pct in zip(df_chart["Change in Value"], df_chart["% Change in NAV"])
             ],
             textposition="outside",
+            cliponaxis=False,          # ← critical: stops Plotly clipping outside-labels
+            textfont=dict(size=11),
             hovertemplate=(
                 "<b>%{customdata[0]}</b><br>"
                 "Code: %{customdata[1]}<br>"
@@ -789,6 +791,9 @@ with tab4:
 
         # Dynamic height: 52px per fund, min 300
         chart_height = max(300, len(df_chart) * 52 + 120)
+        # Compute a padded x-axis range so labels have room
+        max_abs = df_chart["Change in Value"].abs().max()
+        x_pad = max_abs * 0.45   # 45% breathing room on each side for labels
 
         # Legend entries below chart (positive / negative indicator)
         fig.update_layout(
@@ -799,17 +804,19 @@ with tab4:
             ),
             xaxis=dict(
                 title="Change in Value (₹)",
+                range=[-(max_abs + x_pad), max_abs + x_pad],   # ← symmetric padding
                 zeroline=True,
                 zerolinecolor="#555",
                 zerolinewidth=1.5,
                 tickformat=",.0f",
             ),
             yaxis=dict(
-                automargin=True,       # prevents label clipping
+                automargin=True,
                 tickfont=dict(size=12),
             ),
             height=chart_height,
-            margin=dict(l=20, r=140, t=50, b=120),  # bottom room for legend
+            margin=dict(l=20, r=180, t=50, b=120),  # bump r from 140 → 180
+            uniformtext=dict(mode="hide", minsize=9), # hide labels only if truly tiny
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
             font=dict(color="#e0e0e0"),
