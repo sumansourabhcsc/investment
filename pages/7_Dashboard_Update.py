@@ -30,203 +30,178 @@ st.set_page_config(
 )
 
 # =========================================================
-# BRIGHT "LIVELIHOOD" PALETTE — vivid, sunlit, colorful
+# CLEAN SAAS PALETTE — white cards, single dark-green accent
 # =========================================================
-SUCCESS = "#00C97A"   # vivid emerald — growth / gain
-DANGER  = "#FF4D5E"   # bright coral red — loss
-GOLD    = "#FFA800"   # marigold — prosperity
-VIOLET  = "#7C5CFF"   # electric violet — highlight
-TEAL    = "#00BFC4"   # aqua teal — accent
-SUN     = "#FFD23F"   # sunflower — accent
-PINK    = "#FF5FA2"   # bright pink — accent
-BLUE    = "#3D8BFF"   # sky blue — accent
+PRIMARY_DARK = "#123D2F"   # deep forest green — hero card, active states
+PRIMARY      = "#1F7A5C"   # mid green — icons, links, gains
+PRIMARY_LIGHT= "#3DAE84"   # light green — accents
+MINT_TINT    = "#E7F5EE"   # light mint — badge/pill backgrounds
+DANGER       = "#E5484D"   # muted red — loss
+DANGER_TINT  = "#FDEBEC"   # light red tint — badge backgrounds
 
-TEXT_DARK  = "#141B2E"
-TEXT_SUB   = "rgba(20,27,46,0.58)"
-TEXT_FAINT = "rgba(20,27,46,0.4)"
+TEXT_DARK  = "#16181D"
+TEXT_SUB   = "#7C8493"
+TEXT_FAINT = "#A7AEBB"
+BORDER     = "rgba(16,24,40,0.08)"
+BG_PAGE    = "#F5F6F8"
+CARD_SHADOW = "0 10px 30px rgba(16,24,40,0.06)"
+
+SUCCESS = PRIMARY
+DANGER_ = DANGER  # kept for readability at call sites
 
 PALETTE = [
-    "#00C97A",  # emerald
-    "#FFA800",  # marigold
-    "#FF5FA2",  # pink
-    "#3D8BFF",  # sky blue
-    "#7C5CFF",  # violet
-    "#FFD23F",  # sunflower
-    "#FF7A45",  # tangerine
-    "#00BFC4",  # teal
-    "#36CFC9",  # aqua
-    "#B37FEB",  # lavender
+    "#123D2F",  # deep forest
+    "#1F7A5C",  # mid green
+    "#3DAE84",  # light green
+    "#6FCF97",  # mint green
+    "#4F6D7A",  # steel blue-gray
+    "#F2C94C",  # muted gold
+    "#56CCF2",  # muted sky blue
+    "#BB6BD9",  # muted purple
+    "#F2994A",  # muted orange
+    "#8B93A1",  # slate gray
 ]
 
 ICON_FUND = """
-<svg width="34" height="34" viewBox="0 0 36 36">
-  <rect x="4" y="6" width="28" height="24" rx="3" fill="none" stroke="#00C97A" stroke-width="1.8"/>
-  <line x1="4" y1="13" x2="32" y2="13" stroke="#00C97A" stroke-width="1.8"/>
-  <rect x="9"  y="18" width="6"  height="2" rx="1" fill="#00C97A"/>
-  <rect x="9"  y="23" width="10" height="2" rx="1" fill="rgba(0,201,122,0.5)"/>
-  <rect x="21" y="18" width="6"  height="2" rx="1" fill="rgba(0,201,122,0.5)"/>
-  <rect x="21" y="23" width="4"  height="2" rx="1" fill="rgba(0,201,122,0.5)"/>
+<svg width="20" height="20" viewBox="0 0 36 36">
+  <rect x="4" y="6" width="28" height="24" rx="3" fill="none" stroke="#1F7A5C" stroke-width="2"/>
+  <line x1="4" y1="13" x2="32" y2="13" stroke="#1F7A5C" stroke-width="2"/>
+  <rect x="9"  y="18" width="6"  height="2" rx="1" fill="#1F7A5C"/>
+  <rect x="9"  y="23" width="10" height="2" rx="1" fill="rgba(31,122,92,0.5)"/>
+  <rect x="21" y="18" width="6"  height="2" rx="1" fill="rgba(31,122,92,0.5)"/>
+  <rect x="21" y="23" width="4"  height="2" rx="1" fill="rgba(31,122,92,0.5)"/>
 </svg>"""
 
 ICON_DAILY_SUMMARY = """
-<svg width="34" height="34" viewBox="0 0 36 36">
-  <rect x="5"  y="8"  width="5" height="20" rx="2" fill="rgba(61,139,255,0.4)"/>
-  <rect x="13" y="13" width="5" height="15" rx="2" fill="rgba(61,139,255,0.6)"/>
-  <rect x="21" y="10" width="5" height="18" rx="2" fill="rgba(61,139,255,0.8)"/>
-  <rect x="29" y="16" width="5" height="12" rx="2" fill="#3D8BFF"/>
-  <line x1="3" y1="29" x2="36" y2="29" stroke="rgba(61,139,255,0.35)" stroke-width="1"/>
+<svg width="20" height="20" viewBox="0 0 36 36">
+  <rect x="5"  y="8"  width="5" height="20" rx="2" fill="rgba(86,204,242,0.45)"/>
+  <rect x="13" y="13" width="5" height="15" rx="2" fill="rgba(86,204,242,0.65)"/>
+  <rect x="21" y="10" width="5" height="18" rx="2" fill="rgba(86,204,242,0.85)"/>
+  <rect x="29" y="16" width="5" height="12" rx="2" fill="#56CCF2"/>
+  <line x1="3" y1="29" x2="36" y2="29" stroke="rgba(86,204,242,0.4)" stroke-width="1"/>
 </svg>"""
 
 ICON_MONTHLY = """
-<svg width="34" height="34" viewBox="0 0 36 36">
-  <rect x="4"  y="6"  width="28" height="26" rx="3" fill="none" stroke="#FFA800" stroke-width="1.8"/>
-  <line x1="4"  y1="13" x2="32" y2="13" stroke="#FFA800" stroke-width="1.8"/>
-  <circle cx="12" cy="9.5" r="2" fill="#FFA800"/>
-  <circle cx="24" cy="9.5" r="2" fill="#FFA800"/>
-  <line x1="12" y1="7" x2="12" y2="4" stroke="#FFA800" stroke-width="1.8" stroke-linecap="round"/>
-  <line x1="24" y1="7" x2="24" y2="4" stroke="#FFA800" stroke-width="1.8" stroke-linecap="round"/>
-  <rect x="9"  y="17" width="4" height="4" rx="1" fill="rgba(255,168,0,0.55)"/>
-  <rect x="16" y="17" width="4" height="4" rx="1" fill="#FFA800"/>
-  <rect x="23" y="17" width="4" height="4" rx="1" fill="rgba(255,168,0,0.35)"/>
-  <rect x="9"  y="24" width="4" height="4" rx="1" fill="rgba(255,168,0,0.35)"/>
-  <rect x="16" y="24" width="4" height="4" rx="1" fill="rgba(255,168,0,0.55)"/>
-  <rect x="23" y="24" width="4" height="4" rx="1" fill="#FFA800"/>
+<svg width="20" height="20" viewBox="0 0 36 36">
+  <rect x="4"  y="6"  width="28" height="26" rx="3" fill="none" stroke="#F2994A" stroke-width="2"/>
+  <line x1="4"  y1="13" x2="32" y2="13" stroke="#F2994A" stroke-width="2"/>
+  <circle cx="12" cy="9.5" r="2" fill="#F2994A"/>
+  <circle cx="24" cy="9.5" r="2" fill="#F2994A"/>
+  <rect x="9"  y="17" width="4" height="4" rx="1" fill="rgba(242,153,74,0.5)"/>
+  <rect x="16" y="17" width="4" height="4" rx="1" fill="#F2994A"/>
+  <rect x="23" y="17" width="4" height="4" rx="1" fill="rgba(242,153,74,0.35)"/>
+  <rect x="9"  y="24" width="4" height="4" rx="1" fill="rgba(242,153,74,0.35)"/>
+  <rect x="16" y="24" width="4" height="4" rx="1" fill="rgba(242,153,74,0.5)"/>
+  <rect x="23" y="24" width="4" height="4" rx="1" fill="#F2994A"/>
 </svg>"""
 
 ICON_DAILY_CHANGE = """
-<svg width="34" height="34" viewBox="0 0 36 36">
+<svg width="20" height="20" viewBox="0 0 36 36">
   <polyline points="4,26 10,18 16,22 22,12 28,16 34,8"
-    fill="none" stroke="#FF5FA2" stroke-width="2.2"
+    fill="none" stroke="#BB6BD9" stroke-width="2.4"
     stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="34" cy="8"  r="3"   fill="#FFD23F"/>
-  <circle cx="22" cy="12" r="2"   fill="rgba(255,95,162,0.7)"/>
-  <line   x1="4" y1="30" x2="34" y2="30"
-    stroke="rgba(20,27,46,0.1)" stroke-width="1"/>
+  <circle cx="34" cy="8"  r="3"   fill="#BB6BD9"/>
 </svg>"""
 
 ICON_TREEMAP = """
-<svg width="34" height="34" viewBox="0 0 36 36">
-  <rect x="4"  y="4"  width="13" height="13" rx="2" fill="none" stroke="#00BFC4" stroke-width="1.8"/>
-  <rect x="19" y="4"  width="13" height="8"  rx="2" fill="none" stroke="rgba(0,191,196,0.6)" stroke-width="1.8"/>
-  <rect x="19" y="14" width="13" height="3"  rx="1" fill="rgba(0,191,196,0.35)" stroke="rgba(0,191,196,0.35)" stroke-width="1"/>
-  <rect x="4"  y="19" width="8"  height="13" rx="2" fill="none" stroke="rgba(0,191,196,0.6)" stroke-width="1.8"/>
-  <rect x="14" y="19" width="18" height="13" rx="2" fill="none" stroke="rgba(0,191,196,0.5)" stroke-width="1.8"/>
+<svg width="20" height="20" viewBox="0 0 36 36">
+  <rect x="4"  y="4"  width="13" height="13" rx="2" fill="none" stroke="#4F6D7A" stroke-width="2"/>
+  <rect x="19" y="4"  width="13" height="8"  rx="2" fill="none" stroke="rgba(79,109,122,0.6)" stroke-width="2"/>
+  <rect x="19" y="14" width="13" height="3"  rx="1" fill="rgba(79,109,122,0.35)"/>
+  <rect x="4"  y="19" width="8"  height="13" rx="2" fill="none" stroke="rgba(79,109,122,0.6)" stroke-width="2"/>
+  <rect x="14" y="19" width="18" height="13" rx="2" fill="none" stroke="rgba(79,109,122,0.5)" stroke-width="2"/>
 </svg>"""
 
 
+def get_initials(name):
+    words = [w for w in name.replace("'", "").split() if w]
+    letters = "".join(w[0] for w in words[:2]).upper()
+    return letters or "F"
+
+
 # =========================================================
-# FONTS + THEME — bright, colorful, sunlit backdrop
+# FONTS + THEME — clean, light, single-accent SaaS look
 # =========================================================
-st.markdown("""
+st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
 
-html, body, [class*="css"] { font-family: 'Manrope', sans-serif !important; }
+html, body, [class*="css"] {{ font-family: 'Manrope', sans-serif !important; }}
 
-.stApp {
-    background: linear-gradient(150deg, #EAFBF3 0%, #FFF9E8 42%, #FFEFF4 100%) !important;
-    position: relative;
-}
+.stApp {{ background: {BG_PAGE} !important; }}
 
-/* bright colorful glow blobs */
-.stApp::before {
-    content: '';
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background:
-        radial-gradient(ellipse 60% 45% at 8% 6%,   rgba(0,201,122,0.16) 0%, transparent 60%),
-        radial-gradient(ellipse 55% 55% at 95% 12%,  rgba(255,168,0,0.14) 0%, transparent 55%),
-        radial-gradient(ellipse 55% 45% at 50% 100%, rgba(124,92,255,0.12) 0%, transparent 55%),
-        radial-gradient(ellipse 40% 35% at 30% 90%,  rgba(255,95,162,0.10) 0%, transparent 55%);
-    animation: auroraBreathe 10s ease-in-out infinite;
-}
-@keyframes auroraBreathe { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
+.block-container {{ padding-top: 2.2rem !important; padding-bottom: 3rem !important; max-width: 1800px !important; }}
 
-.stApp::after {
-    content: '';
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image: radial-gradient(circle, rgba(20,27,46,0.06) 1px, transparent 1px);
-    background-size: 42px 42px;
-    opacity: 0.6;
-}
+[data-testid="stDataFrame"] {{ border-radius: 16px !important; overflow: hidden !important; border: 1px solid {BORDER} !important; box-shadow: {CARD_SHADOW}; }}
+.stSelectbox label, .stDateInput label {{
+    color: {TEXT_SUB} !important; font-size: 10px !important;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    font-weight: 700 !important; font-family: 'Manrope', sans-serif !important;
+}}
+hr {{ border-color: {BORDER} !important; margin: 2rem 0 !important; }}
+@keyframes livepulse {{ 0%,100% {{ opacity:1; transform:scale(1); }} 50% {{ opacity:0.4; transform:scale(0.7); }} }}
 
-.stApp > * { position: relative; z-index: 1; }
-
-.block-container { padding-top: 2.2rem !important; padding-bottom: 3rem !important; max-width: 1800px !important; }
-
-[data-testid="stDataFrame"] { border-radius: 14px !important; overflow: hidden !important; border: 1px solid rgba(20,27,46,0.08) !important; box-shadow: 0 4px 18px rgba(20,27,46,0.05); }
-.stSelectbox label, .stDateInput label {
-    color: rgba(20,27,46,0.45) !important; font-size: 9px !important;
-    text-transform: uppercase; letter-spacing: 0.15em;
-    font-weight: 700 !important; font-family: 'JetBrains Mono', monospace !important;
-}
-hr { border-color: rgba(20,27,46,0.08) !important; margin: 2rem 0 !important; }
-@keyframes livepulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
-
-[data-testid="stDataFrame"] thead tr th {
-    background: linear-gradient(90deg, rgba(0,201,122,0.12), rgba(255,168,0,0.10)) !important;
-    color: #141B2E !important;
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 9px !important; letter-spacing: 0.12em !important; text-transform: uppercase !important;
+[data-testid="stDataFrame"] thead tr th {{
+    background: {MINT_TINT} !important;
+    color: {PRIMARY_DARK} !important;
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 11px !important; letter-spacing: 0.04em !important; text-transform: none !important;
     font-weight: 700 !important;
-}
-[data-testid="stDataFrame"] tbody tr td {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 11px !important;
-    color: #202944 !important;
-    background: rgba(255,255,255,0.75) !important;
-}
-[data-testid="stDataFrame"] tbody tr:hover td { background: rgba(0,201,122,0.07) !important; }
+}}
+[data-testid="stDataFrame"] tbody tr td {{
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 13px !important;
+    color: {TEXT_DARK} !important;
+    background: #ffffff !important;
+}}
+[data-testid="stDataFrame"] tbody tr:hover td {{ background: {MINT_TINT} !important; }}
 
-.stSelectbox > div > div, .stDateInput input {
-    background: rgba(255,255,255,0.85) !important;
-    border: 1px solid rgba(20,27,46,0.12) !important;
-    border-radius: 10px !important; color: #141B2E !important;
-    font-family: 'JetBrains Mono', monospace !important;
-}
+.stSelectbox > div > div, .stDateInput input {{
+    background: #ffffff !important;
+    border: 1px solid {BORDER} !important;
+    border-radius: 10px !important; color: {TEXT_DARK} !important;
+    font-family: 'Manrope', sans-serif !important;
+}}
 
-/* pill-style tabs — bright */
-div[data-baseweb="tab-list"] {
+/* pill-style tabs — clean */
+div[data-baseweb="tab-list"] {{
     gap: 6px;
-    background: rgba(255,255,255,0.65);
+    background: #ffffff;
     padding: 7px;
     border-radius: 16px;
-    border: 1px solid rgba(20,27,46,0.08);
-    box-shadow: 0 4px 18px rgba(20,27,46,0.05);
+    border: 1px solid {BORDER};
+    box-shadow: {CARD_SHADOW};
     margin-bottom: 0.6rem;
-}
-button[data-baseweb="tab"] {
-    height: 46px;
+}}
+button[data-baseweb="tab"] {{
+    height: 44px;
     border-radius: 11px !important;
-    color: rgba(20,27,46,0.55) !important;
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 12px !important;
-    letter-spacing: 0.06em;
+    color: {TEXT_SUB} !important;
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
     background: transparent !important;
     border: none !important;
-    transition: all 0.22s ease;
-}
-button[data-baseweb="tab"]:hover {
-    background: rgba(0,201,122,0.09) !important;
-    color: #00915C !important;
-}
-button[data-baseweb="tab"][aria-selected="true"] {
-    background: linear-gradient(135deg, #00C97A, #3D8BFF) !important;
+    transition: all 0.2s ease;
+}}
+button[data-baseweb="tab"]:hover {{
+    background: {MINT_TINT} !important;
+    color: {PRIMARY_DARK} !important;
+}}
+button[data-baseweb="tab"][aria-selected="true"] {{
+    background: {PRIMARY_DARK} !important;
     color: #ffffff !important;
-    box-shadow: 0 6px 18px rgba(0,201,122,0.35);
-}
-div[data-baseweb="tab-highlight"] { background-color: transparent !important; }
-div[data-baseweb="tab-border"]    { display: none !important; }
+    box-shadow: 0 6px 16px rgba(18,61,47,0.28);
+}}
+div[data-baseweb="tab-highlight"] {{ background-color: transparent !important; }}
+div[data-baseweb="tab-border"]    {{ display: none !important; }}
 
-/* glass card hover lift, reused via .life-card class */
-.life-card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
-.life-card:hover {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: 0 16px 34px rgba(20,27,46,0.18);
-}
+.life-card {{ transition: transform 0.2s ease, box-shadow 0.2s ease; }}
+.life-card:hover {{ transform: translateY(-3px); box-shadow: 0 16px 34px rgba(16,24,40,0.12); }}
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: rgba(20,27,46,0.04); }
-::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #00C97A, #3D8BFF); border-radius: 6px; }
+::-webkit-scrollbar {{ width: 6px; height: 6px; }}
+::-webkit-scrollbar-track {{ background: rgba(16,24,40,0.04); }}
+::-webkit-scrollbar-thumb {{ background: {PRIMARY}; border-radius: 6px; }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -235,115 +210,88 @@ div[data-baseweb="tab-border"]    { display: none !important; }
 # HELPERS
 # =========================================================
 
-def kpi_card(icon, label, value, sub, gradient_css):
+def kpi_card(label, value, sub_text, trend_positive=True, hero=False):
+    bg          = PRIMARY_DARK if hero else "#FFFFFF"
+    text_color  = "#FFFFFF" if hero else TEXT_DARK
+    sub_color   = "rgba(255,255,255,0.75)" if hero else TEXT_SUB
+    badge_bg    = "rgba(255,255,255,0.18)" if hero else BG_PAGE
+    badge_col   = "#FFFFFF" if hero else TEXT_DARK
+    badge_border= "rgba(255,255,255,0.35)" if hero else BORDER
+    trend_bg    = "rgba(255,255,255,0.2)" if hero else (MINT_TINT if trend_positive else DANGER_TINT)
+    trend_col   = "#FFFFFF" if hero else (PRIMARY if trend_positive else DANGER)
+    trend_icon  = "↑" if trend_positive else "↓"
+    border      = "none" if hero else f"1px solid {BORDER}"
+    shadow      = "0 14px 30px rgba(18,61,47,0.28)" if hero else CARD_SHADOW
+
     return f"""
-    <div class="life-card" style="background:{gradient_css}; border:none;
-        border-radius:18px; padding:20px 20px 18px; position:relative;
-        overflow:hidden; box-sizing:border-box; height:100%;
-        box-shadow:0 10px 24px rgba(20,27,46,0.14);">
-        <div style="position:absolute; top:-20px; right:-20px; width:90px; height:90px;
-            border-radius:50%; background:rgba(255,255,255,0.14);"></div>
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; position:relative;">
-            <div style="width:32px; height:32px; border-radius:10px; display:flex; align-items:center;
-                justify-content:center; font-size:16px; background:rgba(255,255,255,0.25);
-                backdrop-filter: blur(4px);">{icon}</div>
-            <div style="font-family:'JetBrains Mono',monospace; font-size:9px;
-                color:rgba(255,255,255,0.85); text-transform:uppercase;
-                letter-spacing:0.15em; font-weight:700;">{label}</div>
+    <div class="life-card" style="background:{bg}; border:{border};
+        border-radius:20px; padding:22px 22px 20px; position:relative;
+        box-sizing:border-box; height:100%; box-shadow:{shadow};">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between;">
+            <div style="font-size:13px; font-weight:700; color:{text_color};">{label}</div>
+            <div style="width:26px; height:26px; border-radius:50%; background:{badge_bg};
+                border:1px solid {badge_border}; display:flex; align-items:center; justify-content:center;
+                font-size:12px; color:{badge_col}; flex-shrink:0;">↗</div>
         </div>
-        <div style="font-size:1.5rem; font-weight:800; font-family:'JetBrains Mono',monospace;
-            line-height:1.1; color:#ffffff; position:relative; text-shadow:0 2px 10px rgba(0,0,0,0.12);">{value}</div>
-        <div style="font-size:9.5px; color:rgba(255,255,255,0.78); margin-top:7px; position:relative;
-            font-family:'JetBrains Mono',monospace; letter-spacing:0.02em;">{sub}</div>
+        <div style="font-size:1.7rem; font-weight:800; color:{text_color}; margin-top:16px;
+            letter-spacing:-0.01em; font-family:'Manrope',sans-serif;">{value}</div>
+        <div style="display:flex; align-items:center; gap:7px; margin-top:12px;">
+            <div style="width:18px; height:18px; border-radius:50%; background:{trend_bg};
+                display:flex; align-items:center; justify-content:center; font-size:9px;
+                color:{trend_col}; font-weight:700; flex-shrink:0;">{trend_icon}</div>
+            <div style="font-size:11.5px; color:{sub_color};">{sub_text}</div>
+        </div>
     </div>"""
 
 
 def sec_header(icon_svg, title, subtitle=""):
-    icon_part = f'<div style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:rgba(20,27,46,0.04);border-radius:10px;">{icon_svg}</div>' if icon_svg else ""
-    sub_part  = f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:{TEXT_FAINT};letter-spacing:0.15em;text-transform:uppercase;margin-top:3px;">{subtitle}</div>' if subtitle else ""
+    icon_part = f'<div style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;background:{MINT_TINT};border-radius:10px;">{icon_svg}</div>' if icon_svg else ""
+    sub_part  = f'<div style="font-size:11.5px;color:{TEXT_SUB};margin-top:2px;">{subtitle}</div>' if subtitle else ""
     st.markdown(f"""
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.6rem;margin-top:0.4rem;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.6rem;margin-top:0.4rem;">
         {icon_part}
         <div>
-            <div style="font-size:17px;font-weight:800;color:{TEXT_DARK};font-family:'Manrope',sans-serif;line-height:1.1;">{title}</div>
+            <div style="font-size:16px;font-weight:800;color:{TEXT_DARK};font-family:'Manrope',sans-serif;line-height:1.2;">{title}</div>
             {sub_part}
         </div>
-        <div style="flex:1;height:2px;background:linear-gradient(90deg, rgba(0,201,122,0.35), rgba(255,168,0,0.15), transparent);margin-left:6px;border-radius:2px;"></div>
     </div>""", unsafe_allow_html=True)
 
 
 def change_summary_box(total_change):
     sign  = "+" if total_change >= 0 else ""
-    color = SUCCESS if total_change >= 0 else DANGER
+    color = PRIMARY if total_change >= 0 else DANGER
+    tint  = MINT_TINT if total_change >= 0 else DANGER_TINT
     icon  = "▲" if total_change >= 0 else "▼"
     st.markdown(f"""
-    <div style="margin-top:14px; background:rgba(255,255,255,0.8); padding:18px 24px;
-        border-radius:14px; border:1px solid rgba(20,27,46,0.08); box-shadow:0 6px 20px rgba(20,27,46,0.06);
+    <div style="margin-top:14px; background:#ffffff; padding:18px 24px;
+        border-radius:16px; border:1px solid {BORDER}; box-shadow:{CARD_SHADOW};
         display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-        <div style="font-family:'JetBrains Mono',monospace; font-size:10px;
-            color:{TEXT_SUB}; letter-spacing:0.12em; text-transform:uppercase;">
-            {icon} Total Daily Change Across All Funds
+        <div style="font-size:12px; font-weight:600; color:{TEXT_SUB};">
+            Total Daily Change Across All Funds
         </div>
-        <div style="font-size:1.4rem; font-weight:800; font-family:'JetBrains Mono',monospace;
-            color:{color};">{sign}₹{abs(total_change):,.2f}</div>
+        <div style="display:flex; align-items:center; gap:8px; background:{tint}; padding:6px 14px; border-radius:999px;">
+            <span style="color:{color}; font-size:11px;">{icon}</span>
+            <span style="font-size:1.1rem; font-weight:800; color:{color};">{sign}₹{abs(total_change):,.2f}</span>
+        </div>
     </div>""", unsafe_allow_html=True)
 
 
 # =========================================================
-# HERO — bright rainbow banner
+# HEADER — clean title + live badge (no heavy banner)
 # =========================================================
-components.html("""
-<!DOCTYPE html><html><head><meta charset="utf-8"/>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@800&family=JetBrains+Mono:wght@400;500&display=swap');
-  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-  body { background:transparent; font-family:'Manrope',sans-serif; overflow:hidden; }
-  .banner {
-    background: linear-gradient(115deg, #00C97A 0%, #3D8BFF 38%, #7C5CFF 68%, #FF5FA2 100%);
-    border-radius: 22px; padding: 22px 28px;
-    box-shadow: 0 12px 28px rgba(60,60,120,0.22);
-    display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
-  }
-  h1 {
-    font-weight:800; letter-spacing:-0.02em; line-height:1.05; color:#ffffff;
-    font-size:clamp(1.6rem, 4.6vw, 2.4rem);
-    text-shadow: 0 2px 12px rgba(0,0,0,0.15);
-  }
-  .tag { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.2em;
-    color:rgba(255,255,255,0.85); text-transform:uppercase; margin-top:6px; }
-  .pill { display:inline-flex; align-items:center; gap:7px; margin-top:12px;
-    background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.4);
-    border-radius:22px; padding:6px 14px; font-size:11px; font-weight:700;
-    color:#ffffff; font-family:'JetBrains Mono',monospace; }
-  .dot { width:7px; height:7px; border-radius:50%; background:#ffffff;
-    animation:beat 1.3s ease-in-out infinite; }
-  @keyframes beat { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.35; transform:scale(0.6); } }
-  .heart-wrap { flex-shrink:0; width:60px; height:60px; position:relative;
-    display:flex; align-items:center; justify-content:center; margin-top:4px; }
-  .ring { position:absolute; width:24px; height:24px; border-radius:50%;
-    border:1.5px solid #ffffff; opacity:0; animation:ripple 1.6s ease-out infinite; }
-  .ring:nth-child(2){animation-delay:.4s;}
-  .ring:nth-child(3){animation-delay:.8s;}
-  @keyframes ripple { 0% { transform:scale(1); opacity:.8; } 100% { transform:scale(3.2); opacity:0; } }
-  .core { width:15px; height:15px; border-radius:50%; z-index:5;
-    background:#ffffff;
-    animation:throb .9s ease-in-out infinite alternate; }
-  @keyframes throb { from{box-shadow:0 0 6px rgba(255,255,255,0.7);} to{box-shadow:0 0 18px rgba(255,255,255,0.95);} }
-</style></head>
-<body>
-<div class="banner">
-  <div style="flex:1;min-width:0;">
-    <h1>Dashboard Update</h1>
-    <div class="tag">◈ Taurus · Reimagined Portfolio View · Live NAV</div>
-    <div class="pill"><span class="dot"></span> Live &amp; Breathing</div>
-  </div>
-  <div class="heart-wrap">
-    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
-    <div class="core"></div>
-  </div>
+st.markdown(f"""
+<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:1.8rem;">
+    <div>
+        <div style="font-size:2rem;font-weight:800;color:{TEXT_DARK};letter-spacing:-0.02em;">Dashboard Update</div>
+        <div style="font-size:13.5px;color:{TEXT_SUB};margin-top:6px;">Live portfolio insights across all funds, reimagined.</div>
+    </div>
+    <div style="display:inline-flex;align-items:center;gap:8px;background:{MINT_TINT};
+        border:1px solid rgba(31,122,92,0.25); border-radius:999px;padding:9px 16px;margin-top:4px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:{PRIMARY};animation:livepulse 2s ease-in-out infinite;"></div>
+        <span style="font-size:12.5px;font-weight:700;color:{PRIMARY_DARK};">Live NAV</span>
+    </div>
 </div>
-</body></html>
-""", height=155, scrolling=False)
+""", unsafe_allow_html=True)
 
 
 # =========================================================
@@ -394,10 +342,6 @@ pnl_sign   = "+" if total_pnl >= 0 else ""
 ret_sign   = "+" if absolute_return_pct >= 0 else ""
 xirr_sign  = "+" if overall_xirr_pct >= 0 else ""
 
-pnl_gradient  = f"linear-gradient(135deg, {TEAL}, {BLUE})"   if total_pnl >= 0           else f"linear-gradient(135deg, {DANGER}, {GOLD})"
-ret_gradient  = f"linear-gradient(135deg, {VIOLET}, {PINK})" if absolute_return_pct >= 0  else f"linear-gradient(135deg, {DANGER}, {VIOLET})"
-xirr_gradient = f"linear-gradient(135deg, {PINK}, {SUN})"    if overall_xirr_pct >= 0     else f"linear-gradient(135deg, {DANGER}, {PINK})"
-
 
 # =========================================================
 # KPI CARDS
@@ -406,42 +350,42 @@ c1, c2, c3, c4, c5 = st.columns(5)
 
 with c1:
     st.markdown(kpi_card(
-        "🌱", "Total Invested",
+        "Total Invested",
         f"₹{total_invested:,.0f}",
         f"across {len(summary)} funds",
-        f"linear-gradient(135deg, {GOLD}, {SUN})"
+        trend_positive=True, hero=True
     ), unsafe_allow_html=True)
 
 with c2:
     st.markdown(kpi_card(
-        "🌿", "Current Value",
+        "Current Value",
         f"₹{total_current:,.0f}",
         "live NAV",
-        f"linear-gradient(135deg, {SUCCESS}, {TEAL})"
+        trend_positive=(total_pnl >= 0)
     ), unsafe_allow_html=True)
 
 with c3:
     st.markdown(kpi_card(
-        "⚡", "Total P&L",
+        "Total P&L",
         f"{pnl_sign}₹{abs(total_pnl):,.0f}",
         "unrealised gain/loss",
-        pnl_gradient
+        trend_positive=(total_pnl >= 0)
     ), unsafe_allow_html=True)
 
 with c4:
     st.markdown(kpi_card(
-        "📈", "Absolute Return",
+        "Absolute Return",
         f"{ret_sign}{absolute_return_pct:.2f}%",
         "since first investment",
-        ret_gradient
+        trend_positive=(absolute_return_pct >= 0)
     ), unsafe_allow_html=True)
 
 with c5:
     st.markdown(kpi_card(
-        "🎯", "Overall XIRR",
+        "Overall XIRR",
         f"{xirr_sign}{overall_xirr_pct:.2f}%",
         "annualised return",
-        xirr_gradient
+        trend_positive=(overall_xirr_pct >= 0)
     ), unsafe_allow_html=True)
 
 st.divider()
@@ -476,29 +420,38 @@ with tab1:
         rows_html = ""
         for i, (_, row) in enumerate(display_df.iterrows(), start=1):
             pnl_val   = row["P&L"]
-            pnl_color = SUCCESS if pnl_val >= 0 else DANGER
+            pnl_color = PRIMARY if pnl_val >= 0 else DANGER
             pnl_sign  = "+" if pnl_val >= 0 else ""
             xirr_val  = float(str(row["XIRR"]).replace("%", ""))
-            xirr_col  = SUCCESS if xirr_val >= 0 else DANGER
-            row_bg    = "rgba(255,255,255,0.9)" if i % 2 else "rgba(246,250,255,0.9)"
+            xirr_col  = PRIMARY if xirr_val >= 0 else DANGER
+            avatar_bg = PALETTE[(i - 1) % len(PALETTE)]
+            initials  = get_initials(row["Fund"])
 
             rows_html += f"""
-            <tr style="background:{row_bg};">
-                <td style="padding:11px 14px; color:{TEXT_FAINT}; font-size:10px; text-align:center; width:36px;">{i}</td>
-                <td style="padding:11px 14px; color:{TEXT_DARK}; font-weight:700; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{row['Fund']}">{row['Fund']}</td>
-                <td style="padding:11px 14px; color:{TEXT_FAINT}; font-size:10px;">{row['SchemeCode']}</td>
-                <td style="padding:11px 14px; color:{TEXT_SUB};">{row['TotalUnits']:.3f}</td>
-                <td style="padding:11px 14px; color:#B8790A;">&#8377;{row['Invested']:,.0f}</td>
-                <td style="padding:11px 14px; color:#3D8BFF; font-weight:600;">&#8377;{row['Current']:,.0f}</td>
-                <td style="padding:11px 14px; color:{pnl_color}; font-weight:700;">{pnl_sign}&#8377;{abs(pnl_val):,.0f}</td>
-                <td style="padding:11px 14px; color:{TEXT_SUB};">{row['Latest NAV']:.2f}</td>
-                <td style="padding:11px 14px; color:{TEXT_FAINT}; font-size:10px;">{row['NAV Date']}</td>
-                <td style="padding:11px 14px; color:{xirr_col}; font-weight:700;">{row['XIRR']}</td>
+            <tr>
+                <td style="padding:12px 14px; color:{TEXT_FAINT}; font-size:11px; text-align:center; width:32px;">{i}</td>
+                <td style="padding:12px 14px; max-width:220px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:28px;height:28px;border-radius:50%;background:{avatar_bg};
+                            display:flex;align-items:center;justify-content:center;color:#fff;
+                            font-size:10px;font-weight:700;flex-shrink:0;">{initials}</div>
+                        <span style="color:{TEXT_DARK}; font-weight:600; white-space:nowrap; overflow:hidden;
+                            text-overflow:ellipsis;" title="{row['Fund']}">{row['Fund']}</span>
+                    </div>
+                </td>
+                <td style="padding:12px 14px; color:{TEXT_FAINT}; font-size:11px;">{row['SchemeCode']}</td>
+                <td style="padding:12px 14px; color:{TEXT_SUB};">{row['TotalUnits']:.3f}</td>
+                <td style="padding:12px 14px; color:{TEXT_SUB};">&#8377;{row['Invested']:,.0f}</td>
+                <td style="padding:12px 14px; color:{TEXT_DARK}; font-weight:600;">&#8377;{row['Current']:,.0f}</td>
+                <td style="padding:12px 14px; color:{pnl_color}; font-weight:700;">{pnl_sign}&#8377;{abs(pnl_val):,.0f}</td>
+                <td style="padding:12px 14px; color:{TEXT_SUB};">{row['Latest NAV']:.2f}</td>
+                <td style="padding:12px 14px; color:{TEXT_FAINT}; font-size:11px;">{row['NAV Date']}</td>
+                <td style="padding:12px 14px; color:{xirr_col}; font-weight:700;">{row['XIRR']}</td>
             </tr>"""
 
         headers = ["#", "Fund", "Code", "Units", "Invested", "Current", "P&amp;L", "NAV", "NAV Date", "XIRR"]
         header_html = "".join(
-            f'<th style="padding:11px 14px; text-align:left; font-family:JetBrains Mono,monospace; font-size:9px; color:{TEXT_DARK}; text-transform:uppercase; letter-spacing:0.15em; font-weight:700; white-space:nowrap;">{h}</th>'
+            f'<th style="padding:12px 14px; text-align:left; font-family:Manrope,sans-serif; font-size:11px; color:{PRIMARY_DARK}; font-weight:700; white-space:nowrap;">{h}</th>'
             for h in headers
         )
 
@@ -506,7 +459,7 @@ with tab1:
         <!DOCTYPE html>
         <html>
         <head>
-        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
             * {{ box-sizing: border-box; margin: 0; padding: 0; }}
             html, body {{ background: transparent; height: 100%; }}
@@ -514,27 +467,26 @@ with tab1:
                 overflow-x: auto;
                 overflow-y: auto;
                 height: 100%;
-                border-radius: 14px;
-                border: 1px solid rgba(20,27,46,0.08);
-                background: rgba(255,255,255,0.6);
-                box-shadow: 0 6px 20px rgba(20,27,46,0.06);
+                border-radius: 16px;
+                border: 1px solid {BORDER};
+                background: #ffffff;
+                box-shadow: {CARD_SHADOW};
             }}
             table {{
                 width: 100%;
                 border-collapse: collapse;
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 12px;
+                font-family: 'Manrope', sans-serif;
+                font-size: 13px;
             }}
-            thead tr {{ background: linear-gradient(90deg, rgba(0,201,122,0.14), rgba(255,168,0,0.12)); }}
+            thead tr {{ background: {MINT_TINT}; }}
             thead th {{
                 position: sticky; top: 0; z-index: 10;
-                background: #eefaf3;
-                border-bottom: 1px solid rgba(20,27,46,0.1);
-                box-shadow: 0 1px 0 rgba(20,27,46,0.06);
+                background: {MINT_TINT};
+                border-bottom: 1px solid {BORDER};
             }}
-            tbody tr {{ border-bottom: 1px solid rgba(20,27,46,0.05); transition: background 0.15s; }}
+            tbody tr {{ border-bottom: 1px solid {BORDER}; transition: background 0.15s; }}
             tbody tr:last-child {{ border-bottom: none; }}
-            tbody tr:hover td {{ background: rgba(0,201,122,0.08) !important; }}
+            tbody tr:hover td {{ background: {MINT_TINT} !important; }}
         </style>
         </head>
         <body>
@@ -555,7 +507,7 @@ with tab1:
             labels=df["Fund"], values=df["Current"], hole=0.65,
             marker=dict(colors=PALETTE[:len(df)], line=dict(color="#ffffff", width=3)),
             textinfo="percent",
-            textfont=dict(size=12, family="JetBrains Mono", color="#141B2E"),
+            textfont=dict(size=12, family="Manrope", color=TEXT_DARK),
             hovertemplate="<b>%{label}</b><br>₹%{value:,.0f}<br>%{percent}<extra></extra>"
         ))
         fig_donut.update_layout(
@@ -566,7 +518,7 @@ with tab1:
             annotations=[dict(
                 text=f"<b>₹{total_current/1e5:.1f}L</b>",
                 x=0.5, y=0.5,
-                font=dict(size=18, color="#00915C", family="JetBrains Mono"),
+                font=dict(size=18, color=PRIMARY_DARK, family="Manrope"),
                 showarrow=False
             )]
         )
@@ -659,7 +611,7 @@ with tab2:
     chart_df["OneDayChangePct_val"] = (
         chart_df["OneDayChangePct"].str.replace("%", "", regex=False).astype(float)
     )
-    bar_colors = [SUCCESS if x >= 0 else DANGER for x in chart_df["OneDayChange"]]
+    bar_colors = [PRIMARY if x >= 0 else DANGER for x in chart_df["OneDayChange"]]
 
     fig_perf = make_subplots(specs=[[{"secondary_y": True}]])
     fig_perf.add_trace(go.Bar(
@@ -670,12 +622,12 @@ with tab2:
     fig_perf.add_trace(go.Scatter(
         x=chart_df["Date"], y=chart_df["TotalValue"],
         name="Total Value (₹)", mode="lines",
-        line=dict(color=BLUE, width=3),
-        fill="tozeroy", fillcolor="rgba(61,139,255,0.10)",
+        line=dict(color=PRIMARY_DARK, width=3),
+        fill="tozeroy", fillcolor="rgba(18,61,47,0.08)",
         hovertemplate="<b>%{x|%d %b %Y}</b><br>Value: ₹%{y:,.0f}<extra></extra>"
     ), secondary_y=True)
     fig_perf.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(255,255,255,0.55)",
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(247,248,250,0.7)",
         font=dict(color=TEXT_SUB, family="Manrope"),
         hovermode="x unified", height=460, margin=dict(t=20, b=40, l=10, r=10),
         legend=dict(
@@ -687,7 +639,7 @@ with tab2:
     )
 
     fig_perf.update_yaxes(
-        showgrid=True, gridcolor="rgba(20,27,46,0.07)",
+        showgrid=True, gridcolor="rgba(16,24,40,0.06)",
         zeroline=False, tickprefix="₹", secondary_y=False
     )
     fig_perf.update_yaxes(
@@ -757,7 +709,7 @@ with tab3:
             labels={"Month_Name": "Month", "Amount": "Amount (₹)"}
         )
         fig_month.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(255,255,255,0.55)",
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(247,248,250,0.7)",
             font=dict(color=TEXT_SUB, family="Manrope"),
             height=340, margin=dict(t=20, b=10, l=10, r=10),
             legend=dict(
@@ -771,7 +723,7 @@ with tab3:
                 categoryorder="array", categoryarray=list(month_map.values())
             ),
             yaxis=dict(
-                showgrid=True, gridcolor="rgba(20,27,46,0.07)",
+                showgrid=True, gridcolor="rgba(16,24,40,0.06)",
                 zeroline=False, tickprefix="₹"
             ),
         )
@@ -837,7 +789,7 @@ with tab4:
         df_chart = df_daily_change.copy().sort_values("Change in Value", ascending=True)
 
         colors = [
-            SUCCESS if v >= 0 else DANGER
+            PRIMARY if v >= 0 else DANGER
             for v in df_chart["Change in Value"]
         ]
 
@@ -886,10 +838,10 @@ with tab4:
                 title="Change in Value (₹)",
                 range=[-(max_abs + x_pad), max_abs + x_pad],
                 zeroline=True,
-                zerolinecolor="rgba(20,27,46,0.25)",
+                zerolinecolor="rgba(16,24,40,0.2)",
                 zerolinewidth=1.5,
                 tickformat=",.0f",
-                gridcolor="rgba(20,27,46,0.07)",
+                gridcolor="rgba(16,24,40,0.06)",
             ),
             yaxis=dict(
                 automargin=True,
@@ -915,7 +867,7 @@ with tab4:
                     xref="paper", yref="paper",
                     text="🟢  Gain (positive change)",
                     showarrow=False,
-                    font=dict(size=12, color=SUCCESS),
+                    font=dict(size=12, color=PRIMARY),
                     xanchor="left",
                 ),
                 dict(
