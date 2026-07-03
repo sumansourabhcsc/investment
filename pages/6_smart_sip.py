@@ -239,12 +239,12 @@ Respond in this EXACT JSON format (no markdown, no extra text):
         raw = raw.replace("```json", "").replace("```", "").strip()
         result = json.loads(raw)
         return result
-    except Exception as e:
+    except Exception:
         # Fallback: pick highest 3Y CAGR
         best = max(candidates, key=lambda c: c["cagr_3y"] or 0)
         return {
             "winner": best["name"],
-            "reasoning": f"AI unavailable ({e}). Selected by highest 3Y CAGR: {best['cagr_3y']}%."
+            "reasoning": f"Selected by highest 3Y CAGR: {best['cagr_3y']}%."
         }
 
 
