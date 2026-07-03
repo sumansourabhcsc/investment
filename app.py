@@ -575,6 +575,181 @@ def market_ticker():
     else:
         st.warning(f"⚠️ Market data unavailable: {mkt['error']}")
 
+
+# ─────────────────────────────────────────────
+# Currency Ticker — USD/INR & EUR/INR (manual refresh)
+# ─────────────────────────────────────────────
+
+@st.fragment
+def currency_ticker():
+
+    @st.cache_data(ttl=300)
+    def get_currency_data():
+        try:
+            usd = yf.Ticker("USDINR=X").fast_info
+            eur = yf.Ticker("EURINR=X").fast_info
+            return {
+                "usd": {
+                    "price":  round(usd.last_price, 4),
+                    "change": round(usd.last_price - usd.previous_close, 4),
+                    "pct":    round((usd.last_price - usd.previous_close) / usd.previous_close * 100, 2),
+                },
+                "eur": {
+                    "price":  round(eur.last_price, 4),
+                    "change": round(eur.last_price - eur.previous_close, 4),
+                    "pct":    round((eur.last_price - eur.previous_close) / eur.previous_close * 100, 2),
+                },
+                "timestamp": datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%H:%M:%S"),
+                "error": None
+            }
+        except Exception as e:
+            return {"error": str(e)}
+
+    col_label, col_btn = st.columns([5, 1])
+    with col_label:
+        st.markdown(
+            "<div style=\"font-family:'Syne',sans-serif;font-size:0.72rem;font-weight:700;"
+            "letter-spacing:0.14em;color:rgba(0,245,212,0.5);text-transform:uppercase;"
+            "padding-top:0.4rem;\">Currency Exchange</div>",
+            unsafe_allow_html=True
+        )
+    with col_btn:
+        if st.button("🔄 Refresh", key="refresh_currency", use_container_width=True):
+            get_currency_data.clear()
+
+    cur = get_currency_data()
+
+    if not cur.get("error"):
+        usd = cur["usd"]
+        eur = cur["eur"]
+
+        def arrow(v): return "▲" if v >= 0 else "▼"
+        def color(v): return "#00f5d4" if v >= 0 else "#ff4d6d"
+
+        components.html(f"""
+<!DOCTYPE html><html><head>
+<meta charset="utf-8"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@300;400;500&display=swap');
+  *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ background: transparent; font-family: 'DM Mono', monospace; padding: 0.3rem 0; }}
+  .ticker-wrap {{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    width: 100%;
+  }}
+  .card {{
+    background: rgba(8,14,20,0.78);
+    border: 1px solid rgba(255,209,102,0.15);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+  }}
+  .card.eur {{ border-color: rgba(76,201,240,0.18); }}
+  .card::before {{
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #ffd166, #f7b733);
+    opacity: 0.5;
+  }}
+  .card.eur::before {{ background: linear-gradient(90deg, #4cc9f0, #4361ee); }}
+  .card-header {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+  }}
+  .exchange-tag {{
+    font-family: 'Syne', sans-serif;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: rgba(255,209,102,0.6);
+    text-transform: uppercase;
+  }}
+  .card.eur .exchange-tag {{ color: rgba(76,201,240,0.6); }}
+  .index-name {{
+    font-family: 'Syne', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: rgba(200,230,225,0.6);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.25rem;
+  }}
+  .price {{
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.2rem, 5vw, 1.55rem);
+    font-weight: 800;
+    color: #e8f5f2;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    white-space: nowrap;
+  }}
+  .change-row {{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.35rem;
+  }}
+  .change-abs {{
+    font-size: 0.68rem;
+    font-weight: 500;
+  }}
+  .change-pct {{
+    font-size: 0.62rem;
+    font-weight: 400;
+    opacity: 0.85;
+  }}
+  .timestamp {{
+    text-align: right;
+    font-size: 0.5rem;
+    color: rgba(255,209,102,0.35);
+    letter-spacing: 0.1em;
+    margin-top: 0.6rem;
+    text-transform: uppercase;
+  }}
+  .card.eur .timestamp {{ color: rgba(76,201,240,0.35); }}
+</style>
+</head><body>
+<div class="ticker-wrap">
+  <div class="card usd">
+    <div class="card-header">
+      <span class="exchange-tag">USD / INR</span>
+    </div>
+    <div class="index-name">US DOLLAR</div>
+    <div class="price">₹{usd['price']:,.4f}</div>
+    <div class="change-row">
+      <span class="change-abs" style="color:{color(usd['change'])}">{arrow(usd['change'])} {abs(usd['change']):.4f}</span>
+      <span class="change-pct" style="color:{color(usd['pct'])}">({arrow(usd['pct'])}{abs(usd['pct']):.2f}%)</span>
+    </div>
+    <div class="timestamp">as of {cur['timestamp']} IST</div>
+  </div>
+  <div class="card eur">
+    <div class="card-header">
+      <span class="exchange-tag">EUR / INR</span>
+    </div>
+    <div class="index-name">EURO</div>
+    <div class="price">₹{eur['price']:,.4f}</div>
+    <div class="change-row">
+      <span class="change-abs" style="color:{color(eur['change'])}">{arrow(eur['change'])} {abs(eur['change']):.4f}</span>
+      <span class="change-pct" style="color:{color(eur['pct'])}">({arrow(eur['pct'])}{abs(eur['pct']):.2f}%)</span>
+    </div>
+    <div class="timestamp">as of {cur['timestamp']} IST</div>
+  </div>
+</div>
+</body></html>
+""", height=150, scrolling=False)
+
+    else:
+        st.warning(f"⚠️ Currency data unavailable: {cur['error']}")
+
+
 # ── Date / Time bar ──
 now = datetime.now(ZoneInfo("Asia/Kolkata"))
 # ── Live Clock Bar ──
@@ -655,6 +830,8 @@ components.html("""
 
 market_ticker()  # ← this call auto-reruns every 30s
 
+st.markdown("<br>", unsafe_allow_html=True)
+currency_ticker()  # ← manual refresh via button
 
 st.markdown("<br>", unsafe_allow_html=True)
 show_market_history_chart()
