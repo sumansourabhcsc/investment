@@ -4,6 +4,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import json
 import os
+from datetime import date, datetime, timedelta
 
 def show_market_history_chart():
     base_dir  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -18,6 +19,55 @@ def show_market_history_chart():
 
     if len(history) < 2:
         st.info("Collecting data — chart will appear once 2+ days are recorded.")
+        return
+
+    range_choice = st.radio(
+        "Quick Range", options=["1M", "6M", "1Y", "All", "Custom"],
+        index=3, horizontal=True, label_visibility="collapsed", key="market_history_range"
+    )
+
+    range_map = {"1M": 30, "6M": 180, "1Y": 365, "All": 9999}
+
+    if range_choice != "Custom":
+        days          = range_map[range_choice]
+        default_start = date.today() - timedelta(days=days)
+        default_end   = date.today()
+        col_d1, col_d2, col_spacer = st.columns([1, 1, 3])
+        with col_d1:
+            st.markdown(f"""
+            <div style="display:inline-flex;align-items:center;gap:8px;
+                background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
+                border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;
+                font-size:13px;color:rgba(255,255,255,0.5);">
+                <span style="color:rgba(255,255,255,0.3);font-size:11px;">FROM</span>
+                <span style="color:rgba(255,255,255,0.85);">{default_start.strftime("%d %b %Y")}</span>
+            </div>""", unsafe_allow_html=True)
+        with col_d2:
+            st.markdown(f"""
+            <div style="display:inline-flex;align-items:center;gap:8px;
+                background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
+                border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;
+                font-size:13px;color:rgba(255,255,255,0.5);">
+                <span style="color:rgba(255,255,255,0.3);font-size:11px;">TO</span>
+                <span style="color:rgba(255,255,255,0.85);">{default_end.strftime("%d %b %Y")}</span>
+            </div>""", unsafe_allow_html=True)
+        start_date, end_date = default_start, default_end
+    else:
+        default_start = date.today() - timedelta(days=365)
+        default_end   = date.today()
+        col_d1, col_d2, col_spacer = st.columns([1, 1, 3])
+        with col_d1:
+            start_date = st.date_input("Start Date", value=default_start, max_value=date.today(), key="market_start_date")
+        with col_d2:
+            end_date = st.date_input("End Date", value=default_end, min_value=start_date, max_value=date.today(), key="market_end_date")
+
+    history = [
+        e for e in history
+        if start_date <= datetime.strptime(e["date"], "%Y-%m-%d").date() <= end_date
+    ]
+
+    if len(history) < 2:
+        st.info("Not enough data in the selected range — try a wider range.")
         return
 
     dates_js  = json.dumps([e["date"]   for e in history])
