@@ -311,16 +311,42 @@ with col_info:
 # ─────────────────────────────────────────────
 # Allocation customiser
 # ─────────────────────────────────────────────
+
+# Map each display category back to the fund names in that category,
+# so the customiser can offer them for select/deselect.
+DISPLAY_TO_RAW = {}
+for raw_cat, disp_cat in CATEGORY_DISPLAY.items():
+    DISPLAY_TO_RAW.setdefault(disp_cat, []).append(raw_cat)
+
+FUNDS_BY_DISPLAY_CAT = {
+    disp_cat: [
+        name for name, meta in mutual_funds.items()
+        if meta.get("category") in raw_cats
+    ]
+    for disp_cat, raw_cats in DISPLAY_TO_RAW.items()
+}
+
 alloc = dict(DEFAULT_ALLOC)
+selected_funds = dict(FUNDS_BY_DISPLAY_CAT)
 total = 100
 
 with st.expander("⚙️  Customise allocation %", expanded=False):
-    st.caption("Adjust category weights. Must total 100%.")
+    st.caption("Adjust category weights and pick which of your funds are eligible in each category. Weights must total 100%.")
     alloc = {}
+    selected_funds = {}
     c1, c2 = st.columns(2)
     for i, (cat, default) in enumerate(DEFAULT_ALLOC.items()):
         with (c1 if i % 2 == 0 else c2):
             alloc[cat] = st.slider(cat, 0, 60, default, step=5, key=f"sl_{cat}")
+            cat_funds = FUNDS_BY_DISPLAY_CAT.get(cat, [])
+            selected_funds[cat] = st.multiselect(
+                f"Eligible {cat} funds",
+                options=cat_funds,
+                default=cat_funds,
+                key=f"funds_{cat}",
+                label_visibility="collapsed",
+            )
+            st.markdown("<div style='margin-bottom:14px;'></div>", unsafe_allow_html=True)
     total = sum(alloc.values())
     if total != 100:
         st.warning(f"Total = **{total}%** — must be exactly 100%.")
@@ -344,11 +370,14 @@ if generate or "sip_plan" in st.session_state:
             if pct == 0:
                 continue
 
-            # Get all funds in this display category with valid 3Y CAGR
+            # Get selected, eligible funds in this display category with valid 3Y CAGR
+            eligible_names = selected_funds.get(cat, list(fund_metrics.keys()))
             candidates = [
                 {"name": name, **meta}
                 for name, meta in fund_metrics.items()
-                if meta["category"] == cat and meta["cagr_3y"] is not None
+                if meta["category"] == cat
+                and meta["cagr_3y"] is not None
+                and name in eligible_names
             ]
             if not candidates:
                 continue
