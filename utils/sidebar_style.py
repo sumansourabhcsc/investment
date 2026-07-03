@@ -140,7 +140,6 @@ def render_sidebar(current_page: str):
         # Main nav — use st.page_link so Streamlit handles routing (no new tab)
         st.page_link("app.py",                          label="Home",             icon="🏠")
         st.page_link("pages/1_Portfolio_Overview.py",   label="Dashboard", icon="📊")
-        st.page_link("pages/7_Dashboard_Update.py",     label="Dashboard update", icon="🌿")
         st.page_link("pages/2_Fund_Details.py",         label="Funds",     icon="📁")
         st.page_link("pages/3_Fund_Analysis.py",        label="Analysis",    icon="📈")
         st.page_link("pages/4_Tools.py",                label="Tools",            icon="🔧")
