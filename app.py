@@ -828,10 +828,10 @@ components.html("""
 
 
 
-market_ticker()  # ← this call auto-reruns every 30s
+currency_ticker()  # ← manual refresh via button
 
 st.markdown("<br>", unsafe_allow_html=True)
-currency_ticker()  # ← manual refresh via button
+market_ticker()  # ← this call auto-reruns every 30s
 
 st.markdown("<br>", unsafe_allow_html=True)
 show_market_history_chart()
