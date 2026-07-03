@@ -30,86 +30,92 @@ st.set_page_config(
 )
 
 # =========================================================
-# "LIVELIHOOD" PALETTE — vivid, alive, growth-coded
+# BRIGHT "LIVELIHOOD" PALETTE — vivid, sunlit, colorful
 # =========================================================
-SUCCESS = "#00E68A"   # vivid living emerald — growth / gain
-DANGER  = "#FF5D5D"   # warm coral red — loss
-GOLD    = "#FFB020"   # harvest gold — prosperity
-VIOLET  = "#8B6BFF"   # spark violet — highlight
-TEAL    = "#2DD4BF"   # aqua teal — accent
-SUN     = "#FFD54F"   # sunflower — accent
+SUCCESS = "#00C97A"   # vivid emerald — growth / gain
+DANGER  = "#FF4D5E"   # bright coral red — loss
+GOLD    = "#FFA800"   # marigold — prosperity
+VIOLET  = "#7C5CFF"   # electric violet — highlight
+TEAL    = "#00BFC4"   # aqua teal — accent
+SUN     = "#FFD23F"   # sunflower — accent
+PINK    = "#FF5FA2"   # bright pink — accent
+BLUE    = "#3D8BFF"   # sky blue — accent
+
+TEXT_DARK  = "#141B2E"
+TEXT_SUB   = "rgba(20,27,46,0.58)"
+TEXT_FAINT = "rgba(20,27,46,0.4)"
 
 PALETTE = [
-    "#00E68A",  # vivid emerald
-    "#FFB020",  # golden amber
-    "#FF6F61",  # coral
-    "#2DD4BF",  # turquoise
-    "#8B6BFF",  # violet spark
-    "#FFD54F",  # sunflower yellow
-    "#FF8A65",  # warm orange
-    "#4CD9A8",  # jade
-    "#26C6DA",  # aqua
-    "#B388FF",  # lavender
+    "#00C97A",  # emerald
+    "#FFA800",  # marigold
+    "#FF5FA2",  # pink
+    "#3D8BFF",  # sky blue
+    "#7C5CFF",  # violet
+    "#FFD23F",  # sunflower
+    "#FF7A45",  # tangerine
+    "#00BFC4",  # teal
+    "#36CFC9",  # aqua
+    "#B37FEB",  # lavender
 ]
 
 ICON_FUND = """
 <svg width="34" height="34" viewBox="0 0 36 36">
-  <rect x="4" y="6" width="28" height="24" rx="3" fill="none" stroke="#00E68A" stroke-width="1.5"/>
-  <line x1="4" y1="13" x2="32" y2="13" stroke="#00E68A" stroke-width="1.5"/>
-  <rect x="9"  y="18" width="6"  height="2" rx="1" fill="#00E68A"/>
-  <rect x="9"  y="23" width="10" height="2" rx="1" fill="rgba(0,230,138,0.4)"/>
-  <rect x="21" y="18" width="6"  height="2" rx="1" fill="rgba(0,230,138,0.4)"/>
-  <rect x="21" y="23" width="4"  height="2" rx="1" fill="rgba(0,230,138,0.4)"/>
+  <rect x="4" y="6" width="28" height="24" rx="3" fill="none" stroke="#00C97A" stroke-width="1.8"/>
+  <line x1="4" y1="13" x2="32" y2="13" stroke="#00C97A" stroke-width="1.8"/>
+  <rect x="9"  y="18" width="6"  height="2" rx="1" fill="#00C97A"/>
+  <rect x="9"  y="23" width="10" height="2" rx="1" fill="rgba(0,201,122,0.5)"/>
+  <rect x="21" y="18" width="6"  height="2" rx="1" fill="rgba(0,201,122,0.5)"/>
+  <rect x="21" y="23" width="4"  height="2" rx="1" fill="rgba(0,201,122,0.5)"/>
 </svg>"""
 
 ICON_DAILY_SUMMARY = """
 <svg width="34" height="34" viewBox="0 0 36 36">
-  <rect x="5"  y="8"  width="5" height="20" rx="2" fill="rgba(0,230,138,0.35)"/>
-  <rect x="13" y="13" width="5" height="15" rx="2" fill="rgba(0,230,138,0.55)"/>
-  <rect x="21" y="10" width="5" height="18" rx="2" fill="rgba(0,230,138,0.75)"/>
-  <rect x="29" y="16" width="5" height="12" rx="2" fill="#00E68A"/>
-  <line x1="3" y1="29" x2="36" y2="29" stroke="rgba(0,230,138,0.3)" stroke-width="1"/>
+  <rect x="5"  y="8"  width="5" height="20" rx="2" fill="rgba(61,139,255,0.4)"/>
+  <rect x="13" y="13" width="5" height="15" rx="2" fill="rgba(61,139,255,0.6)"/>
+  <rect x="21" y="10" width="5" height="18" rx="2" fill="rgba(61,139,255,0.8)"/>
+  <rect x="29" y="16" width="5" height="12" rx="2" fill="#3D8BFF"/>
+  <line x1="3" y1="29" x2="36" y2="29" stroke="rgba(61,139,255,0.35)" stroke-width="1"/>
 </svg>"""
 
 ICON_MONTHLY = """
 <svg width="34" height="34" viewBox="0 0 36 36">
-  <rect x="4"  y="6"  width="28" height="26" rx="3" fill="none" stroke="#FFB020" stroke-width="1.5"/>
-  <line x1="4"  y1="13" x2="32" y2="13" stroke="#FFB020" stroke-width="1.5"/>
-  <circle cx="12" cy="9.5" r="2" fill="#FFB020"/>
-  <circle cx="24" cy="9.5" r="2" fill="#FFB020"/>
-  <line x1="12" y1="7" x2="12" y2="4" stroke="#FFB020" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="24" y1="7" x2="24" y2="4" stroke="#FFB020" stroke-width="1.5" stroke-linecap="round"/>
-  <rect x="9"  y="17" width="4" height="4" rx="1" fill="rgba(255,176,32,0.5)"/>
-  <rect x="16" y="17" width="4" height="4" rx="1" fill="#FFB020"/>
-  <rect x="23" y="17" width="4" height="4" rx="1" fill="rgba(255,176,32,0.3)"/>
-  <rect x="9"  y="24" width="4" height="4" rx="1" fill="rgba(255,176,32,0.3)"/>
-  <rect x="16" y="24" width="4" height="4" rx="1" fill="rgba(255,176,32,0.5)"/>
-  <rect x="23" y="24" width="4" height="4" rx="1" fill="#FFB020"/>
+  <rect x="4"  y="6"  width="28" height="26" rx="3" fill="none" stroke="#FFA800" stroke-width="1.8"/>
+  <line x1="4"  y1="13" x2="32" y2="13" stroke="#FFA800" stroke-width="1.8"/>
+  <circle cx="12" cy="9.5" r="2" fill="#FFA800"/>
+  <circle cx="24" cy="9.5" r="2" fill="#FFA800"/>
+  <line x1="12" y1="7" x2="12" y2="4" stroke="#FFA800" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="24" y1="7" x2="24" y2="4" stroke="#FFA800" stroke-width="1.8" stroke-linecap="round"/>
+  <rect x="9"  y="17" width="4" height="4" rx="1" fill="rgba(255,168,0,0.55)"/>
+  <rect x="16" y="17" width="4" height="4" rx="1" fill="#FFA800"/>
+  <rect x="23" y="17" width="4" height="4" rx="1" fill="rgba(255,168,0,0.35)"/>
+  <rect x="9"  y="24" width="4" height="4" rx="1" fill="rgba(255,168,0,0.35)"/>
+  <rect x="16" y="24" width="4" height="4" rx="1" fill="rgba(255,168,0,0.55)"/>
+  <rect x="23" y="24" width="4" height="4" rx="1" fill="#FFA800"/>
 </svg>"""
 
 ICON_DAILY_CHANGE = """
 <svg width="34" height="34" viewBox="0 0 36 36">
   <polyline points="4,26 10,18 16,22 22,12 28,16 34,8"
-    fill="none" stroke="#FF6F61" stroke-width="2"
+    fill="none" stroke="#FF5FA2" stroke-width="2.2"
     stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="34" cy="8"  r="3"   fill="#FFD54F"/>
-  <circle cx="22" cy="12" r="2"   fill="rgba(255,111,97,0.6)"/>
+  <circle cx="34" cy="8"  r="3"   fill="#FFD23F"/>
+  <circle cx="22" cy="12" r="2"   fill="rgba(255,95,162,0.7)"/>
   <line   x1="4" y1="30" x2="34" y2="30"
-    stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    stroke="rgba(20,27,46,0.1)" stroke-width="1"/>
 </svg>"""
 
 ICON_TREEMAP = """
 <svg width="34" height="34" viewBox="0 0 36 36">
-  <rect x="4"  y="4"  width="13" height="13" rx="2" fill="none" stroke="#2DD4BF" stroke-width="1.5"/>
-  <rect x="19" y="4"  width="13" height="8"  rx="2" fill="none" stroke="rgba(45,212,191,0.5)" stroke-width="1.5"/>
-  <rect x="19" y="14" width="13" height="3"  rx="1" fill="rgba(45,212,191,0.3)" stroke="rgba(45,212,191,0.3)" stroke-width="1"/>
-  <rect x="4"  y="19" width="8"  height="13" rx="2" fill="none" stroke="rgba(45,212,191,0.5)" stroke-width="1.5"/>
-  <rect x="14" y="19" width="18" height="13" rx="2" fill="none" stroke="rgba(45,212,191,0.4)" stroke-width="1.5"/>
+  <rect x="4"  y="4"  width="13" height="13" rx="2" fill="none" stroke="#00BFC4" stroke-width="1.8"/>
+  <rect x="19" y="4"  width="13" height="8"  rx="2" fill="none" stroke="rgba(0,191,196,0.6)" stroke-width="1.8"/>
+  <rect x="19" y="14" width="13" height="3"  rx="1" fill="rgba(0,191,196,0.35)" stroke="rgba(0,191,196,0.35)" stroke-width="1"/>
+  <rect x="4"  y="19" width="8"  height="13" rx="2" fill="none" stroke="rgba(0,191,196,0.6)" stroke-width="1.8"/>
+  <rect x="14" y="19" width="18" height="13" rx="2" fill="none" stroke="rgba(0,191,196,0.5)" stroke-width="1.8"/>
 </svg>"""
 
 
 # =========================================================
-# FONTS + THEME — "living" glass, aurora backdrop
+# FONTS + THEME — bright, colorful, sunlit backdrop
 # =========================================================
 st.markdown("""
 <style>
@@ -118,77 +124,80 @@ st.markdown("""
 html, body, [class*="css"] { font-family: 'Manrope', sans-serif !important; }
 
 .stApp {
-    background: #060b08 !important;
+    background: linear-gradient(150deg, #EAFBF3 0%, #FFF9E8 42%, #FFEFF4 100%) !important;
     position: relative;
 }
 
-/* living aurora glow — emerald / gold / coral breathing light */
+/* bright colorful glow blobs */
 .stApp::before {
     content: '';
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background:
-        radial-gradient(ellipse 65% 50% at 12% 8%,  rgba(0,230,138,0.10) 0%, transparent 60%),
-        radial-gradient(ellipse 55% 60% at 92% 18%,  rgba(255,176,32,0.08) 0%, transparent 55%),
-        radial-gradient(ellipse 60% 50% at 50% 100%, rgba(255,111,97,0.06) 0%, transparent 55%);
+        radial-gradient(ellipse 60% 45% at 8% 6%,   rgba(0,201,122,0.16) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 55% at 95% 12%,  rgba(255,168,0,0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 55% 45% at 50% 100%, rgba(124,92,255,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 35% at 30% 90%,  rgba(255,95,162,0.10) 0%, transparent 55%);
     animation: auroraBreathe 10s ease-in-out infinite;
 }
-@keyframes auroraBreathe { 0%,100% { opacity:1; } 50% { opacity:0.55; } }
+@keyframes auroraBreathe { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
 
 .stApp::after {
     content: '';
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image: radial-gradient(circle, rgba(0,230,138,0.10) 1px, transparent 1px);
+    background-image: radial-gradient(circle, rgba(20,27,46,0.06) 1px, transparent 1px);
     background-size: 42px 42px;
-    opacity: 0.5;
+    opacity: 0.6;
 }
 
 .stApp > * { position: relative; z-index: 1; }
 
 .block-container { padding-top: 2.2rem !important; padding-bottom: 3rem !important; max-width: 1800px !important; }
-section[data-testid="stSidebar"] { background: #070f0b !important; border-right: 1px solid rgba(0,230,138,0.08) !important; }
 
-[data-testid="stDataFrame"] { border-radius: 14px !important; overflow: hidden !important; border: 1px solid rgba(0,230,138,0.1) !important; }
+[data-testid="stDataFrame"] { border-radius: 14px !important; overflow: hidden !important; border: 1px solid rgba(20,27,46,0.08) !important; box-shadow: 0 4px 18px rgba(20,27,46,0.05); }
 .stSelectbox label, .stDateInput label {
-    color: rgba(230,255,240,0.35) !important; font-size: 9px !important;
+    color: rgba(20,27,46,0.45) !important; font-size: 9px !important;
     text-transform: uppercase; letter-spacing: 0.15em;
-    font-weight: 600 !important; font-family: 'JetBrains Mono', monospace !important;
+    font-weight: 700 !important; font-family: 'JetBrains Mono', monospace !important;
 }
-hr { border-color: rgba(0,230,138,0.1) !important; margin: 2rem 0 !important; }
+hr { border-color: rgba(20,27,46,0.08) !important; margin: 2rem 0 !important; }
 @keyframes livepulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
 
 [data-testid="stDataFrame"] thead tr th {
-    background: rgba(0,230,138,0.04) !important;
-    color: rgba(230,255,240,0.4) !important;
+    background: linear-gradient(90deg, rgba(0,201,122,0.12), rgba(255,168,0,0.10)) !important;
+    color: #141B2E !important;
     font-family: 'JetBrains Mono', monospace !important;
     font-size: 9px !important; letter-spacing: 0.12em !important; text-transform: uppercase !important;
+    font-weight: 700 !important;
 }
 [data-testid="stDataFrame"] tbody tr td {
     font-family: 'JetBrains Mono', monospace !important;
     font-size: 11px !important;
-    color: rgba(225,245,235,0.8) !important;
+    color: #202944 !important;
+    background: rgba(255,255,255,0.75) !important;
 }
-[data-testid="stDataFrame"] tbody tr:hover td { background: rgba(0,230,138,0.03) !important; }
+[data-testid="stDataFrame"] tbody tr:hover td { background: rgba(0,201,122,0.07) !important; }
 
 .stSelectbox > div > div, .stDateInput input {
-    background: rgba(0,230,138,0.05) !important;
-    border: 1px solid rgba(0,230,138,0.15) !important;
-    border-radius: 10px !important; color: #EFFFF6 !important;
+    background: rgba(255,255,255,0.85) !important;
+    border: 1px solid rgba(20,27,46,0.12) !important;
+    border-radius: 10px !important; color: #141B2E !important;
     font-family: 'JetBrains Mono', monospace !important;
 }
 
-/* pill-style tabs */
+/* pill-style tabs — bright */
 div[data-baseweb="tab-list"] {
     gap: 6px;
-    background: rgba(255,255,255,0.025);
+    background: rgba(255,255,255,0.65);
     padding: 7px;
     border-radius: 16px;
-    border: 1px solid rgba(0,230,138,0.12);
+    border: 1px solid rgba(20,27,46,0.08);
+    box-shadow: 0 4px 18px rgba(20,27,46,0.05);
     margin-bottom: 0.6rem;
 }
 button[data-baseweb="tab"] {
     height: 46px;
     border-radius: 11px !important;
-    color: rgba(230,255,240,0.5) !important;
+    color: rgba(20,27,46,0.55) !important;
     font-family: 'JetBrains Mono', monospace !important;
     font-size: 12px !important;
     letter-spacing: 0.06em;
@@ -197,28 +206,27 @@ button[data-baseweb="tab"] {
     transition: all 0.22s ease;
 }
 button[data-baseweb="tab"]:hover {
-    background: rgba(0,230,138,0.07) !important;
-    color: #00E68A !important;
+    background: rgba(0,201,122,0.09) !important;
+    color: #00915C !important;
 }
 button[data-baseweb="tab"][aria-selected="true"] {
-    background: linear-gradient(135deg, rgba(0,230,138,0.22), rgba(255,176,32,0.14)) !important;
+    background: linear-gradient(135deg, #00C97A, #3D8BFF) !important;
     color: #ffffff !important;
-    box-shadow: 0 0 24px rgba(0,230,138,0.18), inset 0 0 0 1px rgba(0,230,138,0.3);
+    box-shadow: 0 6px 18px rgba(0,201,122,0.35);
 }
 div[data-baseweb="tab-highlight"] { background-color: transparent !important; }
 div[data-baseweb="tab-border"]    { display: none !important; }
 
 /* glass card hover lift, reused via .life-card class */
-.life-card { transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
+.life-card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
 .life-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(0,230,138,0.4) !important;
-    box-shadow: 0 12px 32px rgba(0,230,138,0.12);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 16px 34px rgba(20,27,46,0.18);
 }
 
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(0,230,138,0.25); border-radius: 6px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: rgba(20,27,46,0.04); }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #00C97A, #3D8BFF); border-radius: 6px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -227,39 +235,40 @@ div[data-baseweb="tab-border"]    { display: none !important; }
 # HELPERS
 # =========================================================
 
-def kpi_card(icon, label, value, value_color, sub, bar_gradient):
+def kpi_card(icon, label, value, sub, gradient_css):
     return f"""
-    <div class="life-card" style="background:rgba(255,255,255,0.035); border:1px solid rgba(0,230,138,0.14);
-        border-radius:16px; padding:20px 20px 16px; position:relative;
-        overflow:hidden; box-sizing:border-box; height:100%;">
-        <div style="position:absolute; top:0; left:0; right:0; height:3px;
-            background:{bar_gradient};"></div>
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
-            <div style="width:30px; height:30px; border-radius:9px; display:flex; align-items:center;
-                justify-content:center; font-size:15px; background:rgba(255,255,255,0.05);
-                border:1px solid rgba(255,255,255,0.08);">{icon}</div>
+    <div class="life-card" style="background:{gradient_css}; border:none;
+        border-radius:18px; padding:20px 20px 18px; position:relative;
+        overflow:hidden; box-sizing:border-box; height:100%;
+        box-shadow:0 10px 24px rgba(20,27,46,0.14);">
+        <div style="position:absolute; top:-20px; right:-20px; width:90px; height:90px;
+            border-radius:50%; background:rgba(255,255,255,0.14);"></div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; position:relative;">
+            <div style="width:32px; height:32px; border-radius:10px; display:flex; align-items:center;
+                justify-content:center; font-size:16px; background:rgba(255,255,255,0.25);
+                backdrop-filter: blur(4px);">{icon}</div>
             <div style="font-family:'JetBrains Mono',monospace; font-size:9px;
-                color:rgba(230,255,240,0.38); text-transform:uppercase;
-                letter-spacing:0.15em; font-weight:600;">{label}</div>
+                color:rgba(255,255,255,0.85); text-transform:uppercase;
+                letter-spacing:0.15em; font-weight:700;">{label}</div>
         </div>
-        <div style="font-size:1.45rem; font-weight:800; font-family:'JetBrains Mono',monospace;
-            line-height:1.1; color:{value_color};">{value}</div>
-        <div style="font-size:9.5px; color:rgba(230,255,240,0.3); margin-top:6px;
+        <div style="font-size:1.5rem; font-weight:800; font-family:'JetBrains Mono',monospace;
+            line-height:1.1; color:#ffffff; position:relative; text-shadow:0 2px 10px rgba(0,0,0,0.12);">{value}</div>
+        <div style="font-size:9.5px; color:rgba(255,255,255,0.78); margin-top:7px; position:relative;
             font-family:'JetBrains Mono',monospace; letter-spacing:0.02em;">{sub}</div>
     </div>"""
 
 
 def sec_header(icon_svg, title, subtitle=""):
-    icon_part = f'<div style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;">{icon_svg}</div>' if icon_svg else ""
-    sub_part  = f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:rgba(230,255,240,0.35);letter-spacing:0.15em;text-transform:uppercase;margin-top:3px;">{subtitle}</div>' if subtitle else ""
+    icon_part = f'<div style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:rgba(20,27,46,0.04);border-radius:10px;">{icon_svg}</div>' if icon_svg else ""
+    sub_part  = f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:{TEXT_FAINT};letter-spacing:0.15em;text-transform:uppercase;margin-top:3px;">{subtitle}</div>' if subtitle else ""
     st.markdown(f"""
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.6rem;margin-top:0.4rem;">
         {icon_part}
         <div>
-            <div style="font-size:17px;font-weight:700;color:#EFFFF6;font-family:'Manrope',sans-serif;line-height:1.1;">{title}</div>
+            <div style="font-size:17px;font-weight:800;color:{TEXT_DARK};font-family:'Manrope',sans-serif;line-height:1.1;">{title}</div>
             {sub_part}
         </div>
-        <div style="flex:1;height:1px;background:linear-gradient(90deg, rgba(0,230,138,0.25), transparent);margin-left:6px;"></div>
+        <div style="flex:1;height:2px;background:linear-gradient(90deg, rgba(0,201,122,0.35), rgba(255,168,0,0.15), transparent);margin-left:6px;border-radius:2px;"></div>
     </div>""", unsafe_allow_html=True)
 
 
@@ -268,11 +277,11 @@ def change_summary_box(total_change):
     color = SUCCESS if total_change >= 0 else DANGER
     icon  = "▲" if total_change >= 0 else "▼"
     st.markdown(f"""
-    <div style="margin-top:14px; background:rgba(255,255,255,0.025); padding:18px 24px;
-        border-radius:14px; border:1px solid rgba(0,230,138,0.14);
+    <div style="margin-top:14px; background:rgba(255,255,255,0.8); padding:18px 24px;
+        border-radius:14px; border:1px solid rgba(20,27,46,0.08); box-shadow:0 6px 20px rgba(20,27,46,0.06);
         display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
         <div style="font-family:'JetBrains Mono',monospace; font-size:10px;
-            color:rgba(230,255,240,0.42); letter-spacing:0.12em; text-transform:uppercase;">
+            color:{TEXT_SUB}; letter-spacing:0.12em; text-transform:uppercase;">
             {icon} Total Daily Change Across All Funds
         </div>
         <div style="font-size:1.4rem; font-weight:800; font-family:'JetBrains Mono',monospace;
@@ -281,7 +290,7 @@ def change_summary_box(total_change):
 
 
 # =========================================================
-# HERO — "living pulse" header
+# HERO — bright rainbow banner
 # =========================================================
 components.html("""
 <!DOCTYPE html><html><head><meta charset="utf-8"/>
@@ -289,38 +298,40 @@ components.html("""
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@800&family=JetBrains+Mono:wght@400;500&display=swap');
   *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
   body { background:transparent; font-family:'Manrope',sans-serif; overflow:hidden; }
-  .row { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding-top:6px; }
-  h1 {
-    font-weight:800; letter-spacing:-0.02em; line-height:1.05;
-    font-size:clamp(1.7rem, 5vw, 2.6rem);
-    background:linear-gradient(120deg, #00E68A 0%, #FFD54F 45%, #FF8A65 80%);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  .banner {
+    background: linear-gradient(115deg, #00C97A 0%, #3D8BFF 38%, #7C5CFF 68%, #FF5FA2 100%);
+    border-radius: 22px; padding: 22px 28px;
+    box-shadow: 0 12px 28px rgba(60,60,120,0.22);
+    display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
   }
-  .tag { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.22em;
-    color:rgba(230,255,240,0.35); text-transform:uppercase; margin-top:6px; }
+  h1 {
+    font-weight:800; letter-spacing:-0.02em; line-height:1.05; color:#ffffff;
+    font-size:clamp(1.6rem, 4.6vw, 2.4rem);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .tag { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.2em;
+    color:rgba(255,255,255,0.85); text-transform:uppercase; margin-top:6px; }
   .pill { display:inline-flex; align-items:center; gap:7px; margin-top:12px;
-    background:rgba(0,230,138,0.1); border:1px solid rgba(0,230,138,0.28);
-    border-radius:22px; padding:6px 14px; font-size:11px; font-weight:600;
-    color:#00E68A; font-family:'JetBrains Mono',monospace; }
-  .dot { width:7px; height:7px; border-radius:50%; background:#00E68A;
+    background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.4);
+    border-radius:22px; padding:6px 14px; font-size:11px; font-weight:700;
+    color:#ffffff; font-family:'JetBrains Mono',monospace; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#ffffff;
     animation:beat 1.3s ease-in-out infinite; }
   @keyframes beat { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.35; transform:scale(0.6); } }
-  .heart-wrap { flex-shrink:0; width:64px; height:64px; position:relative;
+  .heart-wrap { flex-shrink:0; width:60px; height:60px; position:relative;
     display:flex; align-items:center; justify-content:center; margin-top:4px; }
-  .ring { position:absolute; width:26px; height:26px; border-radius:50%;
-    border:1px solid #00E68A; opacity:0; animation:ripple 1.6s ease-out infinite; }
-  .ring:nth-child(2){animation-delay:.4s;border-color:#FFB020;}
-  .ring:nth-child(3){animation-delay:.8s;border-color:#FF6F61;}
-  @keyframes ripple { 0% { transform:scale(1); opacity:.6; } 100% { transform:scale(3.2); opacity:0; } }
-  .core { width:16px; height:16px; border-radius:50%; z-index:5;
-    background:radial-gradient(circle at 35% 35%, #00E68Add, #FFB02066);
+  .ring { position:absolute; width:24px; height:24px; border-radius:50%;
+    border:1.5px solid #ffffff; opacity:0; animation:ripple 1.6s ease-out infinite; }
+  .ring:nth-child(2){animation-delay:.4s;}
+  .ring:nth-child(3){animation-delay:.8s;}
+  @keyframes ripple { 0% { transform:scale(1); opacity:.8; } 100% { transform:scale(3.2); opacity:0; } }
+  .core { width:15px; height:15px; border-radius:50%; z-index:5;
+    background:#ffffff;
     animation:throb .9s ease-in-out infinite alternate; }
-  @keyframes throb { from{box-shadow:0 0 6px #00E68A99;} to{box-shadow:0 0 16px #FFB02099;} }
-  .divider { width:100%; height:1px; margin-top:16px;
-    background:linear-gradient(90deg, rgba(0,230,138,0.45), rgba(255,176,32,0.2), transparent); }
+  @keyframes throb { from{box-shadow:0 0 6px rgba(255,255,255,0.7);} to{box-shadow:0 0 18px rgba(255,255,255,0.95);} }
 </style></head>
 <body>
-<div class="row">
+<div class="banner">
   <div style="flex:1;min-width:0;">
     <h1>Dashboard Update</h1>
     <div class="tag">◈ Taurus · Reimagined Portfolio View · Live NAV</div>
@@ -331,9 +342,8 @@ components.html("""
     <div class="core"></div>
   </div>
 </div>
-<div class="divider"></div>
 </body></html>
-""", height=145, scrolling=False)
+""", height=155, scrolling=False)
 
 
 # =========================================================
@@ -380,12 +390,13 @@ all_funds_df        = load_all_funds()
 overall_xirr        = compute_overall_xirr(all_funds_df)
 overall_xirr_pct    = overall_xirr * 100
 
-pnl_color  = SUCCESS if total_pnl >= 0 else DANGER
-ret_color  = SUCCESS if absolute_return_pct >= 0 else DANGER
-xirr_color = SUCCESS if overall_xirr_pct >= 0 else DANGER
 pnl_sign   = "+" if total_pnl >= 0 else ""
 ret_sign   = "+" if absolute_return_pct >= 0 else ""
 xirr_sign  = "+" if overall_xirr_pct >= 0 else ""
+
+pnl_gradient  = f"linear-gradient(135deg, {TEAL}, {BLUE})"   if total_pnl >= 0           else f"linear-gradient(135deg, {DANGER}, {GOLD})"
+ret_gradient  = f"linear-gradient(135deg, {VIOLET}, {PINK})" if absolute_return_pct >= 0  else f"linear-gradient(135deg, {DANGER}, {VIOLET})"
+xirr_gradient = f"linear-gradient(135deg, {PINK}, {SUN})"    if overall_xirr_pct >= 0     else f"linear-gradient(135deg, {DANGER}, {PINK})"
 
 
 # =========================================================
@@ -397,41 +408,40 @@ with c1:
     st.markdown(kpi_card(
         "🌱", "Total Invested",
         f"₹{total_invested:,.0f}",
-        "#EFFFF6",
         f"across {len(summary)} funds",
-        f"linear-gradient(90deg, {GOLD}, {SUN})"
+        f"linear-gradient(135deg, {GOLD}, {SUN})"
     ), unsafe_allow_html=True)
 
 with c2:
     st.markdown(kpi_card(
         "🌿", "Current Value",
         f"₹{total_current:,.0f}",
-        SUCCESS, "live NAV",
-        f"linear-gradient(90deg, {SUCCESS}, {TEAL})"
+        "live NAV",
+        f"linear-gradient(135deg, {SUCCESS}, {TEAL})"
     ), unsafe_allow_html=True)
 
 with c3:
     st.markdown(kpi_card(
         "⚡", "Total P&L",
         f"{pnl_sign}₹{abs(total_pnl):,.0f}",
-        pnl_color, "unrealised gain/loss",
-        f"linear-gradient(90deg, {TEAL}, {VIOLET})"
+        "unrealised gain/loss",
+        pnl_gradient
     ), unsafe_allow_html=True)
 
 with c4:
     st.markdown(kpi_card(
         "📈", "Absolute Return",
         f"{ret_sign}{absolute_return_pct:.2f}%",
-        ret_color, "since first investment",
-        f"linear-gradient(90deg, {GOLD}, {DANGER})"
+        "since first investment",
+        ret_gradient
     ), unsafe_allow_html=True)
 
 with c5:
     st.markdown(kpi_card(
         "🎯", "Overall XIRR",
         f"{xirr_sign}{overall_xirr_pct:.2f}%",
-        xirr_color, "annualised return",
-        f"linear-gradient(90deg, {VIOLET}, {SUCCESS})"
+        "annualised return",
+        xirr_gradient
     ), unsafe_allow_html=True)
 
 st.divider()
@@ -470,24 +480,25 @@ with tab1:
             pnl_sign  = "+" if pnl_val >= 0 else ""
             xirr_val  = float(str(row["XIRR"]).replace("%", ""))
             xirr_col  = SUCCESS if xirr_val >= 0 else DANGER
+            row_bg    = "rgba(255,255,255,0.9)" if i % 2 else "rgba(246,250,255,0.9)"
 
             rows_html += f"""
-            <tr>
-                <td style="padding:11px 14px; color:rgba(230,255,240,0.25); font-size:10px; text-align:center; width:36px;">{i}</td>
-                <td style="padding:11px 14px; color:#EFFFF6; font-weight:600; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{row['Fund']}">{row['Fund']}</td>
-                <td style="padding:11px 14px; color:rgba(230,255,240,0.4); font-size:10px;">{row['SchemeCode']}</td>
-                <td style="padding:11px 14px; color:rgba(230,255,240,0.6);">{row['TotalUnits']:.3f}</td>
-                <td style="padding:11px 14px; color:rgba(255,213,79,0.85);">&#8377;{row['Invested']:,.0f}</td>
-                <td style="padding:11px 14px; color:#2DD4BF;">&#8377;{row['Current']:,.0f}</td>
+            <tr style="background:{row_bg};">
+                <td style="padding:11px 14px; color:{TEXT_FAINT}; font-size:10px; text-align:center; width:36px;">{i}</td>
+                <td style="padding:11px 14px; color:{TEXT_DARK}; font-weight:700; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{row['Fund']}">{row['Fund']}</td>
+                <td style="padding:11px 14px; color:{TEXT_FAINT}; font-size:10px;">{row['SchemeCode']}</td>
+                <td style="padding:11px 14px; color:{TEXT_SUB};">{row['TotalUnits']:.3f}</td>
+                <td style="padding:11px 14px; color:#B8790A;">&#8377;{row['Invested']:,.0f}</td>
+                <td style="padding:11px 14px; color:#3D8BFF; font-weight:600;">&#8377;{row['Current']:,.0f}</td>
                 <td style="padding:11px 14px; color:{pnl_color}; font-weight:700;">{pnl_sign}&#8377;{abs(pnl_val):,.0f}</td>
-                <td style="padding:11px 14px; color:rgba(230,255,240,0.7);">{row['Latest NAV']:.2f}</td>
-                <td style="padding:11px 14px; color:rgba(230,255,240,0.5); font-size:10px;">{row['NAV Date']}</td>
+                <td style="padding:11px 14px; color:{TEXT_SUB};">{row['Latest NAV']:.2f}</td>
+                <td style="padding:11px 14px; color:{TEXT_FAINT}; font-size:10px;">{row['NAV Date']}</td>
                 <td style="padding:11px 14px; color:{xirr_col}; font-weight:700;">{row['XIRR']}</td>
             </tr>"""
 
         headers = ["#", "Fund", "Code", "Units", "Invested", "Current", "P&amp;L", "NAV", "NAV Date", "XIRR"]
         header_html = "".join(
-            f'<th style="padding:11px 14px; text-align:left; font-family:JetBrains Mono,monospace; font-size:9px; color:rgba(230,255,240,0.35); text-transform:uppercase; letter-spacing:0.15em; font-weight:600; white-space:nowrap;">{h}</th>'
+            f'<th style="padding:11px 14px; text-align:left; font-family:JetBrains Mono,monospace; font-size:9px; color:{TEXT_DARK}; text-transform:uppercase; letter-spacing:0.15em; font-weight:700; white-space:nowrap;">{h}</th>'
             for h in headers
         )
 
@@ -504,8 +515,9 @@ with tab1:
                 overflow-y: auto;
                 height: 100%;
                 border-radius: 14px;
-                border: 1px solid rgba(0,230,138,0.14);
-                background: rgba(255,255,255,0.02);
+                border: 1px solid rgba(20,27,46,0.08);
+                background: rgba(255,255,255,0.6);
+                box-shadow: 0 6px 20px rgba(20,27,46,0.06);
             }}
             table {{
                 width: 100%;
@@ -513,16 +525,16 @@ with tab1:
                 font-family: 'JetBrains Mono', monospace;
                 font-size: 12px;
             }}
-            thead tr {{ background: rgba(0,230,138,0.05); }}
+            thead tr {{ background: linear-gradient(90deg, rgba(0,201,122,0.14), rgba(255,168,0,0.12)); }}
             thead th {{
                 position: sticky; top: 0; z-index: 10;
-                background: #0a140f;
-                border-bottom: 1px solid rgba(0,230,138,0.14);
-                box-shadow: 0 1px 0 rgba(0,230,138,0.08);
+                background: #eefaf3;
+                border-bottom: 1px solid rgba(20,27,46,0.1);
+                box-shadow: 0 1px 0 rgba(20,27,46,0.06);
             }}
-            tbody tr {{ border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }}
+            tbody tr {{ border-bottom: 1px solid rgba(20,27,46,0.05); transition: background 0.15s; }}
             tbody tr:last-child {{ border-bottom: none; }}
-            tbody tr:hover td {{ background: rgba(0,230,138,0.035); }}
+            tbody tr:hover td {{ background: rgba(0,201,122,0.08) !important; }}
         </style>
         </head>
         <body>
@@ -541,20 +553,20 @@ with tab1:
     with col_donut:
         fig_donut = go.Figure(go.Pie(
             labels=df["Fund"], values=df["Current"], hole=0.65,
-            marker=dict(colors=PALETTE[:len(df)], line=dict(color="#060b08", width=3)),
+            marker=dict(colors=PALETTE[:len(df)], line=dict(color="#ffffff", width=3)),
             textinfo="percent",
-            textfont=dict(size=12, family="JetBrains Mono"),
+            textfont=dict(size=12, family="JetBrains Mono", color="#141B2E"),
             hovertemplate="<b>%{label}</b><br>₹%{value:,.0f}<br>%{percent}<extra></extra>"
         ))
         fig_donut.update_layout(
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#EFFFF6", family="Manrope"), showlegend=False,
+            font=dict(color=TEXT_DARK, family="Manrope"), showlegend=False,
             margin=dict(t=10, b=10, l=10, r=10),
             height=320,
             annotations=[dict(
                 text=f"<b>₹{total_current/1e5:.1f}L</b>",
                 x=0.5, y=0.5,
-                font=dict(size=18, color="#00E68A", family="JetBrains Mono"),
+                font=dict(size=18, color="#00915C", family="JetBrains Mono"),
                 showarrow=False
             )]
         )
@@ -571,13 +583,13 @@ with tab1:
     )
     fig_tree.update_layout(
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#EFFFF6", family="Manrope"),
+        font=dict(color="#ffffff", family="Manrope"),
         margin=dict(t=10, l=10, r=10, b=10), coloraxis_showscale=False
     )
     fig_tree.update_traces(
         textinfo="label+percent entry",
-        textfont=dict(size=13, family="Manrope"),
-        marker=dict(line=dict(width=2, color="#060b08"))
+        textfont=dict(size=13, family="Manrope", color="#ffffff"),
+        marker=dict(line=dict(width=2, color="#ffffff"))
     )
     st.plotly_chart(fig_tree, use_container_width=True)
 
@@ -652,30 +664,30 @@ with tab2:
     fig_perf = make_subplots(specs=[[{"secondary_y": True}]])
     fig_perf.add_trace(go.Bar(
         x=chart_df["Date"], y=chart_df["OneDayChange"],
-        name="Daily Change (₹)", marker_color=bar_colors, marker_line_width=0, opacity=0.8,
+        name="Daily Change (₹)", marker_color=bar_colors, marker_line_width=0, opacity=0.85,
         hovertemplate="<b>%{x|%d %b %Y}</b><br>Daily Change: ₹%{y:,.2f}<extra></extra>"
     ), secondary_y=False)
     fig_perf.add_trace(go.Scatter(
         x=chart_df["Date"], y=chart_df["TotalValue"],
         name="Total Value (₹)", mode="lines",
-        line=dict(color=TEAL, width=2.5),
-        fill="tozeroy", fillcolor="rgba(45,212,191,0.08)",
+        line=dict(color=BLUE, width=3),
+        fill="tozeroy", fillcolor="rgba(61,139,255,0.10)",
         hovertemplate="<b>%{x|%d %b %Y}</b><br>Value: ₹%{y:,.0f}<extra></extra>"
     ), secondary_y=True)
     fig_perf.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(10,20,15,0.6)",
-        font=dict(color="rgba(230,255,240,0.6)", family="Manrope"),
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(255,255,255,0.55)",
+        font=dict(color=TEXT_SUB, family="Manrope"),
         hovermode="x unified", height=460, margin=dict(t=20, b=40, l=10, r=10),
         legend=dict(
             orientation="h", yanchor="top", y=-0.12, xanchor="center", x=0.5,
-            font=dict(size=12, color="rgba(230,255,240,0.6)"), bgcolor="rgba(0,0,0,0)"
+            font=dict(size=12, color=TEXT_SUB), bgcolor="rgba(0,0,0,0)"
         ),
         bargap=0.3,
         xaxis=dict(showgrid=False, zeroline=False),
     )
 
     fig_perf.update_yaxes(
-        showgrid=True, gridcolor="rgba(0,230,138,0.06)",
+        showgrid=True, gridcolor="rgba(20,27,46,0.07)",
         zeroline=False, tickprefix="₹", secondary_y=False
     )
     fig_perf.update_yaxes(
@@ -745,11 +757,11 @@ with tab3:
             labels={"Month_Name": "Month", "Amount": "Amount (₹)"}
         )
         fig_month.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(10,20,15,0.6)",
-            font=dict(color="rgba(230,255,240,0.6)", family="Manrope"),
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(255,255,255,0.55)",
+            font=dict(color=TEXT_SUB, family="Manrope"),
             height=340, margin=dict(t=20, b=10, l=10, r=10),
             legend=dict(
-                font=dict(size=11, color="rgba(230,255,240,0.55)"),
+                font=dict(size=11, color=TEXT_SUB),
                 bgcolor="rgba(0,0,0,0)", orientation="h",
                 yanchor="top", y=-0.2, xanchor="left", x=0
             ),
@@ -759,7 +771,7 @@ with tab3:
                 categoryorder="array", categoryarray=list(month_map.values())
             ),
             yaxis=dict(
-                showgrid=True, gridcolor="rgba(0,230,138,0.06)",
+                showgrid=True, gridcolor="rgba(20,27,46,0.07)",
                 zeroline=False, tickprefix="₹"
             ),
         )
@@ -846,7 +858,7 @@ with tab4:
             ],
             textposition="outside",
             cliponaxis=False,
-            textfont=dict(size=11, color="#EFFFF6"),
+            textfont=dict(size=11, color=TEXT_DARK),
             hovertemplate=(
                 "<b>%{customdata[0]}</b><br>"
                 "Code: %{customdata[1]}<br>"
@@ -867,28 +879,28 @@ with tab4:
         fig.update_layout(
             title=dict(
                 text=f"Daily Change in Value — {selected_date.strftime('%d %b %Y')}",
-                font=dict(size=15, color="#EFFFF6"),
+                font=dict(size=15, color=TEXT_DARK),
                 x=0,
             ),
             xaxis=dict(
                 title="Change in Value (₹)",
                 range=[-(max_abs + x_pad), max_abs + x_pad],
                 zeroline=True,
-                zerolinecolor="rgba(230,255,240,0.25)",
+                zerolinecolor="rgba(20,27,46,0.25)",
                 zerolinewidth=1.5,
                 tickformat=",.0f",
-                gridcolor="rgba(0,230,138,0.06)",
+                gridcolor="rgba(20,27,46,0.07)",
             ),
             yaxis=dict(
                 automargin=True,
-                tickfont=dict(size=12, color="rgba(230,255,240,0.7)"),
+                tickfont=dict(size=12, color=TEXT_SUB),
             ),
             height=chart_height,
             margin=dict(l=20, r=180, t=50, b=120),
             uniformtext=dict(mode="hide", minsize=9),
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="rgba(230,255,240,0.7)"),
+            font=dict(color=TEXT_SUB),
             legend=dict(
                 orientation="h",
                 yanchor="top",
