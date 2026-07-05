@@ -6,6 +6,8 @@ import json
 import os
 from datetime import date, datetime, timedelta
 
+from utils.sidebar_style import scale_component_html
+
 def show_market_history_chart():
     base_dir  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_path = os.path.join(base_dir, "data", "market_index_history.json")
@@ -38,8 +40,8 @@ def show_market_history_chart():
             <div style="display:inline-flex;align-items:center;gap:8px;
                 background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
                 border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;
-                font-size:13px;color:rgba(255,255,255,0.5);">
-                <span style="color:rgba(255,255,255,0.3);font-size:11px;">FROM</span>
+                font-size:0.8125rem;color:rgba(255,255,255,0.5);">
+                <span style="color:rgba(255,255,255,0.3);font-size:0.6875rem;">FROM</span>
                 <span style="color:rgba(255,255,255,0.85);">{default_start.strftime("%d %b %Y")}</span>
             </div>""", unsafe_allow_html=True)
         with col_d2:
@@ -47,8 +49,8 @@ def show_market_history_chart():
             <div style="display:inline-flex;align-items:center;gap:8px;
                 background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
                 border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;
-                font-size:13px;color:rgba(255,255,255,0.5);">
-                <span style="color:rgba(255,255,255,0.3);font-size:11px;">TO</span>
+                font-size:0.8125rem;color:rgba(255,255,255,0.5);">
+                <span style="color:rgba(255,255,255,0.3);font-size:0.6875rem;">TO</span>
                 <span style="color:rgba(255,255,255,0.85);">{default_end.strftime("%d %b %Y")}</span>
             </div>""", unsafe_allow_html=True)
         start_date, end_date = default_start, default_end
@@ -315,4 +317,4 @@ new Chart(sensexCtx, {
 </body></html>
 """
 
-    components.html(html, height=380, scrolling=False)
+    components.html(scale_component_html(html), height=380, scrolling=False)

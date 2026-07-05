@@ -25,7 +25,7 @@ st.divider()
 #     volume=0.02
 # )
 # pages/1_Portfolio_Overview.py  — add at top
-from utils.sidebar_style import render_sidebar
+from utils.sidebar_style import render_sidebar, scale_component_html
 render_sidebar("portfolio")
 
 # =========================================================
@@ -457,7 +457,7 @@ with tab1:
         </html>
         """
     
-        components.html(table_html, height=min((len(display_df) + 1) * 52, 560), scrolling=True)
+        components.html(scale_component_html(table_html), height=min((len(display_df) + 1) * 52, 560), scrolling=True)
 
     
     with col_donut:

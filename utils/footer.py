@@ -1,5 +1,7 @@
 import streamlit.components.v1 as components
 
+from utils.sidebar_style import scale_component_html
+
 
 def show_footer():
     """
@@ -9,7 +11,7 @@ def show_footer():
         from utils.footer import show_footer
         show_footer()
     """
-    components.html("""
+    components.html(scale_component_html("""
 <!DOCTYPE html>
 <html>
 <head>
@@ -176,4 +178,4 @@ body {
 
 </body>
 </html>
-""", height=320, scrolling=False)
+"""), height=320, scrolling=False)

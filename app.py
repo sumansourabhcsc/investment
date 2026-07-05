@@ -9,7 +9,7 @@ from datetime import datetime
 from utils.add_units import show_add_units
 from zoneinfo import ZoneInfo
 # app.py
-from utils.sidebar_style import render_sidebar
+from utils.sidebar_style import render_sidebar, scale_component_html
 from utils.market_history_chart import show_market_history_chart
 
 
@@ -270,7 +270,7 @@ def trigger_workflow(workflow_filename: str) -> dict:
 # ─────────────────────────────────────────────
 # Header
 # ─────────────────────────────────────────────
-components.html("""
+components.html(scale_component_html("""
 <!DOCTYPE html><html><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <style>
@@ -396,7 +396,7 @@ components.html("""
   </div>
 </div>
 </body></html>
-""", height=130, scrolling=False)
+"""), height=130, scrolling=False)
 
 
 
@@ -442,7 +442,7 @@ def market_ticker():
         def arrow(v): return "▲" if v >= 0 else "▼"
         def color(v): return "#00f5d4" if v >= 0 else "#ff4d6d"
 
-        components.html(f"""
+        components.html(scale_component_html(f"""
 <!DOCTYPE html><html><head>
 <meta charset="utf-8"/>
 <style>
@@ -570,7 +570,7 @@ def market_ticker():
   </div>
 </div>
 </body></html>
-""", height=150, scrolling=False)
+"""), height=150, scrolling=False)
 
     else:
         st.warning(f"⚠️ Market data unavailable: {mkt['error']}")
@@ -626,7 +626,7 @@ def currency_ticker():
         def arrow(v): return "▲" if v >= 0 else "▼"
         def color(v): return "#00f5d4" if v >= 0 else "#ff4d6d"
 
-        components.html(f"""
+        components.html(scale_component_html(f"""
 <!DOCTYPE html><html><head>
 <meta charset="utf-8"/>
 <style>
@@ -744,7 +744,7 @@ def currency_ticker():
   </div>
 </div>
 </body></html>
-""", height=150, scrolling=False)
+"""), height=150, scrolling=False)
 
     else:
         st.warning(f"⚠️ Currency data unavailable: {cur['error']}")
@@ -753,7 +753,7 @@ def currency_ticker():
 # ── Date / Time bar ──
 now = datetime.now(ZoneInfo("Asia/Kolkata"))
 # ── Live Clock Bar ──
-components.html("""
+components.html(scale_component_html("""
 <!DOCTYPE html><html><head>
 <meta charset="utf-8"/>
 <style>
@@ -823,7 +823,7 @@ components.html("""
   setInterval(tick, 1000);
 </script>
 </body></html>
-""", height=50, scrolling=False)
+"""), height=50, scrolling=False)
 
 
 
