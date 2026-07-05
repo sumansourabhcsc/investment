@@ -9,13 +9,31 @@ TEXT_SIZE_SCALES = {
 }
 
 
+def get_text_scale() -> float:
+    return TEXT_SIZE_SCALES[st.session_state.get("taurus_text_size", "Normal")]
+
+
 def apply_text_size_style():
-    scale = TEXT_SIZE_SCALES[st.session_state.get("taurus_text_size", "Normal")]
+    scale = get_text_scale()
     st.markdown(f"""
     <style>
     html {{ font-size: {scale}rem !important; }}
     </style>
     """, unsafe_allow_html=True)
+
+
+def scale_component_html(html: str, scale: float = None) -> str:
+    """
+    components.html() renders into its own iframe, which doesn't inherit
+    the main page's <html> font-size. Inject the same scale directly so
+    text inside these embeds respects the sidebar's Text Size setting too.
+    """
+    if scale is None:
+        scale = get_text_scale()
+    style_tag = f"<style>html{{font-size:{scale}rem !important;}}</style>"
+    if "<head>" in html:
+        return html.replace("<head>", "<head>" + style_tag, 1)
+    return style_tag + html
 
 
 def render_text_size_control():
