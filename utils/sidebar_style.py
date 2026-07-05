@@ -1,6 +1,34 @@
 # utils/sidebar_style.py
 import streamlit as st
 
+TEXT_SIZE_SCALES = {
+    "Small": 0.9,
+    "Normal": 1.0,
+    "Large": 1.15,
+    "Extra Large": 1.3,
+}
+
+
+def apply_text_size_style():
+    scale = TEXT_SIZE_SCALES[st.session_state.get("taurus_text_size", "Normal")]
+    st.markdown(f"""
+    <style>
+    html {{ font-size: {scale}rem !important; }}
+    </style>
+    """, unsafe_allow_html=True)
+
+
+def render_text_size_control():
+    if "taurus_text_size" not in st.session_state:
+        st.session_state["taurus_text_size"] = "Normal"
+    st.markdown("<div style='margin-top:0.6rem'></div>", unsafe_allow_html=True)
+    st.selectbox(
+        "Text Size",
+        options=list(TEXT_SIZE_SCALES.keys()),
+        key="taurus_text_size",
+    )
+
+
 def apply_sidebar_style():
     st.markdown("""
     <style>
@@ -124,6 +152,7 @@ def apply_sidebar_style():
 
 def render_sidebar(current_page: str):
     apply_sidebar_style()
+    apply_text_size_style()
 
     with st.sidebar:
         # Brand header
@@ -154,6 +183,9 @@ def render_sidebar(current_page: str):
         #st.markdown('<div class="news-page">', unsafe_allow_html=True)
         st.page_link("pages/5_Fund_News.py", label="News", icon="📰")
         #st.markdown('</div>', unsafe_allow_html=True)
+
+        st.divider()
+        render_text_size_control()
 
 
             
