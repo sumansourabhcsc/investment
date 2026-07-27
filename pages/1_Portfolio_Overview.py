@@ -609,6 +609,61 @@ with tab2:
     )
     st.plotly_chart(fig_perf, use_container_width=True)
 
+    # ── Performance statistics (monthly & daily change) ─────────────────────
+    st.markdown("<br>", unsafe_allow_html=True)
+    sec_header(ICON_MONTHLY, "Performance Statistics", "monthly & daily change · selected period")
+
+    stats_df = chart_df.copy()
+    stats_df["YearMonth"] = stats_df["Date"].dt.to_period("M")
+    monthly_change = stats_df.groupby("YearMonth")["OneDayChange"].sum()
+
+    gain_months = monthly_change[monthly_change >= 0]
+    loss_months = monthly_change[monthly_change < 0]
+    avg_monthly_gain = gain_months.mean() if not gain_months.empty else 0
+    avg_monthly_loss = loss_months.mean() if not loss_months.empty else 0
+
+    best_month_val  = monthly_change.max() if not monthly_change.empty else 0
+    worst_month_val = monthly_change.min() if not monthly_change.empty else 0
+    best_month_lbl  = monthly_change.idxmax().strftime("%b %Y") if not monthly_change.empty else "—"
+    worst_month_lbl = monthly_change.idxmin().strftime("%b %Y") if not monthly_change.empty else "—"
+
+    total_days       = len(stats_df)
+    gain_days        = stats_df[stats_df["OneDayChange"] >= 0]
+    avg_daily_change = stats_df["OneDayChange"].mean() if total_days else 0
+    pct_positive_days = (len(gain_days) / total_days * 100) if total_days else 0
+
+    s1, s2, s3, s4 = st.columns(4)
+
+    with s1:
+        st.markdown(kpi_card(
+            "📈", "Avg Monthly Increase",
+            f"+₹{avg_monthly_gain:,.0f}",
+            SUCCESS, f"across {len(gain_months)} up month(s)", SUCCESS
+        ), unsafe_allow_html=True)
+
+    with s2:
+        st.markdown(kpi_card(
+            "📉", "Avg Monthly Decrease",
+            f"-₹{abs(avg_monthly_loss):,.0f}",
+            DANGER, f"across {len(loss_months)} down month(s)", DANGER
+        ), unsafe_allow_html=True)
+
+    with s3:
+        st.markdown(kpi_card(
+            "🏆", "Best / Worst Month",
+            f"+₹{best_month_val:,.0f}",
+            SUCCESS, f"{best_month_lbl}  ·  worst: -₹{abs(worst_month_val):,.0f} ({worst_month_lbl})", SUCCESS
+        ), unsafe_allow_html=True)
+
+    with s4:
+        st.markdown(kpi_card(
+            "📌", "Daily Win Rate",
+            f"{pct_positive_days:.1f}%",
+            SUCCESS if pct_positive_days >= 50 else DANGER,
+            f"avg daily change: {'+' if avg_daily_change >= 0 else ''}₹{avg_daily_change:,.2f}",
+            "#4F8BF9"
+        ), unsafe_allow_html=True)
+
 # =========================================================
 # TAB 3 — MONTHLY INVESTMENT SUMMARY + BAR CHART
 # =========================================================
