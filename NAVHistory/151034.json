@@ -2,13 +2,17 @@
   "meta": {
     "fund_house": "HSBC Mutual Fund",
     "scheme_type": "Open Ended Schemes",
-    "scheme_category": "Equity Scheme - Mid Cap Fund",
+    "scheme_category": "Equity Schemes - Mid Cap Fund",
     "scheme_code": 151034,
     "scheme_name": "HSBC Midcap Fund - Regular Growth",
     "isin_growth": "INF917K01254",
     "isin_div_reinvestment": null
   },
   "data": [
+    {
+      "date": "17-08-2026",
+      "nav": "471.06510"
+    },
     {
       "date": "14-08-2026",
       "nav": "469.71870"
