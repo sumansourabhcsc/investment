@@ -7,9 +7,11 @@ AMFI_URL = "https://www.amfiindia.com/spages/NAVAll.txt"
 OUTPUT_DIR = "data"
 OUTPUT_FILE = f"{OUTPUT_DIR}/nav_all_latest.csv"
 
-# -----------------------------
-# YOUR FILTER LIST (EASY TO UPDATE)
-# -----------------------------
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+}
+
 mutual_funds = {
     "Mirae Asset FANG+": "148928",
     "SBI Magnum Children's Benefit Fund": "148490",
@@ -27,72 +29,65 @@ mutual_funds = {
     "Edelweiss Nifty Midcap150 Momentum 50 Index Fund": "150902",
     "Kotak Flexicap Fund": "112090",
     "ICICI Pru BHARAT 22 FOF": "143903"
-    
 }
 
-# Convert to set for fast lookup
 ALLOWED_SCHEME_CODES = set(mutual_funds.values())
 
 
 def fetch_and_clean_navall():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    r = requests.get(AMFI_URL)
+    r = requests.get(AMFI_URL, headers=HEADERS, timeout=30)
     r.raise_for_status()
 
-    rows = []
+    print(f"Fetched {len(r.text)} characters from AMFI")
+    if len(r.text) < 1000:
+        # Real NAVAll.txt is hundreds of KB. A short response means AMFI
+        # served an error/maintenance page, not the NAV file.
+        raise RuntimeError(
+            f"AMFI response looks too short ({len(r.text)} chars) — "
+            "likely blocked, rate-limited, or a maintenance page, not real NAV data."
+        )
 
+    rows = []
     for line in r.text.splitlines():
         line = line.strip()
-
         if not line or "Scheme Code" in line or "Mutual Fund" in line:
             continue
 
         parts = line.split(";")
-
         if len(parts) != 6:
             continue
 
         scheme_code, isin_g, isin_r, name, nav, date = parts
-
-        # -----------------------------
-        # FILTER: only selected funds
-        # -----------------------------
         if scheme_code.strip() not in ALLOWED_SCHEME_CODES:
             continue
 
         try:
             nav = float(nav)
-        except:
+        except ValueError:
             continue
 
         try:
             date_obj = datetime.strptime(date, "%d-%b-%Y")
             date = date_obj.strftime("%d-%m-%Y")
-        except:
+        except ValueError:
             continue
 
-        rows.append([
-            scheme_code.strip(),
-            isin_g.strip(),
-            isin_r.strip(),
-            name.strip(),
-            nav,
-            date
-        ])
+        rows.append([scheme_code.strip(), isin_g.strip(), isin_r.strip(), name.strip(), nav, date])
+
+    if not rows:
+        raise RuntimeError(
+            "Parsed 0 matching rows from AMFI data — either the file format "
+            "changed or none of your scheme codes matched. Refusing to "
+            "overwrite the existing CSV with an empty one."
+        )
 
     df = pd.DataFrame(rows, columns=[
-        "SchemeCode",
-        "ISIN_Growth",
-        "ISIN_Reinvestment",
-        "SchemeName",
-        "NAV",
-        "Date"
+        "SchemeCode", "ISIN_Growth", "ISIN_Reinvestment", "SchemeName", "NAV", "Date"
     ])
-
     df.to_csv(OUTPUT_FILE, index=False)
-
-    print("✅ Filtered NAV updated:", OUTPUT_FILE)
+    print(f"✅ Filtered NAV updated: {OUTPUT_FILE} ({len(rows)} rows)")
 
 
 if __name__ == "__main__":
