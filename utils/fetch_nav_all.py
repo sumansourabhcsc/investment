@@ -40,27 +40,29 @@ def fetch_and_clean_navall():
     r = requests.get(AMFI_URL, headers=HEADERS, timeout=30)
     r.raise_for_status()
 
-    print(f"Fetched {len(r.text)} characters from AMFI")
     if len(r.text) < 1000:
-        # Real NAVAll.txt is hundreds of KB. A short response means AMFI
-        # served an error/maintenance page, not the NAV file.
-        raise RuntimeError(
-            f"AMFI response looks too short ({len(r.text)} chars) — "
-            "likely blocked, rate-limited, or a maintenance page, not real NAV data."
-        )
+        raise RuntimeError(f"AMFI response too short ({len(r.text)} chars)")
 
     rows = []
     for line in r.text.splitlines():
         line = line.strip()
-        if not line or "Scheme Code" in line or "Mutual Fund" in line:
+        if not line or "Scheme Code" in line or ";" not in line:
             continue
 
         parts = line.split(";")
-        if len(parts) != 6:
+
+        # AMFI now emits 8 fields: Code;ISIN_G;ISIN_R;Name;Plan;Option;NAV;Date
+        if len(parts) != 8:
             continue
 
-        scheme_code, isin_g, isin_r, name, nav, date = parts
-        if scheme_code.strip() not in ALLOWED_SCHEME_CODES:
+        scheme_code, isin_g, isin_r, name, plan, option, nav, date = parts
+        scheme_code = scheme_code.strip()
+
+        if scheme_code not in ALLOWED_SCHEME_CODES:
+            continue
+
+        # Be explicit about which variant you want — don't take whatever comes first
+        if plan.strip() != "Direct Plan" or "Growth" not in option.strip():
             continue
 
         try:
@@ -69,25 +71,20 @@ def fetch_and_clean_navall():
             continue
 
         try:
-            date_obj = datetime.strptime(date, "%d-%b-%Y")
+            date_obj = datetime.strptime(date.strip(), "%d-%b-%Y")
             date = date_obj.strftime("%d-%m-%Y")
         except ValueError:
             continue
 
-        rows.append([scheme_code.strip(), isin_g.strip(), isin_r.strip(), name.strip(), nav, date])
+        rows.append([scheme_code, isin_g.strip(), isin_r.strip(), name.strip(), nav, date])
 
     if not rows:
-        raise RuntimeError(
-            "Parsed 0 matching rows from AMFI data — either the file format "
-            "changed or none of your scheme codes matched. Refusing to "
-            "overwrite the existing CSV with an empty one."
-        )
+        raise RuntimeError("Parsed 0 matching rows — check ALLOWED_SCHEME_CODES and Plan/Option filter")
 
-    df = pd.DataFrame(rows, columns=[
-        "SchemeCode", "ISIN_Growth", "ISIN_Reinvestment", "SchemeName", "NAV", "Date"
-    ])
+    df = pd.DataFrame(rows, columns=["SchemeCode", "ISIN_Growth", "ISIN_Reinvestment", "SchemeName", "NAV", "Date"])
     df.to_csv(OUTPUT_FILE, index=False)
     print(f"✅ Filtered NAV updated: {OUTPUT_FILE} ({len(rows)} rows)")
+
 
 
 if __name__ == "__main__":
