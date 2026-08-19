@@ -2,13 +2,17 @@
   "meta": {
     "fund_house": "Mirae Asset Mutual Fund",
     "scheme_type": "Open Ended Schemes",
-    "scheme_category": "Other Scheme - FoF Domestic",
+    "scheme_category": "Equity Schemes - Value Fund",
     "scheme_code": 148928,
-    "scheme_name": "Mirae Asset NYSE FANG + ETF Fund of Fund Direct Growth",
+    "scheme_name": "Mirae Asset NYSE FANG + ETF Fund of Fund - Direct Plan - Growth",
     "isin_growth": "INF769K01HH0",
     "isin_div_reinvestment": null
   },
   "data": [
+    {
+      "date": "18-08-2026",
+      "nav": "44.46500"
+    },
     {
       "date": "17-08-2026",
       "nav": "44.88800"
