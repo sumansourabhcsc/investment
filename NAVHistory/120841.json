@@ -4,11 +4,19 @@
     "scheme_type": "Open Ended Schemes",
     "scheme_category": "Equity Scheme - Mid Cap Fund",
     "scheme_code": 120841,
-    "scheme_name": "quant Mid Cap Fund - Growth Option - Direct Plan",
+    "scheme_name": "Quant Mid Cap Fund - Direct Plan - Growth Option",
     "isin_growth": "INF966L01887",
     "isin_div_reinvestment": null
   },
   "data": [
+    {
+      "date": "20-08-2026",
+      "nav": "250.95330"
+    },
+    {
+      "date": "19-08-2026",
+      "nav": "250.71350"
+    },
     {
       "date": "18-08-2026",
       "nav": "251.66780"

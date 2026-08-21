@@ -4,11 +4,19 @@
     "scheme_type": "Open Ended Schemes",
     "scheme_category": "Equity Scheme - Large Cap Fund",
     "scheme_code": 118632,
-    "scheme_name": "Nippon India Large Cap Fund - Direct Plan Growth Plan - Growth Option",
+    "scheme_name": "Nippon India Large Cap Fund - Direct Plan - Growth Option",
     "isin_growth": "INF204K01XI3",
     "isin_div_reinvestment": null
   },
   "data": [
+    {
+      "date": "20-08-2026",
+      "nav": "101.62010"
+    },
+    {
+      "date": "19-08-2026",
+      "nav": "100.93750"
+    },
     {
       "date": "18-08-2026",
       "nav": "101.20840"

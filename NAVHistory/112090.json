@@ -4,11 +4,19 @@
     "scheme_type": "Open Ended Schemes",
     "scheme_category": "Equity Scheme - Flexi Cap Fund",
     "scheme_code": 112090,
-    "scheme_name": "Kotak Flexicap Fund - Growth",
+    "scheme_name": "Kotak Flexicap Fund - Regular Plan - Growth",
     "isin_growth": "INF174K01336",
     "isin_div_reinvestment": null
   },
   "data": [
+    {
+      "date": "20-08-2026",
+      "nav": "86.11900"
+    },
+    {
+      "date": "19-08-2026",
+      "nav": "85.66200"
+    },
     {
       "date": "18-08-2026",
       "nav": "86.01300"

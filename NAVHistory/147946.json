@@ -4,11 +4,19 @@
     "scheme_type": "Open Ended Schemes",
     "scheme_category": "Equity Scheme - Small Cap Fund",
     "scheme_code": 147946,
-    "scheme_name": "BANDHAN SMALL CAP FUND - DIRECT PLAN GROWTH",
+    "scheme_name": "BANDHAN Small Cap Fund - Direct Plan - Growth",
     "isin_growth": "INF194KB1AL4",
     "isin_div_reinvestment": null
   },
   "data": [
+    {
+      "date": "20-08-2026",
+      "nav": "56.85700"
+    },
+    {
+      "date": "19-08-2026",
+      "nav": "56.46800"
+    },
     {
       "date": "18-08-2026",
       "nav": "56.62900"

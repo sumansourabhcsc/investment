@@ -4,11 +4,19 @@
     "scheme_type": "Open Ended Schemes",
     "scheme_category": "Equity Scheme - Flexi Cap Fund",
     "scheme_code": 140353,
-    "scheme_name": "Edelweiss Flexi Cap Fund - Direct Plan - Growth Option",
+    "scheme_name": "Edelweiss Flexi Cap Fund - Direct Plan - Growth",
     "isin_growth": "INF843K01KK1",
     "isin_div_reinvestment": null
   },
   "data": [
+    {
+      "date": "20-08-2026",
+      "nav": "46.57200"
+    },
+    {
+      "date": "19-08-2026",
+      "nav": "46.32100"
+    },
     {
       "date": "18-08-2026",
       "nav": "46.48700"

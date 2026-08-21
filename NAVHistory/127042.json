@@ -4,11 +4,19 @@
     "scheme_type": "Open Ended Schemes",
     "scheme_category": "Equity Scheme - Mid Cap Fund",
     "scheme_code": 127042,
-    "scheme_name": "Motilal Oswal Midcap Fund-Direct Plan-Growth Option",
+    "scheme_name": "Motilal Oswal Midcap Fund",
     "isin_growth": "INF247L01445",
     "isin_div_reinvestment": null
   },
   "data": [
+    {
+      "date": "20-08-2026",
+      "nav": "121.62230"
+    },
+    {
+      "date": "19-08-2026",
+      "nav": "120.07720"
+    },
     {
       "date": "18-08-2026",
       "nav": "120.00940"

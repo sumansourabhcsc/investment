@@ -4,11 +4,19 @@
     "scheme_type": "Open Ended Schemes",
     "scheme_category": "Other Scheme - FoF Domestic",
     "scheme_code": 143903,
-    "scheme_name": "ICICI Prudential BHARAT 22 FOF - Direct Plan Cumulative Option",
+    "scheme_name": "ICICI Prudential BHARAT 22 FOF - Direct Plan - Cumulative",
     "isin_growth": "INF109KC1FX1",
     "isin_div_reinvestment": null
   },
   "data": [
+    {
+      "date": "20-08-2026",
+      "nav": "33.60560"
+    },
+    {
+      "date": "19-08-2026",
+      "nav": "33.42160"
+    },
     {
       "date": "18-08-2026",
       "nav": "33.74340"
