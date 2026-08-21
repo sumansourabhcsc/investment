@@ -40,7 +40,6 @@ def fetch_and_clean_navall():
 
     rows = []
     matched_codes = set()
-    date_parse_failures = 0
 
     for line in r.text.splitlines():
         line = line.strip()
@@ -55,12 +54,6 @@ def fetch_and_clean_navall():
         if scheme_code not in ALLOWED_SCHEME_CODES:
             continue
 
-        # Case-insensitive match: AMFI mixes "Growth", "GROWTH", "Growth Option", etc.
-        plan_norm = plan.strip().lower()
-        option_norm = option.strip().lower()
-        if plan_norm != "direct plan" or "growth" not in option_norm:
-            continue
-
         try:
             nav = float(nav)
         except ValueError:
@@ -70,20 +63,17 @@ def fetch_and_clean_navall():
             date_obj = datetime.strptime(date.strip(), "%d-%b-%Y")
             date = date_obj.strftime("%d-%m-%Y")
         except ValueError:
-            date_parse_failures += 1
             continue
 
         rows.append([scheme_code, isin_g.strip(), isin_r.strip(), name.strip(), nav, date])
         matched_codes.add(scheme_code)
 
     if not rows:
-        raise RuntimeError("Parsed 0 matching rows — check ALLOWED_SCHEME_CODES and Plan/Option filter")
+        raise RuntimeError("Parsed 0 matching rows — check ALLOWED_SCHEME_CODES")
 
     missing = ALLOWED_SCHEME_CODES - matched_codes
     if missing:
-        print(f"⚠️ {len(missing)} scheme code(s) had no Direct+Growth match: {missing}")
-    if date_parse_failures:
-        print(f"⚠️ {date_parse_failures} row(s) dropped due to unparseable date format")
+        print(f"⚠️ {len(missing)} scheme code(s) not found in AMFI response: {missing}")
 
     df = pd.DataFrame(rows, columns=["SchemeCode", "ISIN_Growth", "ISIN_Reinvestment", "SchemeName", "NAV", "Date"])
     df.to_csv(OUTPUT_FILE, index=False)
