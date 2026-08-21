@@ -6,7 +6,6 @@ import pandas as pd
 AMFI_URL = "https://www.amfiindia.com/spages/NAVAll.txt"
 OUTPUT_DIR = "data"
 OUTPUT_FILE = f"{OUTPUT_DIR}/nav_all_latest.csv"
-
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                   "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
@@ -30,39 +29,36 @@ mutual_funds = {
     "Kotak Flexicap Fund": "112090",
     "ICICI Pru BHARAT 22 FOF": "143903"
 }
-
 ALLOWED_SCHEME_CODES = set(mutual_funds.values())
-
 
 def fetch_and_clean_navall():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-
     r = requests.get(AMFI_URL, headers=HEADERS, timeout=30)
     r.raise_for_status()
-
     if len(r.text) < 1000:
         raise RuntimeError(f"AMFI response too short ({len(r.text)} chars)")
 
     rows = []
+    matched_codes = set()
+    date_parse_failures = 0
+
     for line in r.text.splitlines():
         line = line.strip()
         if not line or "Scheme Code" in line or ";" not in line:
             continue
-
         parts = line.split(";")
-
-        # AMFI now emits 8 fields: Code;ISIN_G;ISIN_R;Name;Plan;Option;NAV;Date
         if len(parts) != 8:
             continue
 
         scheme_code, isin_g, isin_r, name, plan, option, nav, date = parts
         scheme_code = scheme_code.strip()
-
         if scheme_code not in ALLOWED_SCHEME_CODES:
             continue
 
-        # Be explicit about which variant you want — don't take whatever comes first
-        if plan.strip() != "Direct Plan" or "Growth" not in option.strip():
+        # Case-insensitive match: AMFI mixes "Growth", "GROWTH", "Growth Option", etc.
+        plan_norm = plan.strip().lower()
+        option_norm = option.strip().lower()
+        if plan_norm != "direct plan" or "growth" not in option_norm:
             continue
 
         try:
@@ -74,18 +70,24 @@ def fetch_and_clean_navall():
             date_obj = datetime.strptime(date.strip(), "%d-%b-%Y")
             date = date_obj.strftime("%d-%m-%Y")
         except ValueError:
+            date_parse_failures += 1
             continue
 
         rows.append([scheme_code, isin_g.strip(), isin_r.strip(), name.strip(), nav, date])
+        matched_codes.add(scheme_code)
 
     if not rows:
         raise RuntimeError("Parsed 0 matching rows — check ALLOWED_SCHEME_CODES and Plan/Option filter")
 
+    missing = ALLOWED_SCHEME_CODES - matched_codes
+    if missing:
+        print(f"⚠️ {len(missing)} scheme code(s) had no Direct+Growth match: {missing}")
+    if date_parse_failures:
+        print(f"⚠️ {date_parse_failures} row(s) dropped due to unparseable date format")
+
     df = pd.DataFrame(rows, columns=["SchemeCode", "ISIN_Growth", "ISIN_Reinvestment", "SchemeName", "NAV", "Date"])
     df.to_csv(OUTPUT_FILE, index=False)
     print(f"✅ Filtered NAV updated: {OUTPUT_FILE} ({len(rows)} rows)")
-
-
 
 if __name__ == "__main__":
     fetch_and_clean_navall()
