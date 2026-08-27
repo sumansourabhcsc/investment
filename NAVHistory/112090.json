@@ -2,13 +2,17 @@
   "meta": {
     "fund_house": "Kotak Mahindra Mutual Fund",
     "scheme_type": "Open Ended Schemes",
-    "scheme_category": "Equity Scheme - Flexi Cap Fund",
+    "scheme_category": "Equity Schemes - Flexi Cap Fund",
     "scheme_code": 112090,
-    "scheme_name": "Kotak Flexicap Fund - Regular Plan - Growth",
+    "scheme_name": "Kotak Flexi Cap Fund - Regular Plan - Growth",
     "isin_growth": "INF174K01336",
     "isin_div_reinvestment": null
   },
   "data": [
+    {
+      "date": "26-08-2026",
+      "nav": "86.26300"
+    },
     {
       "date": "25-08-2026",
       "nav": "86.44700"
