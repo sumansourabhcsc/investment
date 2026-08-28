@@ -2,13 +2,17 @@
   "meta": {
     "fund_house": "Axis Mutual Fund",
     "scheme_type": "Open Ended Schemes",
-    "scheme_category": "Equity Scheme - Small Cap Fund",
+    "scheme_category": "Equity Schemes - Small Cap Fund",
     "scheme_code": 125354,
     "scheme_name": "Axis Small Cap Fund - Direct Plan - Growth Option",
     "isin_growth": "INF846K01K35",
     "isin_div_reinvestment": null
   },
   "data": [
+    {
+      "date": "27-08-2026",
+      "nav": "137.99000"
+    },
     {
       "date": "26-08-2026",
       "nav": "137.84000"
