@@ -64,10 +64,6 @@ MUTUAL_FUNDS = {
         "code": "119775", "folio": "10368494",
         "category": "Mid Cap", "folder": "kotak_midcap_fund"
     },
-    "quant Mid Cap Fund": {
-        "code": "120841", "folio": "51011322275",
-        "category": "Mid Cap", "folder": "quant_midcap_fund"
-    },
     "Edelweiss Nifty Midcap150 Momentum 50 Index Fund": {
         "code": "150902", "folio": "9106300903",
         "category": "Mid Cap", "folder": "edelweiss_midcap150_momentum"
