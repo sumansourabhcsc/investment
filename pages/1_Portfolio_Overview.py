@@ -311,7 +311,7 @@ xirr_bar   = SUCCESS if overall_xirr_pct >= 0 else DANGER
 # =========================================================
 c1, c2, c3, c4, c5 = st.columns(5)
 
-with c1:
+with c2:
     st.markdown(kpi_card(
         "💰", "Total Invested",
         f"₹{total_invested:,.0f}",
@@ -320,7 +320,7 @@ with c1:
         "#7C3AED"
     ), unsafe_allow_html=True)
 
-with c2:
+with c1:
     st.markdown(kpi_card(
         "📈", "Current Value",
         f"₹{total_current:,.0f}",
