@@ -2,13 +2,25 @@
   "meta": {
     "fund_house": "SBI Mutual Fund",
     "scheme_type": "Open Ended Schemes",
-    "scheme_category": "Solution Oriented Scheme - Children’s Fund",
+    "scheme_category": "Solution Oriented Scheme - Childrenâs Fund",
     "scheme_code": 148490,
     "scheme_name": "SBI Children's Fund - Investment Plan - Direct Plan - Growth",
     "isin_growth": "INF200KA1R07",
     "isin_div_reinvestment": null
   },
   "data": [
+    {
+      "date": "23-09-2026",
+      "nav": "53.65120"
+    },
+    {
+      "date": "22-09-2026",
+      "nav": "53.39950"
+    },
+    {
+      "date": "21-09-2026",
+      "nav": "53.13510"
+    },
     {
       "date": "18-09-2026",
       "nav": "53.37850"
