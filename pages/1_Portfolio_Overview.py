@@ -459,6 +459,50 @@ with tab1:
     
         components.html(scale_component_html(table_html), height=min((len(display_df) + 1) * 52, 560), scrolling=True)
 
+                # ── Download buttons ─────────────────────────────────────────────
+        from datetime import datetime
+        import io
+
+        export_df = df.copy()
+        export_df["XIRR (%)"] = (
+            export_df["XIRR"].astype(str).str.rstrip("%").astype(float)
+        )
+        export_df["NAV Date"] = pd.to_datetime(export_df["NAV Date"]).dt.strftime("%d-%m-%Y")
+        export_df = export_df.drop(columns=["XIRR"]).rename(columns={
+            "TotalUnits": "Units",
+            "Invested": "Invested (INR)",
+            "Current": "Current Value (INR)",
+            "P&L": "P&L (INR)",
+        })
+
+        stamp = datetime.now().strftime("%Y%m%d")
+        d1, d2, _ = st.columns([1, 1, 3])
+
+        with d1:
+            st.download_button(
+                "⬇ CSV",
+                data=export_df.to_csv(index=False).encode("utf-8-sig"),  # utf-8-sig so Excel opens it cleanly
+                file_name=f"fund_details_{stamp}.csv",
+                mime="text/csv",
+                use_container_width=True,
+            )
+
+        with d2:
+            try:
+                buf = io.BytesIO()
+                with pd.ExcelWriter(buf, engine="openpyxl") as writer:
+                    export_df.to_excel(writer, index=False, sheet_name="Fund Details")
+                st.download_button(
+                    "⬇ Excel",
+                    data=buf.getvalue(),
+                    file_name=f"fund_details_{stamp}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                )
+            except ModuleNotFoundError:
+                st.caption("Add `openpyxl` to requirements.txt for Excel export.")
+
+
     
     with col_donut:
         fig_donut = go.Figure(go.Pie(
