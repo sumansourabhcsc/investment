@@ -32,10 +32,7 @@ MUTUAL_FUNDS = {
         "code": "127042", "folio": "6910146429673",
         "category": "Mid Cap", "folder": "motilal_oswal_midcap_fund"
     },
-    "Edelweiss Flexi Cap Fund": {
-        "code": "140353", "folio": "91047811036",
-        "category": "Flexi Cap", "folder": "edelweiss_flexi_cap_fund"
-    },
+    
     "Parag Parikh Flexi Cap Fund": {
         "code": "122639", "folio": "10944223, 18757062",
         "category": "Flexi Cap", "folder": "parag_parikh_flexicap_fund"
