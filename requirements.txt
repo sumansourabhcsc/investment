@@ -9,3 +9,5 @@ scikit-learn
 yfinance
 anthropic
 openpyxl
+kiteconnect
+python-dotenv
