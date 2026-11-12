@@ -176,9 +176,14 @@ if kite is None:
 
     login_url = login_zerodha()
 
-    st.link_button(
-        "Login with Zerodha",
-        login_url
+      
+
+    st.markdown(
+        f'<a href="{login_url}" target="_self" '
+        'style="display:inline-block;padding:0.6rem 1.6rem;border:1px solid rgba(0,245,212,0.4);'
+        'border-radius:8px;color:#00f5d4;text-decoration:none;font-family:Syne,sans-serif;'
+        'font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Login with Zerodha</a>',
+        unsafe_allow_html=True,
     )
 
     st.stop()
