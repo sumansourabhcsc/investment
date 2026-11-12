@@ -11,6 +11,13 @@ from zerodha import (
     get_profile
 )
 
+
+import streamlit as st
+from utils.sidebar_style import render_sidebar
+
+st.set_page_config(page_title="Taurus: Zerodha", page_icon="🐂", layout="wide")
+render_sidebar("zerodha")
+
 st.title("Zerodha Investment Tracker")
 
 # Step 1: Handle Zerodha redirect
