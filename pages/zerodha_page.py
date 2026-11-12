@@ -149,6 +149,20 @@ hr { border-color: rgba(0, 245, 212, 0.1) !important; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0,245,212,0.2); border-radius: 4px; }
+
+/* ── Force readable text regardless of Streamlit theme ── */
+h1, h2, h3, p, label,
+[data-testid="stMetricLabel"],
+[data-testid="stMetricValue"] {
+    color: #e8e2d5 !important;
+}
+[data-testid="stHeader"] { background: transparent !important; }
+[data-testid="stAlert"] {
+    background: rgba(0,245,212,0.07) !important;
+    color: #e8e2d5 !important;
+}
+
+
 </style>
 """, unsafe_allow_html=True)
 
