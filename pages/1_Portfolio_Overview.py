@@ -569,7 +569,7 @@ with tab2:
     # ── Time-period filter ──────────────────────────────────────────────────
     chart_df_full = daily_df.sort_values("Date")
 
-    PERIODS = {"1M": 30, "3M": 90, "6M": 180, "All": None, "Custom": -1}
+    PERIODS = {"1M": 30, "3M": 90, "6M": 180, "1Y": 365, "All": None, "Custom": -1}
 
     col_btns, col_custom = st.columns([3, 2])
 
