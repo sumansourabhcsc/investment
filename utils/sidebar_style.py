@@ -201,7 +201,7 @@ def render_sidebar(current_page: str):
         #st.markdown('<div class="news-page">', unsafe_allow_html=True)
         st.page_link("pages/5_Fund_News.py", label="News", icon="📰")
         #st.markdown('</div>', unsafe_allow_html=True)
-        st.page_link("pages/zerodha_page.py", label="Zerodha", icon="🪁")
+        
 
         st.divider()
         render_text_size_control()
