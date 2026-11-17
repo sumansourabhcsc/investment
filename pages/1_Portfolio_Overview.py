@@ -377,19 +377,45 @@ pnl_sign   = "+" if total_pnl >= 0 else ""
 ret_sign   = "+" if absolute_return_pct >= 0 else ""
 xirr_sign  = "+" if overall_xirr_pct >= 0 else ""
 
+# # Today's change for the hero card
+# try:
+#     _d = pd.read_csv("data/portfolio_daily.csv")
+#     _d["Date"] = pd.to_datetime(_d["Date"], format="%d-%m-%Y")
+#     day_change = float(_d.sort_values("Date").iloc[-1]["OneDayChange"])
+# except Exception:
+#     day_change = None
+
+# if day_change is None:
+#     day_sub, day_col = "live NAV", "rgba(255,255,255,0.45)"
+# else:
+#     day_sub = f"{'▲' if day_change >= 0 else '▼'} ₹{abs(day_change):,.0f} today"
+#     day_col = SUCCESS if day_change >= 0 else DANGER
+
+
 # Today's change for the hero card
 try:
     _d = pd.read_csv("data/portfolio_daily.csv")
     _d["Date"] = pd.to_datetime(_d["Date"], format="%d-%m-%Y")
-    day_change = float(_d.sort_values("Date").iloc[-1]["OneDayChange"])
+
+    latest_record = _d.sort_values("Date").iloc[-1]
+
+    day_change = float(latest_record["OneDayChange"])
+    day_date = latest_record["Date"].strftime("%d %b %Y")
+
 except Exception:
     day_change = None
+    day_date = None
 
 if day_change is None:
-    day_sub, day_col = "live NAV", "rgba(255,255,255,0.45)"
+    day_sub = "Live NAV"
+    day_col = "rgba(255,255,255,0.45)"
 else:
-    day_sub = f"{'▲' if day_change >= 0 else '▼'} ₹{abs(day_change):,.0f} today"
+    day_sub = (
+        f"{'▲' if day_change >= 0 else '▼'} "
+        f"₹{abs(day_change):,.0f} on {day_date}"
+    )
     day_col = SUCCESS if day_change >= 0 else DANGER
+
 
 
 # =========================================================
