@@ -294,7 +294,7 @@ components.html(scale_component_html("""
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@300;400;500&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: transparent; font-family: 'DM Mono', monospace; padding: 0.6rem 0 0; overflow: hidden; }
-  .row { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; width:100%; }
+  .row { position:relative; width:100%; }
   .brand { display:flex; align-items:center; gap:1rem; }
   h1 {
     font-family:'Syne',sans-serif; font-weight:800; letter-spacing:-0.03em; line-height:1;
@@ -316,10 +316,19 @@ components.html(scale_component_html("""
   @keyframes throb { from { box-shadow:0 0 5px #00f5d499; } to { box-shadow:0 0 12px #00f5d4dd, 0 0 20px #00f5d466; } }
   .live { font-size:0.68rem; letter-spacing:0.22em; color:rgba(0,245,212,0.7); text-transform:uppercase; animation:blink 1.4s step-start infinite; }
   @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
-  .clock { text-align:right; flex-shrink:0; }
-  .time { font-size:1.6rem; font-weight:500; color:#eef9f6; letter-spacing:0.06em; font-variant-numeric:tabular-nums; }
+  /* Mobile first: clock sits under the wordmark, time and date on one line */
+  .clock { display:flex; align-items:baseline; flex-wrap:wrap; gap:0.2rem 0.9rem; margin-top:0.8rem; }
+  .time { font-size:1.35rem; font-weight:500; color:#eef9f6; letter-spacing:0.06em; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .time small { font-size:0.7rem; color:rgba(0,245,212,0.65); letter-spacing:0.16em; margin-left:6px; }
-  .date { font-family:'Syne',sans-serif; font-size:0.75rem; font-weight:700; letter-spacing:0.14em; color:rgba(200,230,225,0.65); text-transform:uppercase; margin-top:0.3rem; }
+  .date { font-family:'Syne',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:0.1em; color:rgba(200,230,225,0.65); text-transform:uppercase; white-space:nowrap; }
+  .sub { white-space:normal; letter-spacing:0.14em; font-size:0.66rem; }
+  /* Wide screens: clock moves to the top-right, aligned with the subtitle */
+  @media (min-width: 640px) {
+    .clock { position:absolute; right:0; bottom:0; display:block; text-align:right; margin-top:0; }
+    .time { font-size:1.6rem; }
+    .date { display:block; font-size:0.75rem; letter-spacing:0.14em; margin-top:0.3rem; }
+    .sub { white-space:nowrap; letter-spacing:0.26em; font-size:0.72rem; }
+  }
   .divider { width:100%; height:1px; margin-top:1rem; background:linear-gradient(90deg, rgba(0,245,212,0.4), rgba(0,201,255,0.2) 50%, transparent); }
 </style></head>
 <body>
@@ -350,7 +359,7 @@ components.html(scale_component_html("""
   tick(); setInterval(tick, 1000);
 </script>
 </body></html>
-"""), height=125, scrolling=False)
+"""), height=155, scrolling=False)
 
 
 # ─────────────────────────────────────────────
