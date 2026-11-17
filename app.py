@@ -1,50 +1,43 @@
-#App.py
+# App.py — Taurus home
+import time
+from datetime import datetime, time as dtime
+from zoneinfo import ZoneInfo
 
+import requests
 import streamlit as st
 import streamlit.components.v1 as components
-import requests
-import time
-import yfinance as yf          # ← add here
-from datetime import datetime
-from utils.add_units import show_add_units
-from zoneinfo import ZoneInfo
-# app.py
-from utils.sidebar_style import render_sidebar, scale_component_html
-from utils.market_history_chart import show_market_history_chart
-
-
-
+import yfinance as yf
 
 # ─────────────────────────────────────────────
-# Page Config — MUST be first, only once
+# Page config — MUST be the first Streamlit call
 # ─────────────────────────────────────────────
 st.set_page_config(
     page_title="Taurus: Home",
     page_icon="🐂",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
-render_sidebar("home")          # ← change the key per page
-# with st.sidebar:
-#     st.markdown("### 🐂 TAURUS")
-#     st.page_link("pages/1_Portfolio_Overview.py", label="📊 Portfolio Overview")
-#     st.page_link("pages/2_Fund_Details.py", label="📁 Fund Details")  
-#     st.page_link("pages/Tools.py", label="🛠 Tools")
 
+from utils.add_units import show_add_units
+from utils.sidebar_style import render_sidebar, scale_component_html
+from utils.market_history_chart import show_market_history_chart
+
+render_sidebar("home")
+
+IST   = ZoneInfo("Asia/Kolkata")
+TEAL  = "#00f5d4"
+UP    = "#00f5d4"
+DOWN  = "#ff4d6d"
 
 # ─────────────────────────────────────────────
-# Full Redesign — Styles
+# Global styles
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
 
-html, body, [class*="css"] {
-    font-family: 'DM Mono', monospace;
-    color: #e8e2d5;
-}
+html, body, [class*="css"] { font-family: 'DM Mono', monospace; color: #e8e2d5; }
 
-/* ── Base: deep midnight navy (replaces image background) ── */
 .stApp {
     background-color: #080b0f;
     background-image:
@@ -57,38 +50,20 @@ html, body, [class*="css"] {
     position: relative;
     min-height: 100vh;
 }
-
-/* ── Layer 1: animated teal orb pulse ── */
 .stApp::before {
-    content: "";
-    position: fixed;
-    inset: 0;
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background:
         radial-gradient(ellipse 70% 55% at 8%  18%,  rgba(0, 245, 212, 0.06) 0%, transparent 60%),
         radial-gradient(ellipse 55% 70% at 88% 72%,  rgba(0, 140, 255, 0.05) 0%, transparent 55%),
         radial-gradient(ellipse 45% 35% at 52% 98%,  rgba(0, 245, 212, 0.04) 0%, transparent 50%);
-    z-index: 0;
-    pointer-events: none;
     animation: taurus-pulse 8s ease-in-out infinite;
 }
-
-/* ── Layer 2: dot-grid constellation ── */
 .stApp::after {
-    content: "";
-    position: fixed;
-    inset: 0;
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background-image: radial-gradient(circle, rgba(0,245,212,0.16) 1px, transparent 1px);
-    background-size: 38px 38px;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.45;
+    background-size: 38px 38px; opacity: 0.4;
 }
-
-@keyframes taurus-pulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.55; }
-}
-
+@keyframes taurus-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 .stApp > * { position: relative; z-index: 1; }
 
 [data-testid="stSidebar"] {
@@ -96,72 +71,76 @@ html, body, [class*="css"] {
     border-right: 1px solid rgba(0, 245, 212, 0.1) !important;
     box-shadow: 4px 0 32px rgba(0,0,0,0.5) !important;
     backdrop-filter: blur(12px);
+    visibility: visible !important;
+    display: block !important;
 }
-
+[data-testid="stSidebarCollapsedControl"] { visibility: visible !important; display: flex !important; }
+[data-testid="stSidebarNav"] { display: block !important; }
 #MainMenu, footer { visibility: hidden; }
 
-[data-testid="stSidebarCollapsedControl"] {
-    visibility: visible !important;
-    display: flex !important;
-}
-
-[data-testid="stSidebar"] {
-    visibility: visible !important;
-    display: block !important;
-}
-
-[data-testid="stSidebarNav"] {
-    display: block !important;
-}
-
-
-
 .block-container {
-    padding-top: 2rem !important;
+    padding-top: 1.5rem !important;
     padding-bottom: 3rem !important;
-    max-width: 1100px !important;
+    max-width: 1280px !important;
+}
+hr { border-color: rgba(0, 245, 212, 0.1) !important; }
+
+/* ── Section labels ── */
+.tz-section { display:flex; align-items:center; gap:14px; margin: 2rem 0 0.9rem; }
+.tz-section-title {
+    font-family:'Syne',sans-serif; font-size:0.85rem; font-weight:700;
+    letter-spacing:0.16em; text-transform:uppercase; color:rgba(0,245,212,0.85); white-space:nowrap;
+}
+.tz-section-sub {
+    font-family:'DM Mono',monospace; font-size:0.72rem; letter-spacing:0.08em;
+    color:rgba(200,230,225,0.5); white-space:nowrap;
+}
+.tz-section-line { flex:1; height:1px; background:linear-gradient(90deg, rgba(0,245,212,0.25), transparent); }
+.tz-sublabel {
+    height:38px; display:flex; align-items:center; gap:10px;
+    font-family:'Syne',sans-serif; font-size:0.75rem; font-weight:700;
+    letter-spacing:0.12em; text-transform:uppercase; color:rgba(200,230,225,0.75);
+}
+.tz-sublabel small {
+    font-family:'DM Mono',monospace; font-weight:400; letter-spacing:0.06em;
+    text-transform:none; color:rgba(200,230,225,0.45); font-size:0.7rem;
+}
+.tz-badge {
+    display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:20px;
+    font-family:'DM Mono',monospace; font-size:0.7rem; letter-spacing:0.08em; text-transform:uppercase;
 }
 
-.stButton > button[kind="primary"] {
-    font-family: 'Syne', sans-serif !important;
-    font-weight: 700 !important;
-    font-size: 0.9rem !important;
-    letter-spacing: 0.08em !important;
-    text-transform: uppercase !important;
+/* ── Buttons ── */
+.stButton > button[kind="primary"], [data-testid="stBaseButton-primary"] {
+    font-family: 'Syne', sans-serif !important; font-weight: 700 !important;
+    font-size: 0.9rem !important; letter-spacing: 0.08em !important; text-transform: uppercase !important;
     background: linear-gradient(135deg, rgba(0,245,212,0.12), rgba(0,201,255,0.08)) !important;
-    color: #00f5d4 !important;
-    border: 1px solid rgba(0,245,212,0.4) !important;
-    border-radius: 8px !important;
-    padding: 0.65rem 1.8rem !important;
-    transition: all 0.25s !important;
-    box-shadow: 0 0 20px rgba(0,245,212,0.07) !important;
+    color: #00f5d4 !important; border: 1px solid rgba(0,245,212,0.4) !important;
+    border-radius: 8px !important; padding: 0.65rem 1.8rem !important;
+    transition: all 0.25s !important; box-shadow: 0 0 20px rgba(0,245,212,0.07) !important;
 }
-
-.stButton > button[kind="primary"]:hover {
+.stButton > button[kind="primary"]:hover, [data-testid="stBaseButton-primary"]:hover {
     background: linear-gradient(135deg, rgba(0,245,212,0.22), rgba(0,201,255,0.15)) !important;
     border-color: rgba(0,245,212,0.7) !important;
     box-shadow: 0 0 30px rgba(0,245,212,0.18), 0 0 60px rgba(0,245,212,0.06) !important;
     transform: translateY(-1px) !important;
 }
+.stButton > button[kind="secondary"], [data-testid="stBaseButton-secondary"] {
+    font-family: 'DM Mono', monospace !important; font-size: 0.8rem !important;
+    background: rgba(255,255,255,0.04) !important; color: #cfeee8 !important;
+    border: 1px solid rgba(0,245,212,0.25) !important; border-radius: 8px !important;
+}
+.stButton > button[kind="secondary"]:hover, [data-testid="stBaseButton-secondary"]:hover {
+    border-color: rgba(0,245,212,0.6) !important; color: #fff !important;
+}
 
+/* ── Alerts ── */
 .stSuccess > div, .stError > div, .stInfo > div, .stSpinner > div {
-    font-family: 'DM Mono', monospace !important;
-    font-size: 0.8rem !important;
+    font-family: 'DM Mono', monospace !important; font-size: 0.82rem !important;
 }
-
-hr { border-color: rgba(0, 245, 212, 0.1) !important; }
-
-.stInfo {
-    background: rgba(0,201,255,0.06) !important;
-    border-left-color: #00c9ff !important;
-}
-
-.stSuccess {
-    background: rgba(0,245,212,0.07) !important;
-    border-left-color: #00f5d4 !important;
-}
-
-.stError { background: rgba(255,70,70,0.07) !important; }
+.stInfo    { background: rgba(0,201,255,0.06) !important; border-left-color: #00c9ff !important; }
+.stSuccess { background: rgba(0,245,212,0.07) !important; border-left-color: #00f5d4 !important; }
+.stError   { background: rgba(255,70,70,0.07) !important; }
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -169,860 +148,452 @@ hr { border-color: rgba(0, 245, 212, 0.1) !important; }
 </style>
 """, unsafe_allow_html=True)
 
+# Navigation cards: the whole card is clickable via an invisible button laid over it.
+# Needs st.container(key=...) (Streamlit >= 1.39), which adds a "st-key-<key>" CSS class.
+st.markdown("""
+<style>
+div[class*="st-key-navcard_"] { position: relative; gap: 0 !important; }
+div[class*="st-key-navcard_"] .stElementContainer,
+div[class*="st-key-navcard_"] .element-container { position: static !important; }
+
+.tz-nav {
+    position: relative; overflow: hidden;
+    background: rgba(8,14,20,0.78);
+    border: 1px solid rgba(0,245,212,0.2);
+    border-radius: 12px; padding: 1.3rem 1.4rem 1.2rem;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    pointer-events: none;
+    transition: background 0.25s, border-color 0.25s, transform 0.22s;
+}
+.tz-nav .bar {
+    position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,#00f5d4,#00c9ff); opacity:0.4; transition:opacity 0.3s;
+}
+.tz-nav .dot {
+    position:absolute; top:1rem; right:1rem; width:7px; height:7px; border-radius:50%;
+    background:rgba(0,245,212,0.35); animation:pdot 2.2s ease-in-out infinite;
+}
+.tz-nav .num  { font-family:'Syne',sans-serif; font-size:1.8rem; font-weight:800;
+                color:rgba(0,245,212,0.25); line-height:1; margin-bottom:0.55rem; transition:color 0.3s; }
+.tz-nav .name { font-family:'Syne',sans-serif; font-size:1.05rem; font-weight:700;
+                color:#e6f8f4; margin-bottom:0.3rem; transition:color 0.3s; }
+.tz-nav .desc { font-family:'DM Mono',monospace; font-size:0.76rem; line-height:1.5;
+                color:rgba(210,240,235,0.7); letter-spacing:0.02em; transition:color 0.3s; }
+.tz-nav .go   { margin-top:0.85rem; display:flex; align-items:center; gap:2px;
+                font-family:'DM Mono',monospace; font-size:0.85rem; color:rgba(0,245,212,0.75); }
+.tz-nav .go span { display:inline-block; animation:chevron-slide 1.1s ease-in-out infinite; }
+.tz-nav .go span:nth-child(2) { animation-delay:0.18s; }
+.tz-nav .go span:nth-child(3) { animation-delay:0.36s; }
+
+div[class*="st-key-navcard_"]:hover .tz-nav { background:rgba(0,245,212,0.09); border-color:rgba(0,245,212,0.65); transform:translateY(-3px); }
+div[class*="st-key-navcard_"]:hover .tz-nav .bar  { opacity:1; }
+div[class*="st-key-navcard_"]:hover .tz-nav .num  { color:rgba(0,245,212,0.6); }
+div[class*="st-key-navcard_"]:hover .tz-nav .name { color:#fff; }
+div[class*="st-key-navcard_"]:hover .tz-nav .desc { color:rgba(210,240,235,0.92); }
+
+div[class*="st-key-navcard_"] [data-testid="stButton"],
+div[class*="st-key-navcard_"] .stButton {
+    position:absolute !important; inset:0 !important; z-index:9 !important;
+}
+div[class*="st-key-navcard_"] [data-testid="stButton"] button,
+div[class*="st-key-navcard_"] .stButton > button {
+    width:100% !important; height:100% !important; background:transparent !important;
+    border:none !important; box-shadow:none !important; opacity:0 !important;
+    cursor:pointer !important; padding:0 !important;
+}
+@keyframes chevron-slide {
+    0%   { opacity:0.15; transform:translateX(-4px); }
+    50%  { opacity:1;    transform:translateX(2px);  }
+    100% { opacity:0.15; transform:translateX(-4px); }
+}
+@keyframes pdot {
+    0%   { box-shadow:0 0 0 0   rgba(0,245,212,0.6); }
+    60%  { box-shadow:0 0 0 6px rgba(0,245,212,0);   }
+    100% { box-shadow:0 0 0 0   rgba(0,245,212,0);   }
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 # ─────────────────────────────────────────────
-# GitHub Config
+# Config
 # ─────────────────────────────────────────────
-GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
-GITHUB_OWNER = st.secrets["GITHUB_OWNER"]
-GITHUB_REPO  = st.secrets["GITHUB_REPO"]
-
 WORKFLOWS = [
-    {
-        "name": "Fetch NAV Daily",
-        "file": "fetch_nav_daily.yml",
-        "description": "Fetches latest NAV data for all funds",
-        "num": "01",
-        "link": "https://taurus.streamlit.app/Portfolio_Overview",
-        "link_label": "Portfolio Overview"
-    },
-    {
-        "name": "Portfolio Overview",
-        "file": "update_fund_snapshots.yml",
-        "description": "Overall fund snapshot",
-        "num": "02",
-        "link": "https://taurus.streamlit.app/Portfolio_Overview",
-        "link_label": "Portfolio Overview"
-    },
-    {
-        "name": "Individual Funds",
-        "file": "update_portfolio_daily.yml",
-        "description": "Individual Fund Details",
-        "num": "03",
-        "link": "https://taurus.streamlit.app/Fund_Details",
-        "link_label": "Fund Details"
-    },
+    {"name": "Fetch NAV Daily",     "file": "fetch_nav_daily.yml",         "num": "01"},
+    {"name": "Portfolio Overview",  "file": "update_fund_snapshots.yml",   "num": "02"},
+    {"name": "Individual Funds",    "file": "update_portfolio_daily.yml",  "num": "03"},
 ]
 
-
 PAGES = [
-    {
-        "name": "Portfolio Overview",
-        "file": "update_fund_snapshots.yml",
-        "description": "Overall fund snapshot",
-        "num": "01",
-        "link": "https://taurus.streamlit.app/Portfolio_Overview",
-        "link_label": "Portfolio Overview"
-    },
-    
-    {
-        "name": "Individual Funds",
-        "file": "update_portfolio_daily.yml",
-        "description": "Individual Fund Details",
-        "num": "02",
-        "link": "https://taurus.streamlit.app/Fund_Details",
-        "link_label": "Fund Details"
-    },
-    {
-        "name": "Tools",
-        "file": "update_fund_snapshots.yml",
-        "description": "calculator & utilities",
-        "num": "03",
-        "link": "https://taurus.streamlit.app/4_Tools",
-        "link_label": "Tools"
-    },
-    {
-        "name": "Smart SIP",
-        "file": "update_fund_snapshots.yml",
-        "description": "SIP planner & projections",
-        "num": "04",
-        "link": "https://taurus.streamlit.app/6_smart_sip",
-        "link_label": "Smart SIP"
-    }
-   
+    {"num": "01", "name": "Portfolio Overview", "description": "Overall fund snapshot",
+     "page": "pages/1_Portfolio_Overview.py"},
+    {"num": "02", "name": "Individual Funds",   "description": "Individual fund details",
+     "page": "pages/2_Fund_Details.py"},
+    {"num": "03", "name": "Tools",              "description": "Calculators & utilities",
+     "page": "pages/4_Tools.py"},
+    {"num": "04", "name": "Smart SIP",          "description": "SIP planner & projections",
+     "page": "pages/6_smart_sip.py"},
 ]
 
 DELAY_SECONDS = 60
 
 
 # ─────────────────────────────────────────────
-# Trigger Workflow Helper
+# Helpers
 # ─────────────────────────────────────────────
-def trigger_workflow(workflow_filename: str) -> dict:
-    url = (
-        f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}"
-        f"/actions/workflows/{workflow_filename}/dispatches"
+def section(title: str, sub: str = ""):
+    sub_html = f'<span class="tz-section-sub">{sub}</span>' if sub else ""
+    st.markdown(
+        f'<div class="tz-section"><span class="tz-section-title">{title}</span>'
+        f'{sub_html}<span class="tz-section-line"></span></div>',
+        unsafe_allow_html=True,
     )
+
+
+def sublabel(title: str, note: str = ""):
+    note_html = f"<small>{note}</small>" if note else ""
+    st.markdown(f'<div class="tz-sublabel">{title}{note_html}</div>', unsafe_allow_html=True)
+
+
+def trigger_workflow(workflow_filename: str) -> dict:
+    try:
+        token = st.secrets["GITHUB_TOKEN"]
+        owner = st.secrets["GITHUB_OWNER"]
+        repo  = st.secrets["GITHUB_REPO"]
+    except Exception as e:
+        return {"success": False, "message": f"Missing secret: {e}"}
+
+    url = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_filename}/dispatches"
     headers = {
-        "Authorization": f"Bearer {GITHUB_TOKEN}",
+        "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
     }
-    payload = {"ref": "main"}
-    response = requests.post(url, headers=headers, json=payload)
+    try:
+        response = requests.post(url, headers=headers, json={"ref": "main"}, timeout=20)
+    except requests.RequestException as e:
+        return {"success": False, "message": f"Request failed: {e}"}
 
     if response.status_code == 204:
         return {"success": True, "message": "Triggered successfully ✅"}
-    else:
-        return {"success": False, "message": f"Error {response.status_code}: {response.text}"}
+    return {"success": False, "message": f"Error {response.status_code}: {response.text}"}
+
+
+def nse_session_open(now: datetime) -> bool:
+    """Mon–Fri 09:15–15:30 IST. Does not know about exchange holidays."""
+    return now.weekday() < 5 and dtime(9, 15) <= now.time() <= dtime(15, 30)
 
 
 # ─────────────────────────────────────────────
-# Header
+# Header: wordmark + live IST clock in one row
 # ─────────────────────────────────────────────
 components.html(scale_component_html("""
 <!DOCTYPE html><html><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Mono:wght@300;400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@300;400;500&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: transparent;
-    font-family: 'DM Mono', monospace;
-    padding: 1.2rem 0 0 0;
-    overflow: hidden;
-  }
-  .header-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    width: 100%;
-  }
-  .wordmark-block { flex: 1; min-width: 0; }
+  body { background: transparent; font-family: 'DM Mono', monospace; padding: 0.6rem 0 0; overflow: hidden; }
+  .row { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; width:100%; }
+  .brand { display:flex; align-items:center; gap:1rem; }
   h1 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    white-space: nowrap;
-    font-size: clamp(1.8rem, 10vw, 5rem);
-    background: linear-gradient(135deg, #00f5d4 0%, #00c9ff 55%, #a78bfa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-family:'Syne',sans-serif; font-weight:800; letter-spacing:-0.03em; line-height:1;
+    white-space:nowrap; font-size:clamp(2rem, 8vw, 4rem);
+    background:linear-gradient(135deg,#00f5d4 0%,#00c9ff 55%,#a78bfa 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
   }
   .sub {
-    font-size: clamp(0.5rem, 1.8vw, 0.68rem);
-    font-weight: 300;
-    letter-spacing: clamp(0.1em, 1vw, 0.28em);
-    color: rgba(0, 245, 212, 0.5);
-    text-transform: uppercase;
-    margin-top: 0.4rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size:0.72rem; letter-spacing:0.26em; color:rgba(0,245,212,0.65);
+    text-transform:uppercase; margin-top:0.5rem; white-space:nowrap;
   }
-  .divider {
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, rgba(0,245,212,0.4) 0%, rgba(0,201,255,0.2) 50%, transparent 100%);
-    margin: 1rem 0 0 0;
-  }
-  .pulser-wrap {
-    flex-shrink: 0;
-    width: clamp(50px, 8vw, 80px);
-    height: clamp(50px, 8vw, 80px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    margin-top: 4px;
-  }
-  .ring {
-    position: absolute;
-    width: clamp(22px, 3.5vw, 34px);
-    height: clamp(22px, 3.5vw, 34px);
-    border-radius: 50%;
-    border: 1px solid #00f5d4;
-    opacity: 0;
-    animation: ripple 1.5s ease-out infinite;
-  }
-  .ring:nth-child(1) { animation-delay: 0s; }
-  .ring:nth-child(2) { animation-delay: 0.25s; }
-  .ring:nth-child(3) { animation-delay: 0.5s; }
-  .ring:nth-child(4) { animation-delay: 0.75s; }
-  @keyframes ripple {
-    0%   { transform: scale(1); opacity: 0.65; }
-    100% { transform: scale(3.4); opacity: 0; }
-  }
-  .core {
-    position: relative;
-    width: clamp(14px, 2.2vw, 22px);
-    height: clamp(14px, 2.2vw, 22px);
-    border-radius: 50%;
-    z-index: 10;
-    background: radial-gradient(circle at 35% 35%, #00f5d4cc, #00f5d444);
-    animation: throb 0.9s ease-in-out infinite alternate;
-  }
-  @keyframes throb {
-    from { box-shadow: 0 0 5px #00f5d499, 0 0 10px #00f5d444; }
-    to   { box-shadow: 0 0 10px #00f5d4dd, 0 0 20px #00f5d466; }
-  }
-  .live-label {
-    position: absolute;
-    bottom: -14px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: clamp(7px, 1.2vw, 9px);
-    letter-spacing: 0.22em;
-    color: rgba(0, 245, 212, 0.5);
-    text-transform: uppercase;
-    white-space: nowrap;
-    animation: blink 1.4s step-start infinite;
-  }
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.15; }
-  }
-</style>
-</head>
+  .pulser { position:relative; width:44px; height:44px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ring { position:absolute; width:20px; height:20px; border-radius:50%; border:1px solid #00f5d4; opacity:0; animation:ripple 1.5s ease-out infinite; }
+  .ring:nth-child(2) { animation-delay:0.3s; } .ring:nth-child(3) { animation-delay:0.6s; }
+  @keyframes ripple { 0% { transform:scale(1); opacity:0.65; } 100% { transform:scale(2.4); opacity:0; } }
+  .core { width:13px; height:13px; border-radius:50%; z-index:2;
+          background:radial-gradient(circle at 35% 35%, #00f5d4cc, #00f5d444);
+          animation:throb 0.9s ease-in-out infinite alternate; }
+  @keyframes throb { from { box-shadow:0 0 5px #00f5d499; } to { box-shadow:0 0 12px #00f5d4dd, 0 0 20px #00f5d466; } }
+  .live { font-size:0.68rem; letter-spacing:0.22em; color:rgba(0,245,212,0.7); text-transform:uppercase; animation:blink 1.4s step-start infinite; }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
+  .clock { text-align:right; flex-shrink:0; }
+  .time { font-size:1.6rem; font-weight:500; color:#eef9f6; letter-spacing:0.06em; font-variant-numeric:tabular-nums; }
+  .time small { font-size:0.7rem; color:rgba(0,245,212,0.65); letter-spacing:0.16em; margin-left:6px; }
+  .date { font-family:'Syne',sans-serif; font-size:0.75rem; font-weight:700; letter-spacing:0.14em; color:rgba(200,230,225,0.65); text-transform:uppercase; margin-top:0.3rem; }
+  .divider { width:100%; height:1px; margin-top:1rem; background:linear-gradient(90deg, rgba(0,245,212,0.4), rgba(0,201,255,0.2) 50%, transparent); }
+</style></head>
 <body>
-<div class="header-row">
-  <div class="wordmark-block">
-    <div style="display:flex;align-items:center;gap:1.2rem;">
+<div class="row">
+  <div>
+    <div class="brand">
       <h1>TAURUS</h1>
-      <div class="pulser-wrap" style="margin-top:0;">
-        <div class="ring"></div>
-        <div class="ring"></div>
-        <div class="ring"></div>
-        <div class="ring"></div>
-        <div class="core"></div>
-        <span class="live-label">live</span>
-      </div>
+      <div class="pulser"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="core"></div></div>
+      <span class="live">live</span>
     </div>
     <div class="sub">Portfolio Intelligence System</div>
-    <div class="divider"></div>
+  </div>
+  <div class="clock">
+    <div class="time"><span id="t">--:--:--</span><small>IST</small></div>
+    <div class="date" id="d">--</div>
   </div>
 </div>
+<div class="divider"></div>
+<script>
+  const dF = new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Kolkata', weekday:'long', day:'2-digit', month:'short', year:'numeric'});
+  const tF = new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Kolkata', hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'});
+  const parts = (f, d) => { const o = {}; f.formatToParts(d).forEach(p => o[p.type] = p.value); return o; };
+  function tick() {
+    const now = new Date(), dp = parts(dF, now), tp = parts(tF, now);
+    document.getElementById('d').textContent = `${dp.weekday}, ${dp.day} ${dp.month} ${dp.year}`;
+    document.getElementById('t').textContent = `${tp.hour}:${tp.minute}:${tp.second}`;
+  }
+  tick(); setInterval(tick, 1000);
+</script>
 </body></html>
-"""), height=130, scrolling=False)
-
+"""), height=125, scrolling=False)
 
 
 # ─────────────────────────────────────────────
-# Market Ticker — NSE Nifty 50 & BSE Sensex
+# Shared ticker card renderer
 # ─────────────────────────────────────────────
+TICKER_CSS = """
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@300;400;500&display=swap');
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: transparent; font-family: 'DM Mono', monospace; padding: 2px 0; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; width: 100%; }
+.card {
+  position: relative; overflow: hidden; background: rgba(8,14,20,0.78);
+  border: 1px solid rgba(255,255,255,0.09); border-radius: 12px;
+  padding: 0.8rem 1rem 0.75rem; backdrop-filter: blur(12px);
+}
+.card::before { content:""; position:absolute; top:0; left:0; right:0; height:2px; background:var(--accent); opacity:0.65; }
+.top { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem; }
+.tag { font-family:'Syne',sans-serif; font-size:0.68rem; font-weight:700; letter-spacing:0.16em; color:var(--accent); text-transform:uppercase; }
+.dot { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pdot 1.8s ease-in-out infinite; }
+@keyframes pdot { 0% { box-shadow:0 0 0 0 rgba(0,245,212,0.7); } 60% { box-shadow:0 0 0 5px rgba(0,245,212,0); } 100% { box-shadow:0 0 0 0 rgba(0,245,212,0); } }
+.name { font-family:'Syne',sans-serif; font-size:0.78rem; font-weight:700; color:rgba(220,240,235,0.75); letter-spacing:0.05em; margin-bottom:0.35rem; }
+.price { font-family:'DM Mono',monospace; font-size:clamp(1.3rem, 3vw, 1.75rem); font-weight:500; color:#eef9f6; letter-spacing:-0.01em; line-height:1; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.foot { display:flex; justify-content:space-between; align-items:baseline; gap:0.5rem; flex-wrap:wrap; margin-top:0.55rem; }
+.delta { font-size:0.8rem; font-weight:500; }
+.ts { font-size:0.64rem; color:rgba(200,230,225,0.5); letter-spacing:0.08em; text-transform:uppercase; }
+"""
+
+
+def card_html(tag, name, price_text, change, pct, decimals, accent, ts, live=False):
+    up    = change >= 0
+    color = UP if up else DOWN
+    arrow = "▲" if up else "▼"
+    sign  = "+" if up else "−"
+    dot   = '<span class="dot"></span>' if live else ""
+    return (
+        f'<div class="card" style="--accent:{accent}">'
+        f'<div class="top"><span class="tag">{tag}</span>{dot}</div>'
+        f'<div class="name">{name}</div>'
+        f'<div class="price">{price_text}</div>'
+        f'<div class="foot">'
+        f'<span class="delta" style="color:{color}">{arrow} {abs(change):,.{decimals}f} ({sign}{abs(pct):.2f}%)</span>'
+        f'<span class="ts">{ts} IST</span></div></div>'
+    )
+
+
+def render_cards(cards: str, height: int = 135):
+    components.html(
+        scale_component_html(
+            f"<!DOCTYPE html><html><head><meta charset='utf-8'/><style>{TICKER_CSS}</style></head>"
+            f"<body><div class='grid'>{cards}</div></body></html>"
+        ),
+        height=height, scrolling=False,
+    )
+
+
+def _quote(symbol: str, decimals: int) -> dict:
+    fi   = yf.Ticker(symbol).fast_info
+    last = float(fi.last_price)
+    prev = float(fi.previous_close)
+    return {
+        "price":  round(last, decimals),
+        "change": round(last - prev, decimals),
+        "pct":    round((last - prev) / prev * 100, 2),
+    }
+
 
 # ─────────────────────────────────────────────
-# Market Ticker — Auto-refreshing every 30s
+# Market data (cached at module level)
 # ─────────────────────────────────────────────
+@st.cache_data(ttl=25)
+def get_market_data():
+    try:
+        return {
+            "nifty":  _quote("^NSEI", 2),
+            "sensex": _quote("^BSESN", 2),
+            "timestamp": datetime.now(IST).strftime("%H:%M:%S"),
+            "error": None,
+        }
+    except Exception as e:
+        return {"error": str(e)}
 
+
+@st.cache_data(ttl=300)
+def get_currency_data():
+    try:
+        return {
+            "usd": _quote("USDINR=X", 4),
+            "eur": _quote("EURINR=X", 4),
+            "timestamp": datetime.now(IST).strftime("%H:%M:%S"),
+            "error": None,
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+# ─────────────────────────────────────────────
+# Market ticker — auto-refreshes every 30s
+# ─────────────────────────────────────────────
 @st.fragment(run_every=30)
 def market_ticker():
-
-    @st.cache_data(ttl=25)
-    def get_market_data():
-        try:
-            ni = yf.Ticker("^NSEI").fast_info
-            se = yf.Ticker("^BSESN").fast_info
-            return {
-                "nifty": {
-                    "price":  round(ni.last_price, 2),
-                    "change": round(ni.last_price - ni.previous_close, 2),
-                    "pct":    round((ni.last_price - ni.previous_close) / ni.previous_close * 100, 2),
-                },
-                "sensex": {
-                    "price":  round(se.last_price, 2),
-                    "change": round(se.last_price - se.previous_close, 2),
-                    "pct":    round((se.last_price - se.previous_close) / se.previous_close * 100, 2),
-                },
-                "timestamp": datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%H:%M:%S"),
-                "error": None
-            }
-        except Exception as e:
-            return {"error": str(e)}
+    now = datetime.now(IST)
+    left, right = st.columns([3, 2])
+    with left:
+        sublabel("Indian indices", "auto · 30s")
+    with right:
+        if nse_session_open(now):
+            badge = ('<span class="tz-badge" style="background:rgba(0,245,212,0.1);'
+                     'border:1px solid rgba(0,245,212,0.3);color:#00f5d4;">● Session open</span>')
+        else:
+            badge = ('<span class="tz-badge" style="background:rgba(255,255,255,0.05);'
+                     'border:1px solid rgba(255,255,255,0.15);color:rgba(220,235,230,0.7);">○ Session closed</span>')
+        st.markdown(f'<div style="height:38px;display:flex;align-items:center;justify-content:flex-end;">{badge}</div>',
+                    unsafe_allow_html=True)
 
     mkt = get_market_data()
-
-    if not mkt.get("error"):
-        ni = mkt["nifty"]
-        se = mkt["sensex"]
-
-        def arrow(v): return "▲" if v >= 0 else "▼"
-        def color(v): return "#00f5d4" if v >= 0 else "#ff4d6d"
-
-        components.html(scale_component_html(f"""
-<!DOCTYPE html><html><head>
-<meta charset="utf-8"/>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@300;400;500&display=swap');
-  *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{ background: transparent; font-family: 'DM Mono', monospace; padding: 0.5rem 0; }}
-  .ticker-wrap {{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.6rem;
-    width: 100%;
-  }}
-  .card {{
-    background: rgba(8,14,20,0.78);
-    border: 1px solid rgba(0,245,212,0.15);
-    border-radius: 12px;
-    padding: 0.85rem 1rem;
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(12px);
-  }}
-  .card::before {{
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #00f5d4, #00c9ff);
-    opacity: 0.5;
-  }}
-  .card-header {{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.4rem;
-  }}
-  .exchange-tag {{
-    font-family: 'Syne', sans-serif;
-    font-size: 0.58rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    color: rgba(0,245,212,0.5);
-    text-transform: uppercase;
-  }}
-  .dot {{
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: #00f5d4;
-    animation: pdot 1.8s ease-in-out infinite;
-    flex-shrink: 0;
-  }}
-  @keyframes pdot {{
-    0%   {{ box-shadow: 0 0 0 0   rgba(0,245,212,0.7); }}
-    60%  {{ box-shadow: 0 0 0 5px rgba(0,245,212,0);   }}
-    100% {{ box-shadow: 0 0 0 0   rgba(0,245,212,0);   }}
-  }}
-  .index-name {{
-    font-family: 'Syne', sans-serif;
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: rgba(200,230,225,0.6);
-    letter-spacing: 0.06em;
-    margin-bottom: 0.25rem;
-  }}
-  .price {{
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(1.2rem, 5vw, 1.55rem);
-    font-weight: 800;
-    color: #e8f5f2;
-    letter-spacing: -0.02em;
-    line-height: 1;
-    white-space: nowrap;
-  }}
-  .change-row {{
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    margin-top: 0.35rem;
-  }}
-  .change-abs {{
-    font-size: 0.68rem;
-    font-weight: 500;
-  }}
-  .change-pct {{
-    font-size: 0.62rem;
-    font-weight: 400;
-    opacity: 0.85;
-  }}
-  .timestamp {{
-    text-align: right;
-    font-size: 0.5rem;
-    color: rgba(0,245,212,0.3);
-    letter-spacing: 0.1em;
-    margin-top: 0.6rem;
-    text-transform: uppercase;
-  }}
-</style>
-</head><body>
-<div class="ticker-wrap">
-  <div class="card">
-    <div class="card-header">
-      <span class="exchange-tag">NSE</span>
-      <div class="dot"></div>
-    </div>
-    <div class="index-name">NIFTY 50</div>
-    <div class="price">{ni['price']:,.2f}</div>
-    <div class="change-row">
-      <span class="change-abs" style="color:{color(ni['change'])}">{arrow(ni['change'])} {abs(ni['change']):,.2f}</span>
-      <span class="change-pct" style="color:{color(ni['pct'])}">({arrow(ni['pct'])}{abs(ni['pct']):.2f}%)</span>
-    </div>
-    <div class="timestamp">as of {mkt['timestamp']} IST</div>
-  </div>
-  <div class="card">
-    <div class="card-header">
-      <span class="exchange-tag">BSE</span>
-      <div class="dot"></div>
-    </div>
-    <div class="index-name">SENSEX</div>
-    <div class="price">{se['price']:,.2f}</div>
-    <div class="change-row">
-      <span class="change-abs" style="color:{color(se['change'])}">{arrow(se['change'])} {abs(se['change']):,.2f}</span>
-      <span class="change-pct" style="color:{color(se['pct'])}">({arrow(se['pct'])}{abs(se['pct']):.2f}%)</span>
-    </div>
-    <div class="timestamp">as of {mkt['timestamp']} IST</div>
-  </div>
-</div>
-</body></html>
-"""), height=150, scrolling=False)
-
-    else:
+    if mkt.get("error"):
         st.warning(f"⚠️ Market data unavailable: {mkt['error']}")
+        return
+
+    ni, se, ts = mkt["nifty"], mkt["sensex"], mkt["timestamp"]
+    render_cards(
+        card_html("NSE", "NIFTY 50", f"{ni['price']:,.2f}", ni["change"], ni["pct"], 2, "#00f5d4", ts, live=True)
+        + card_html("BSE", "SENSEX", f"{se['price']:,.2f}", se["change"], se["pct"], 2, "#a78bfa", ts, live=True)
+    )
 
 
 # ─────────────────────────────────────────────
-# Currency Ticker — USD/INR & EUR/INR (manual refresh)
+# Currency ticker — manual refresh
 # ─────────────────────────────────────────────
-
 @st.fragment
 def currency_ticker():
-
-    @st.cache_data(ttl=300)
-    def get_currency_data():
-        try:
-            usd = yf.Ticker("USDINR=X").fast_info
-            eur = yf.Ticker("EURINR=X").fast_info
-            return {
-                "usd": {
-                    "price":  round(usd.last_price, 4),
-                    "change": round(usd.last_price - usd.previous_close, 4),
-                    "pct":    round((usd.last_price - usd.previous_close) / usd.previous_close * 100, 2),
-                },
-                "eur": {
-                    "price":  round(eur.last_price, 4),
-                    "change": round(eur.last_price - eur.previous_close, 4),
-                    "pct":    round((eur.last_price - eur.previous_close) / eur.previous_close * 100, 2),
-                },
-                "timestamp": datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%H:%M:%S"),
-                "error": None
-            }
-        except Exception as e:
-            return {"error": str(e)}
-
-    col_label, col_btn = st.columns([5, 1])
-    with col_label:
-        st.markdown(
-            "<div style=\"font-family:'Syne',sans-serif;font-size:0.72rem;font-weight:700;"
-            "letter-spacing:0.14em;color:rgba(0,245,212,0.5);text-transform:uppercase;"
-            "padding-top:0.4rem;\">Currency Exchange</div>",
-            unsafe_allow_html=True
-        )
-    with col_btn:
-        if st.button("🔄 Refresh", key="refresh_currency", use_container_width=True):
+    left, right = st.columns([3, 2])
+    with left:
+        sublabel("Currency", "vs INR · cached 5 min")
+    with right:
+        if st.button("↻ Refresh", key="refresh_currency", use_container_width=True):
             get_currency_data.clear()
 
     cur = get_currency_data()
-
-    if not cur.get("error"):
-        usd = cur["usd"]
-        eur = cur["eur"]
-
-        def arrow(v): return "▲" if v >= 0 else "▼"
-        def color(v): return "#00f5d4" if v >= 0 else "#ff4d6d"
-
-        components.html(scale_component_html(f"""
-<!DOCTYPE html><html><head>
-<meta charset="utf-8"/>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@300;400;500&display=swap');
-  *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{ background: transparent; font-family: 'DM Mono', monospace; padding: 0.3rem 0; }}
-  .ticker-wrap {{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.6rem;
-    width: 100%;
-  }}
-  .card {{
-    background: rgba(8,14,20,0.78);
-    border: 1px solid rgba(255,209,102,0.15);
-    border-radius: 12px;
-    padding: 0.85rem 1rem;
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(12px);
-  }}
-  .card.eur {{ border-color: rgba(76,201,240,0.18); }}
-  .card::before {{
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #ffd166, #f7b733);
-    opacity: 0.5;
-  }}
-  .card.eur::before {{ background: linear-gradient(90deg, #4cc9f0, #4361ee); }}
-  .card-header {{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.4rem;
-  }}
-  .exchange-tag {{
-    font-family: 'Syne', sans-serif;
-    font-size: 0.58rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    color: rgba(255,209,102,0.6);
-    text-transform: uppercase;
-  }}
-  .card.eur .exchange-tag {{ color: rgba(76,201,240,0.6); }}
-  .index-name {{
-    font-family: 'Syne', sans-serif;
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: rgba(200,230,225,0.6);
-    letter-spacing: 0.06em;
-    margin-bottom: 0.25rem;
-  }}
-  .price {{
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(1.2rem, 5vw, 1.55rem);
-    font-weight: 800;
-    color: #e8f5f2;
-    letter-spacing: -0.02em;
-    line-height: 1;
-    white-space: nowrap;
-  }}
-  .change-row {{
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    margin-top: 0.35rem;
-  }}
-  .change-abs {{
-    font-size: 0.68rem;
-    font-weight: 500;
-  }}
-  .change-pct {{
-    font-size: 0.62rem;
-    font-weight: 400;
-    opacity: 0.85;
-  }}
-  .timestamp {{
-    text-align: right;
-    font-size: 0.5rem;
-    color: rgba(255,209,102,0.35);
-    letter-spacing: 0.1em;
-    margin-top: 0.6rem;
-    text-transform: uppercase;
-  }}
-  .card.eur .timestamp {{ color: rgba(76,201,240,0.35); }}
-</style>
-</head><body>
-<div class="ticker-wrap">
-  <div class="card usd">
-    <div class="card-header">
-      <span class="exchange-tag">USD / INR</span>
-    </div>
-    <div class="index-name">US DOLLAR</div>
-    <div class="price">₹{usd['price']:,.4f}</div>
-    <div class="change-row">
-      <span class="change-abs" style="color:{color(usd['change'])}">{arrow(usd['change'])} {abs(usd['change']):.4f}</span>
-      <span class="change-pct" style="color:{color(usd['pct'])}">({arrow(usd['pct'])}{abs(usd['pct']):.2f}%)</span>
-    </div>
-    <div class="timestamp">as of {cur['timestamp']} IST</div>
-  </div>
-  <div class="card eur">
-    <div class="card-header">
-      <span class="exchange-tag">EUR / INR</span>
-    </div>
-    <div class="index-name">EURO</div>
-    <div class="price">₹{eur['price']:,.4f}</div>
-    <div class="change-row">
-      <span class="change-abs" style="color:{color(eur['change'])}">{arrow(eur['change'])} {abs(eur['change']):.4f}</span>
-      <span class="change-pct" style="color:{color(eur['pct'])}">({arrow(eur['pct'])}{abs(eur['pct']):.2f}%)</span>
-    </div>
-    <div class="timestamp">as of {cur['timestamp']} IST</div>
-  </div>
-</div>
-</body></html>
-"""), height=150, scrolling=False)
-
-    else:
+    if cur.get("error"):
         st.warning(f"⚠️ Currency data unavailable: {cur['error']}")
+        return
+
+    usd, eur, ts = cur["usd"], cur["eur"], cur["timestamp"]
+    render_cards(
+        card_html("USD / INR", "US DOLLAR", f"₹{usd['price']:,.4f}", usd["change"], usd["pct"], 4, "#ffd166", ts)
+        + card_html("EUR / INR", "EURO", f"₹{eur['price']:,.4f}", eur["change"], eur["pct"], 4, "#4cc9f0", ts)
+    )
 
 
-# ── Date / Time bar ──
-now = datetime.now(ZoneInfo("Asia/Kolkata"))
-# ── Live Clock Bar ──
-components.html(scale_component_html("""
-<!DOCTYPE html><html><head>
-<meta charset="utf-8"/>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700&family=DM+Mono:wght@300;400&display=swap');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: transparent; font-family: 'DM Mono', monospace; padding: 0.2rem 0; }
-  .datetime-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-    background: rgba(0,245,212,0.04);
-    border: 1px solid rgba(0,245,212,0.1);
-    border-radius: 8px;
-  }
-  .date-part {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: rgba(0,245,212,0.7);
-    text-transform: uppercase;
-  }
-  .time-part {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    font-weight: 400;
-    letter-spacing: 0.14em;
-    color: rgba(200,230,225,0.5);
-  }
-  .separator {
-    width: 1px;
-    height: 14px;
-    background: rgba(0,245,212,0.2);
-  }
-</style>
-</head><body>
-<div class="datetime-bar">
-  <span class="date-part" id="date-el">--</span>
-  <div class="separator"></div>
-  <span class="time-part" id="time-el">--:--:-- IST</span>
-</div>
-<script>
-  const DAYS   = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
-  const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-
-  function tick() {
-    // Convert current local time to IST (UTC+5:30)
-    const now = new Date();
-    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-    const ist = new Date(utc + 5.5 * 3600000);
-
-    const day  = DAYS[ist.getDay()];
-    const dd   = String(ist.getDate()).padStart(2, "0");
-    const mon  = MONTHS[ist.getMonth()];
-    const yyyy = ist.getFullYear();
-
-    const hh   = String(ist.getHours()).padStart(2, "0");
-    const mm   = String(ist.getMinutes()).padStart(2, "0");
-    const ss   = String(ist.getSeconds()).padStart(2, "0");
-
-    document.getElementById("date-el").textContent = `${day}, ${dd} ${mon} ${yyyy}`;
-    document.getElementById("time-el").textContent = `${hh}:${mm}:${ss} IST`;
-  }
-
-  tick();
-  setInterval(tick, 1000);
-</script>
-</body></html>
-"""), height=50, scrolling=False)
+section("Markets")
+col_mkt, col_cur = st.columns(2, gap="medium")
+with col_mkt:
+    market_ticker()
+with col_cur:
+    currency_ticker()
 
 
-
-
-currency_ticker()  # ← manual refresh via button
-
-st.markdown("<br>", unsafe_allow_html=True)
-market_ticker()  # ← this call auto-reruns every 30s
-
-st.markdown("<br>", unsafe_allow_html=True)
+# ─────────────────────────────────────────────
+# Market history chart
+# ─────────────────────────────────────────────
+section("Market history", "Nifty 50 · Sensex")
 show_market_history_chart()
 
-# ── Pipeline navigation ──   ← this line is already in your code, nothing changes below
 
+# ─────────────────────────────────────────────
+# Navigation cards
+# ─────────────────────────────────────────────
+section("Navigate")
 
-
-
-
-
-
-
-# ── Pipeline navigation ──
-PAGE_MAP = {
-    "Portfolio_Overview": "pages/1_Portfolio_Overview.py",
-    "Fund_Details":       "pages/2_Fund_Details.py",
-    "4_Tools":            "pages/4_Tools.py",
-    "6_smart_sip":        "pages/6_smart_sip.py",
-}
-
-st.markdown("""
-<style>
-.nav-btn-wrap { position: relative; margin-bottom: 0.5rem; }
-.nav-btn-wrap .card-visual {
-    background: rgba(8,14,20,0.78);
-    border: 1px solid rgba(0,245,212,0.2);
-    border-radius: 12px;
-    padding: 1.4rem 1.5rem 1.35rem;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    pointer-events: none;
-    transition: background 0.25s, border-color 0.25s, transform 0.22s;
-}
-.nav-btn-wrap:hover .card-visual {
-    background: rgba(0,245,212,0.09);
-    border-color: rgba(0,245,212,0.65);
-    transform: translateY(-3px);
-}
-.nav-btn-wrap:hover .card-topbar { opacity: 1 !important; }
-.nav-btn-wrap:hover .card-num    { color: rgba(0,245,212,0.55) !important; }
-.nav-btn-wrap:hover .card-name   { color: #fff !important; }
-.nav-btn-wrap:hover .card-desc   { color: rgba(210,240,235,0.88) !important; }
-
-.nav-btn-wrap div[data-testid="stButton"] {
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 9 !important;
-}
-.nav-btn-wrap div[data-testid="stButton"] button {
-    width: 100% !important;
-    height: 100% !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    opacity: 0 !important;
-    cursor: pointer !important;
-    padding: 0 !important;
-}
-@keyframes chevron-slide {
-    0%   { opacity: 0.15; transform: translateX(-4px); }
-    50%  { opacity: 1;    transform: translateX(2px);  }
-    100% { opacity: 0.15; transform: translateX(-4px); }
-}
-@keyframes pdot {
-    0%   { box-shadow: 0 0 0 0   rgba(0,245,212,0.6); }
-    60%  { box-shadow: 0 0 0 6px rgba(0,245,212,0);   }
-    100% { box-shadow: 0 0 0 0   rgba(0,245,212,0);   }
-}
-</style>
-""", unsafe_allow_html=True)
-
-col_c1, col_c2, col_c3, col_c4 = st.columns(4)
-
-for col, wf in zip([col_c1, col_c2, col_c3, col_c4], PAGES):
-    page_key = wf["link"].rstrip("/").split("/")[-1]
+for col, pg in zip(st.columns(4, gap="medium"), PAGES):
     with col:
-        st.markdown(f"""
-        <div class="nav-btn-wrap">
-          <div class="card-visual">
-            <div class="card-topbar" style="
-                position:absolute;top:0;left:0;right:0;height:2px;
-                background:linear-gradient(90deg,#00f5d4,#00c9ff);
-                opacity:0.4;border-radius:12px 12px 0 0;transition:opacity 0.3s;"></div>
-            <div style="
-                position:absolute;top:1rem;right:1rem;
-                width:7px;height:7px;border-radius:50%;
-                background:rgba(0,245,212,0.35);
-                animation:pdot 2.2s ease-in-out infinite;"></div>
-            <div class="card-num" style="
-                font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;
-                color:rgba(0,245,212,0.22);line-height:1;margin-bottom:0.55rem;
-                transition:color 0.3s;">{wf['num']}</div>
-            <div class="card-name" style="
-                font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;
-                color:#dff5f0;margin-bottom:0.3rem;
-                text-shadow:0 1px 10px rgba(0,0,0,1);
-                transition:color 0.3s;">{wf['name']}</div>
-            <div class="card-desc" style="
-                font-family:'DM Mono',monospace;font-size:0.68rem;
-                color:rgba(210,240,235,0.62);letter-spacing:0.03em;line-height:1.5;
-                text-shadow:0 1px 8px rgba(0,0,0,1);
-                transition:color 0.3s;">{wf['description']}</div>
-            <div style="
-                font-family:'DM Mono',monospace;font-size:0.8rem;
-                color:rgba(0,245,212,0.7);letter-spacing:0.05em;
-                margin-top:0.85rem;display:flex;align-items:center;gap:2px;">
-              <span style="display:inline-block;animation:chevron-slide 1.1s ease-in-out infinite;">›</span>
-              <span style="display:inline-block;animation:chevron-slide 1.1s ease-in-out 0.18s infinite;">›</span>
-              <span style="display:inline-block;animation:chevron-slide 1.1s ease-in-out 0.36s infinite;">›</span>
-            </div>
-          </div>
-        """, unsafe_allow_html=True)
+        with st.container(key=f"navcard_{pg['num']}"):
+            st.markdown(
+                f'<div class="tz-nav"><div class="bar"></div><div class="dot"></div>'
+                f'<div class="num">{pg["num"]}</div>'
+                f'<div class="name">{pg["name"]}</div>'
+                f'<div class="desc">{pg["description"]}</div>'
+                f'<div class="go"><span>›</span><span>›</span><span>›</span></div></div>',
+                unsafe_allow_html=True,
+            )
+            if st.button("Open", key=f"go_{pg['num']}"):
+                st.switch_page(pg["page"])
 
-        if st.button("›› ", key=f"nav_{wf['num']}"):
-            st.switch_page(PAGE_MAP[page_key])
 
-        st.markdown("</div></div>", unsafe_allow_html=True)
-
-# ── Add Units section ──
+# ─────────────────────────────────────────────
+# Add units
+# ─────────────────────────────────────────────
+section("Add units")
 show_add_units()
 
-st.markdown("<br>", unsafe_allow_html=True)
 
-# ── Buttons Row ──
-col_btn, col_btn2, col_spacer = st.columns([1, 1, 3])
+# ─────────────────────────────────────────────
+# Data pipeline
+# ─────────────────────────────────────────────
+section("Data pipeline", f"{len(WORKFLOWS)} GitHub workflows · {DELAY_SECONDS}s between steps")
 
+col_btn, col_btn2, _ = st.columns([1.2, 1.2, 3])
 with col_btn:
     clicked = st.button("▶  Update Portfolio", type="primary", use_container_width=True)
-
 with col_btn2:
     nav_clicked = st.button("📥  Fetch NAV History", type="primary", use_container_width=True)
 
-# ── Execution Log ──
 if clicked:
-    st.divider()
-
-    st.markdown(
-        '<p style="font-family:\'DM Mono\',monospace;font-size:0.72rem;letter-spacing:0.2em;'
-        'color:rgba(0,245,212,0.6);text-transform:uppercase;margin-bottom:0.8rem;">⬡ execution log</p>',
-        unsafe_allow_html=True
-    )
-
     overall_success = True
+    with st.status("Running pipeline…", expanded=True) as status:
+        for i, wf in enumerate(WORKFLOWS):
+            with st.spinner(f"[ {wf['num']} ] Triggering {wf['name']} ..."):
+                result = trigger_workflow(wf["file"])
 
-    for i, wf in enumerate(WORKFLOWS):
-        with st.spinner(f"[ {wf['num']} ] Triggering {wf['name']} ..."):
-            result = trigger_workflow(wf["file"])
+            if result["success"]:
+                st.success(f"**{wf['num']} · {wf['name']}** → {result['message']}")
+            else:
+                st.error(f"**{wf['num']} · {wf['name']}** → {result['message']}")
+                st.error(f"⛔ Pipeline halted at step {wf['num']}")
+                overall_success = False
+                break
+
+            if i < len(WORKFLOWS) - 1:
+                countdown = st.empty()
+                for remaining in range(DELAY_SECONDS, 0, -1):
+                    countdown.info(f"⏱  Next step in **{remaining}s** ...")
+                    time.sleep(1)
+                countdown.empty()
+
+        if overall_success:
+            status.update(label=f"All {len(WORKFLOWS)} pipeline steps triggered", state="complete")
+        else:
+            status.update(label="Pipeline stopped early — check errors", state="error")
+
+if nav_clicked:
+    with st.status("Fetching NAV history…", expanded=True) as status:
+        with st.spinner("[ 01 ] Triggering Fetch NAV History ..."):
+            result = trigger_workflow("fetch_nav_history.yml")
 
         if result["success"]:
-            st.success(f"**{wf['num']} · {wf['name']}** → {result['message']}")
+            st.success(f"**01 · Fetch NAV History** → {result['message']}")
+            st.info("⏱  Workflow running in background — NAVHistory/*.json files will update in ~1–2 min.")
+            status.update(label="NAV history workflow triggered", state="complete")
         else:
-            st.error(f"**{wf['num']} · {wf['name']}** → {result['message']}")
-            overall_success = False
-            st.error(f"⛔ Pipeline halted at step {wf['num']}")
-            break
+            st.error(f"**01 · Fetch NAV History** → {result['message']}")
+            status.update(label="NAV history workflow failed", state="error")
 
-        if i < len(WORKFLOWS) - 1:
-            countdown_placeholder = st.empty()
-            for remaining in range(DELAY_SECONDS, 0, -1):
-                countdown_placeholder.info(f"⏱  Next step in **{remaining}s** ...")
-                time.sleep(1)
-            countdown_placeholder.empty()
-
-    st.divider()
-    if overall_success:
-        st.success("✅  All 3 pipeline steps completed successfully.")
-    else:
-        st.warning("⚠️  Pipeline stopped early — check errors above.")
-
-
-# ── Fetch NAV History Execution Log ──
-if nav_clicked:
-    st.divider()
-
-    st.markdown(
-        '<p style="font-family:\'DM Mono\',monospace;font-size:0.72rem;letter-spacing:0.2em;'
-        'color:rgba(0,245,212,0.6);text-transform:uppercase;margin-bottom:0.8rem;">⬡ execution log</p>',
-        unsafe_allow_html=True
-    )
-
-    with st.spinner("[ 01 ] Triggering Fetch NAV History ..."):
-        result = trigger_workflow("fetch_nav_history.yml")
-
-    if result["success"]:
-        st.success(f"**01 · Fetch NAV History** → {result['message']}")
-        st.info("⏱  Workflow running in background — NAVHistory/*.json files will update in ~1–2 min.")
-    else:
-        st.error(f"**01 · Fetch NAV History** → {result['message']}")
-
-    st.divider()
 st.divider()
 
 from utils.footer import show_footer
