@@ -324,37 +324,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-
-# =========================================================
-# PORTFOLIO REFRESH CONTROL
-# =========================================================
-
-refresh_col, info_col = st.columns([1, 5])
-
-with refresh_col:
-    if st.button(
-        "↻ Refresh Portfolio",
-        key="refresh_portfolio",
-        use_container_width=True
-    ):
-        # Clear cached NAV
-        get_nav.clear()
-
-        # Clear cached fund calculations
-        build_summary.clear()
-
-        # Clear cached overall XIRR
-        get_overall_xirr_pct.clear()
-
-        # Recalculate everything
-        st.rerun()
-
-with info_col:
-    st.caption(
-        "Refresh after adding transactions, updating SIPs "
-        "or downloading new NAV data."
-    )
-
 # =========================================================
 # LOAD DATA + OVERALL METRICS
 # =========================================================
@@ -377,45 +346,19 @@ pnl_sign   = "+" if total_pnl >= 0 else ""
 ret_sign   = "+" if absolute_return_pct >= 0 else ""
 xirr_sign  = "+" if overall_xirr_pct >= 0 else ""
 
-# # Today's change for the hero card
-# try:
-#     _d = pd.read_csv("data/portfolio_daily.csv")
-#     _d["Date"] = pd.to_datetime(_d["Date"], format="%d-%m-%Y")
-#     day_change = float(_d.sort_values("Date").iloc[-1]["OneDayChange"])
-# except Exception:
-#     day_change = None
-
-# if day_change is None:
-#     day_sub, day_col = "live NAV", "rgba(255,255,255,0.45)"
-# else:
-#     day_sub = f"{'▲' if day_change >= 0 else '▼'} ₹{abs(day_change):,.0f} today"
-#     day_col = SUCCESS if day_change >= 0 else DANGER
-
-
 # Today's change for the hero card
 try:
     _d = pd.read_csv("data/portfolio_daily.csv")
     _d["Date"] = pd.to_datetime(_d["Date"], format="%d-%m-%Y")
-
-    latest_record = _d.sort_values("Date").iloc[-1]
-
-    day_change = float(latest_record["OneDayChange"])
-    day_date = latest_record["Date"].strftime("%d %b %Y")
-
+    day_change = float(_d.sort_values("Date").iloc[-1]["OneDayChange"])
 except Exception:
     day_change = None
-    day_date = None
 
 if day_change is None:
-    day_sub = "Live NAV"
-    day_col = "rgba(255,255,255,0.45)"
+    day_sub, day_col = "live NAV", "rgba(255,255,255,0.45)"
 else:
-    day_sub = (
-        f"{'▲' if day_change >= 0 else '▼'} "
-        f"₹{abs(day_change):,.0f} on {day_date}"
-    )
+    day_sub = f"{'▲' if day_change >= 0 else '▼'} ₹{abs(day_change):,.0f} today"
     day_col = SUCCESS if day_change >= 0 else DANGER
-
 
 
 # =========================================================
@@ -808,156 +751,193 @@ with tab3:
 # =========================================================
 # TAB 4 — DAILY CHANGE ACROSS FUNDS
 # =========================================================
+@st.cache_data(ttl=900, show_spinner=False)
+def load_daily_files():
+    """{fund_name: (code, DataFrame sorted by date)} for every fund that has a daily CSV."""
+    out = {}
+    for fund_name, meta in mutual_funds.items():
+        path = f"mutualfund/{meta['folder']}/daily_{meta['code']}.csv"
+        if not os.path.exists(path):
+            continue
+        d = pd.read_csv(path)
+        d.columns = d.columns.str.strip()
+        d["date"] = pd.to_datetime(d["date"], format="%d-%m-%Y", errors="coerce")
+        out[fund_name] = (meta["code"], d.dropna(subset=["date"]).sort_values("date"))
+    return out
+
+
+def compute_daily_changes(daily_files, target_date):
+    """One row per fund that has a NAV on target_date and an earlier NAV to compare with."""
+    target = pd.Timestamp(target_date)
+    rows = []
+    for fund_name, (code, d) in daily_files.items():
+        today = d[d["date"] == target]
+        prev  = d[d["date"] < target]
+        if today.empty or prev.empty:
+            continue
+        rt, rp = today.iloc[-1], prev.iloc[-1]
+        nav_t, nav_p = float(rt["nav"]), float(rp["nav"])
+        rows.append({
+            "Fund": fund_name,
+            "Code": code,
+            "Change (₹)": round(float(rt["absolute_gain_loss"]) - float(rp["absolute_gain_loss"]), 2),
+            "NAV %": ((nav_t - nav_p) / nav_p * 100) if nav_p != 0 else 0.0,
+        })
+    return pd.DataFrame(rows, columns=["Fund", "Code", "Change (₹)", "NAV %"])
+
+
+def _shift_daily_date(direction, dates):
+    """Button callback: jump to the previous / next date that actually has data."""
+    cur = st.session_state["daily_date"]
+    if direction < 0:
+        earlier = [d for d in dates if d < cur]
+        if earlier:
+            st.session_state["daily_date"] = earlier[-1]
+    else:
+        later = [d for d in dates if d > cur]
+        if later:
+            st.session_state["daily_date"] = later[0]
+
+
+def _inr(v, decimals=0):
+    return f"{'+' if v >= 0 else '−'}₹{abs(v):,.{decimals}f}"
+
+
+def _short(name, n=26):
+    return name if len(name) <= n else name[:n - 1] + "…"
+
+
 with tab4:
     sec_header(ICON_DAILY_CHANGE, "Daily Change Across Funds", "NAV movement · single date")
 
-    latest_nav_date  = nav_df["Date"].max().date()
-    selected_date    = st.date_input("Select Date", value=latest_nav_date)
-    selected_date_dt = pd.to_datetime(selected_date)
+    daily_files = load_daily_files()
+    avail_dates = sorted({x for _, d in daily_files.values() for x in d["date"].dt.date})
 
-    daily_rows = []
+    if "daily_date" not in st.session_state:
+        st.session_state["daily_date"] = nav_df["Date"].max().date()
+    cur_date = st.session_state["daily_date"]
 
-    for fund_name, meta in mutual_funds.items():
-        folder    = meta["folder"]
-        code      = meta["code"]
-        file_path = f"mutualfund/{folder}/daily_{code}.csv"
-        if not os.path.exists(file_path):
-            continue
-        df_daily         = pd.read_csv(file_path)
-        df_daily.columns = df_daily.columns.str.strip()
-        df_daily["date"] = pd.to_datetime(df_daily["date"], format="%d-%m-%Y", errors="coerce")
-        df_daily         = df_daily.dropna(subset=["date"]).sort_values("date")
+    # ── Date controls: previous / picker / next ──────────────────────
+    b1, b2, b3, _ = st.columns([1.2, 2, 1.2, 6])
+    with b1:
+        st.button("◀ Prev day", key="daily_prev", use_container_width=True,
+                  on_click=_shift_daily_date, args=(-1, avail_dates),
+                  disabled=not any(d < cur_date for d in avail_dates))
+    with b2:
+        st.date_input("Select date", key="daily_date", label_visibility="collapsed")
+    with b3:
+        st.button("Next day ▶", key="daily_next", use_container_width=True,
+                  on_click=_shift_daily_date, args=(1, avail_dates),
+                  disabled=not any(d > cur_date for d in avail_dates))
 
-        today_rows = df_daily[df_daily["date"] == selected_date_dt]
-        if today_rows.empty:
-            continue
-        row_today = today_rows.iloc[-1]
-        prev_rows = df_daily[df_daily["date"] < selected_date_dt]
-        if prev_rows.empty:
-            continue
-        row_prev       = prev_rows.iloc[-1]
-        change_in_val  = float(row_today["absolute_gain_loss"]) - float(row_prev["absolute_gain_loss"])
-        nav_today      = float(row_today["nav"])
-        nav_prev       = float(row_prev["nav"])
-        pct_change_nav = ((nav_today - nav_prev) / nav_prev * 100) if nav_prev != 0 else 0
-        indicator      = "🟢 ↑" if nav_today > nav_prev else "🔴 ↓"
+    selected_date = st.session_state["daily_date"]
+    df_day = compute_daily_changes(daily_files, selected_date)
 
-        daily_rows.append([
-            row_today["date"].strftime("%d-%m-%Y"),
-            fund_name, code,
-            round(change_in_val, 2),
-            f"{pct_change_nav:.2f}%",
-            indicator
-        ])
+    if df_day.empty:
+        earlier = [d for d in avail_dates if d < selected_date]
+        hint = (f" Most recent date with data before this one: **{earlier[-1].strftime('%d %b %Y')}**."
+                if earlier else "")
+        st.info(f"No fund data for {selected_date.strftime('%d %b %Y')} — probably a weekend or market holiday.{hint}")
+    else:
+        df_day = df_day.sort_values("Change (₹)", ascending=False).reset_index(drop=True)
+        total_change = float(df_day["Change (₹)"].sum())
+        n_up   = int((df_day["Change (₹)"] > 0).sum())
+        n_down = int((df_day["Change (₹)"] < 0).sum())
+        best, worst = df_day.iloc[0], df_day.iloc[-1]
 
-    df_daily_change = pd.DataFrame(daily_rows, columns=[
-        "Date", "Fund Name", "Fund Code",
-        "Change in Value", "% Change in NAV", "Indicator"
-    ])
-    st.dataframe(df_daily_change, use_container_width=True)
+        # ── Summary strip ────────────────────────────────────────────
+        st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
+        k1, k2, k3, k4 = st.columns(4)
+        with k1:
+            st.markdown(kpi_card(
+                "Total change", _inr(total_change),
+                SUCCESS if total_change >= 0 else DANGER,
+                selected_date.strftime("%A, %d %b %Y"), hero=True), unsafe_allow_html=True)
+        with k2:
+            st.markdown(kpi_card(
+                "Up / Down", f"{n_up} / {n_down}", "#F1F5F9",
+                f"of {len(df_day)} funds"), unsafe_allow_html=True)
+        with k3:
+            st.markdown(kpi_card(
+                "Best fund", _short(best["Fund"]), "#F1F5F9",
+                f"{_inr(best['Change (₹)'])} · {best['NAV %']:+.2f}%",
+                SUCCESS if best["Change (₹)"] >= 0 else DANGER), unsafe_allow_html=True)
+        with k4:
+            st.markdown(kpi_card(
+                "Worst fund", _short(worst["Fund"]), "#F1F5F9",
+                f"{_inr(worst['Change (₹)'])} · {worst['NAV %']:+.2f}%",
+                SUCCESS if worst["Change (₹)"] >= 0 else DANGER), unsafe_allow_html=True)
 
-    total_change = df_daily_change["Change in Value"].sum() if not df_daily_change.empty else 0
-    change_summary_box(total_change)
+        shown   = set(df_day["Fund"])
+        missing = [f for f in mutual_funds if f not in shown]
+        if missing:
+            st.caption(f"{len(shown)} of {len(mutual_funds)} funds have data for this date. "
+                       f"No data: {', '.join(missing)}")
 
-    # ── Horizontal Bar Chart ──────────────────────────────────────────
-    if not df_daily_change.empty:
-        df_chart = df_daily_change.copy().sort_values("Change in Value", ascending=True)
+        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
-        colors = [
-            "#2ecc71" if v >= 0 else "#e74c3c"
-            for v in df_chart["Change in Value"]
-        ]
+        # ── Chart (left) + full table (right, no scrolling) ──────────
+        col_chart, col_tbl = st.columns([3, 2], gap="large")
 
-        # Truncate long names for display but keep full name in hover
-        max_label_len = 32
-        short_names = [
-            name if len(name) <= max_label_len else name[:max_label_len - 1] + "…"
-            for name in df_chart["Fund Name"]
-        ]
+        with col_chart:
+            small_title("Change by fund")
+            df_chart = df_day.sort_values("Change (₹)", ascending=True)
+            vals = df_chart["Change (₹)"]
+            lo, hi = min(float(vals.min()), 0.0), max(float(vals.max()), 0.0)
+            span = (hi - lo) or 1.0
 
-        fig = go.Figure(go.Bar(
-            x=df_chart["Change in Value"],
-            y=short_names,
-            orientation="h",
-            marker=dict(color=colors),
-            text=[
-                f"₹{v:+,.2f}  ({pct})"
-                for v, pct in zip(df_chart["Change in Value"], df_chart["% Change in NAV"])
-            ],
-            textposition="outside",
-            cliponaxis=False,          # stops Plotly clipping outside-labels
-            textfont=dict(size=11),
-            hovertemplate=(
-                "<b>%{customdata[0]}</b><br>"
-                "Code: %{customdata[1]}<br>"
-                "Change: ₹%{x:+,.2f}<br>"
-                "NAV Change: %{customdata[2]}<extra></extra>"
-            ),
-            customdata=list(zip(
-                df_chart["Fund Name"],
-                df_chart["Fund Code"],
-                df_chart["% Change in NAV"],
-            )),
-        ))
-
-        chart_height = max(300, len(df_chart) * 52 + 120)   # 52px per fund, min 300
-        max_abs = df_chart["Change in Value"].abs().max()
-        x_pad   = max_abs * 0.45                            # breathing room for labels
-
-        fig.update_layout(
-            title=dict(
-                text=f"Daily Change in Value — {selected_date.strftime('%d %b %Y')}",
-                font=dict(size=15),
-                x=0,
-            ),
-            xaxis=dict(
-                title="Change in Value (₹)",
-                range=[-(max_abs + x_pad), max_abs + x_pad],
-                zeroline=True,
-                zerolinecolor="#555",
-                zerolinewidth=1.5,
-                tickformat=",.0f",
-            ),
-            yaxis=dict(
-                automargin=True,
-                tickfont=dict(size=12),
-            ),
-            height=chart_height,
-            margin=dict(l=20, r=180, t=50, b=120),
-            uniformtext=dict(mode="hide", minsize=9),
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#e0e0e0"),
-            legend=dict(
+            fig = go.Figure(go.Bar(
+                x=vals,
+                y=[_short(n, 30) for n in df_chart["Fund"]],
                 orientation="h",
-                yanchor="top",
-                y=-0.18,
-                xanchor="center",
-                x=0.5,
-                font=dict(size=12),
-            ),
-            # Manual legend
-            annotations=[
-                dict(
-                    x=0.0, y=-0.13,
-                    xref="paper", yref="paper",
-                    text="🟢  Gain (positive change)",
-                    showarrow=False,
-                    font=dict(size=12, color="#2ecc71"),
-                    xanchor="left",
+                marker=dict(color=["#2ecc71" if v >= 0 else "#e74c3c" for v in vals]),
+                text=[f"{_inr(v)} ({p:+.2f}%)" for v, p in zip(vals, df_chart["NAV %"])],
+                textposition="outside",
+                cliponaxis=False,
+                textfont=dict(size=11),
+                customdata=list(zip(df_chart["Fund"], df_chart["Code"], df_chart["NAV %"])),
+                hovertemplate=(
+                    "<b>%{customdata[0]}</b><br>"
+                    "Code: %{customdata[1]}<br>"
+                    "Change: ₹%{x:+,.2f}<br>"
+                    "NAV change: %{customdata[2]:+.2f}%<extra></extra>"
                 ),
-                dict(
-                    x=0.5, y=-0.13,
-                    xref="paper", yref="paper",
-                    text="🔴  Loss (negative change)",
-                    showarrow=False,
-                    font=dict(size=12, color="#e74c3c"),
-                    xanchor="left",
+            ))
+            fig.update_layout(
+                height=max(320, len(df_chart) * 34 + 90),
+                margin=dict(l=10, r=10, t=10, b=40),
+                xaxis=dict(
+                    title="Change in value (₹)",
+                    range=[lo - span * (0.45 if lo < 0 else 0.02),
+                           hi + span * (0.45 if hi > 0 else 0.02)],
+                    zeroline=True, zerolinecolor="#555", zerolinewidth=1.5,
+                    tickformat=",.0f", showgrid=True, gridcolor="rgba(255,255,255,0.05)",
                 ),
-            ],
-        )
+                yaxis=dict(automargin=True, tickfont=dict(size=12)),
+                uniformtext=dict(mode="hide", minsize=9),
+                plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(color="#e0e0e0", family="Space Grotesk"),
+                showlegend=False,
+            )
+            st.plotly_chart(fig, use_container_width=True)
 
-        st.plotly_chart(fig, use_container_width=True)
+        with col_tbl:
+            small_title(f"All {len(df_day)} funds")
+            table = df_day[["Fund", "Change (₹)", "NAV %"]]
+
+            def _tint(v):
+                c = "#69F0AE" if v > 0 else "#FF6B6B" if v < 0 else "#9CA3AF"
+                return f"color: {c}; font-weight: 600"
+
+            styler = table.style.format({"Change (₹)": "{:+,.2f}", "NAV %": "{:+.2f}%"})
+            styler = (styler.map if hasattr(styler, "map") else styler.applymap)(
+                _tint, subset=["Change (₹)", "NAV %"])
+
+            st.dataframe(
+                styler, hide_index=True, use_container_width=True,
+                height=(len(table) + 1) * 35 + 3,      # every row visible, no inner scrollbar
+                column_config={"Fund": st.column_config.TextColumn(width="large")},
+            )
 
 
 # =========================================================
