@@ -167,33 +167,6 @@ hr { border-color: rgba(255,255,255,0.06) !important; margin: 2rem 0 !important;
 # =========================================================
 # HELPERS
 # =========================================================
-
-# Short display names for Fund Details
-FUND_DISPLAY_NAMES = {
-    "Mirae Asset FANG+": "Mirae FANG+",
-    "Parag Parikh Flexi Cap Fund": "PPFAS Flexi Cap",
-    "Kotak Flexicap Fund": "Kotak Flexi Cap",
-    "Edelweiss Nifty Midcap150 Momentum 50 Index Fund": "Edelweiss Midcap 150 Momentum",
-    "HSBC Midcap Fund": "HSBC Mid Cap",
-    "quant Small Cap Fund": "Quant Small Cap",
-    "Bandhan Small Cap Fund": "Bandhan Small Cap",
-    "SBI Magnum Children's Benefit Fund": "SBI Children's Benefit",
-    "ICICI Pru BHARAT 22 FOF": "ICICI Bharat 22 FoF",
-    "SBI Small Cap Fund": "SBI Small Cap",
-    "Kotak Midcap Fund": "Kotak Mid Cap",
-    "Motilal Oswal Midcap Fund": "MO Mid Cap",
-    "Nippon India Large Cap Fund": "Nippon Large Cap",
-    "Axis Small Cap Fund": "Axis Small Cap",
-}
-
-def display_fund_name(name):
-    return FUND_DISPLAY_NAMES.get(name, name)
-
-
-
-
-
-
 def categorize(name: str) -> str:
     n = name.lower()
     if "fang" in n:       return "International"
@@ -487,34 +460,14 @@ def render_fund_tab(summary_rows):
         "Fund", "Code", "Units", "Invested", "Current",
         "P&L", "NAV", "NAV Date", "XIRR", "Held (yrs)"
     ])
-
-    df["Fund"] = df["Fund"].apply(display_fund_name)
     if df.empty:
         st.warning("No fund data available.")
         return
 
     df["Category"] = df["Fund"].map(categorize)
-
-    df["Return %"] = (
-    df["P&L"] / df["Invested"].replace(0, pd.NA)
-        ) * 100
-
-    df["Share"] = (
-    df["Current"] / df["Current"].sum()
-        ) * 100
-
-# Category-wise sorting
-    df["Category Order"] = df["Category"].map(CATEGORY_ORDER)
-
-    df = df.sort_values(
-        by=["Category Order", "Current"],
-        ascending=[True, False]
-    ).reset_index(drop=True)
-    
-    # df["Category"] = df["Fund"].map(categorize)
-    # df["Return %"] = df["P&L"] / df["Invested"] * 100
-    # df["Share"]    = df["Current"] / df["Current"].sum() * 100
-    # df = df.sort_values("Current", ascending=False).reset_index(drop=True)
+    df["Return %"] = df["P&L"] / df["Invested"] * 100
+    df["Share"]    = df["Current"] / df["Current"].sum() * 100
+    df = df.sort_values("Current", ascending=False).reset_index(drop=True)
 
     # Funds held under MIN_HELD_YRS get a neutral colour: short-period XIRR is mostly noise
     held_ok = df["Held (yrs)"].fillna(MIN_HELD_YRS) >= MIN_HELD_YRS
