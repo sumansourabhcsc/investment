@@ -1,23 +1,11 @@
+##new
 import streamlit as st
-
-# =========================================================
-# PAGE CONFIG — must be the first Streamlit call
-# (if utils.sidebar_style.render_sidebar() also calls set_page_config,
-#  delete one of the two)
-# =========================================================
-st.set_page_config(
-    page_title="Taurus: Dashboard",
-    layout="wide",
-    page_icon="🐂",
-)
-
-import io
-import os
-from datetime import datetime
-
 import pandas as pd
+import os
 import plotly.express as px
 import plotly.graph_objects as go
+import streamlit.components.v1 as components
+
 from plotly.subplots import make_subplots
 
 from config import mutual_funds
@@ -26,29 +14,36 @@ from utils.calculations import calculate_invested_amount, calculate_current_valu
 from utils.load_funds import load_all_funds
 from utils.xirr_overall import compute_overall_xirr
 from utils.xirr_helper import compute_fund_xirr
-from utils.sidebar_style import render_sidebar
 
-render_sidebar("portfolio")
-
+st.divider()
 # =========================================================
-# MUSIC (disabled)
+# MUSIC
 # =========================================================
 # from utils.music import play_background_music
 # play_background_music(
 #     "https://raw.githubusercontent.com/sumansourabhcsc/investment/main/music.mp3",
 #     volume=0.02
 # )
+# pages/1_Portfolio_Overview.py  — add at top
+from utils.sidebar_style import render_sidebar, scale_component_html
+render_sidebar("portfolio")
 
 # =========================================================
-# CONSTANTS
+# PAGE CONFIG
 # =========================================================
+st.set_page_config(
+    page_title="Taurus: Dashboard",
+    layout="wide",
+    page_icon="🐂"
+)
+
 SUCCESS = "#1D9E75"
 DANGER  = "#E24B4A"
 BG_MAIN = "#0A0F1E"
 CARD_BG = "#0F1629"
 
-HURDLE        = 12.0   # XIRR % treated as "par" for the treemap colour scale. Set your own benchmark.
-MIN_HELD_YRS  = 1.0    # funds held for less than this are shown neutral (XIRR on short periods is noise)
+# PALETTE = ["#7C3AED","#1D9E75","#06B6D4","#EF9F27","#E24B4A",
+#            "#D4537E","#4F8BF9","#00f5d4","#F59E0B","#8B5CF6"]
 
 PALETTE = [
     "#2E7D8C",  # deep teal blue
@@ -62,6 +57,7 @@ PALETTE = [
     "#B5C85A",  # olive lime
     "#3D5A80",  # navy blue
 ]
+
 
 ICON_FUND = """
 <svg width="36" height="36" viewBox="0 0 36 36">
@@ -120,9 +116,7 @@ ICON_TREEMAP = """
 
 
 # =========================================================
-# GLOBAL CSS
-# (st.dataframe renders on a canvas, so DOM selectors can't style it —
-#  theme it via .streamlit/config.toml [theme] instead)
+# GOOGLE FONTS + MINIMAL SAFE CSS
 # =========================================================
 st.markdown("""
 <style>
@@ -134,12 +128,26 @@ html, body, [class*="css"] { font-family: 'Space Grotesk', sans-serif !important
 section[data-testid="stSidebar"] { background: #0A0E17 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
 [data-testid="stDataFrame"] { border-radius: 12px !important; overflow: hidden !important; border: 1px solid rgba(255,255,255,0.06) !important; }
 .stSelectbox label, .stDateInput label {
-    color: rgba(255,255,255,0.5) !important; font-size: 11px !important;
-    text-transform: uppercase; letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.3) !important; font-size: 9px !important;
+    text-transform: uppercase; letter-spacing: 0.15em;
     font-weight: 500 !important; font-family: 'JetBrains Mono', monospace !important;
 }
 hr { border-color: rgba(255,255,255,0.06) !important; margin: 2rem 0 !important; }
 @keyframes livepulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
+
+/* DataFrames to match theme */
+[data-testid="stDataFrame"] thead tr th {
+    background: rgba(255,255,255,0.02) !important;
+    color: rgba(255,255,255,0.3) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 9px !important; letter-spacing: 0.12em !important; text-transform: uppercase !important;
+}
+[data-testid="stDataFrame"] tbody tr td {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    color: rgba(220,230,245,0.75) !important;
+}
+[data-testid="stDataFrame"] tbody tr:hover td { background: rgba(255,255,255,0.02) !important; }
 
 /* selectbox/date input */
 .stSelectbox > div > div, .stDateInput input {
@@ -165,61 +173,38 @@ hr { border-color: rgba(255,255,255,0.06) !important; margin: 2rem 0 !important;
 
 
 # =========================================================
-# HELPERS
+# HELPERS — 100% inlined styles, no CSS class dependency
 # =========================================================
-def categorize(name: str) -> str:
-    n = name.lower()
-    if "fang" in n:       return "International"
-    if "children" in n:   return "Hybrid / Children"
-    if "bharat 22" in n:  return "Thematic FoF"
-    if "small" in n:      return "Small cap"
-    if "mid" in n:        return "Mid cap"
-    if "large" in n:      return "Large cap"
-    if "flexi" in n:      return "Flexi cap"
-    return "Other"
 
-
-def kpi_card(label, value, value_color, sub, sub_color="rgba(255,255,255,0.45)", hero=False):
-    size   = "2.1rem" if hero else "1.5rem"
-    border = "rgba(29,158,117,0.35)" if hero else "rgba(255,255,255,0.08)"
+def kpi_card(icon, label, value, value_color, sub, bottom_color):
     return f"""
-    <div style="background:rgba(255,255,255,0.03); border:1px solid {border};
-        border-radius:14px; padding:18px 20px; height:100%; box-sizing:border-box;">
-        <div style="font-size:11px; color:rgba(255,255,255,0.5); text-transform:uppercase;
-            letter-spacing:0.1em; font-weight:500; margin-bottom:8px;">{label}</div>
-        <div style="font-size:{size}; font-weight:700; line-height:1.1; color:{value_color};
-            font-variant-numeric:tabular-nums;">{value}</div>
-        <div style="font-size:12px; color:{sub_color}; margin-top:6px;">{sub}</div>
+    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+        border-radius:14px; padding:18px 18px 14px; position:relative;
+        overflow:hidden; box-sizing:border-box; height:100%;">
+        <div style="position:absolute; bottom:0; left:0; right:0; height:3px;
+            background:{bottom_color}; border-radius:0 0 14px 14px;"></div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9px;
+            color:rgba(255,255,255,0.3); text-transform:uppercase;
+            letter-spacing:0.15em; font-weight:500; margin-bottom:8px;">{label}</div>
+        <div style="font-size:1.35rem; font-weight:700; font-family:'JetBrains Mono',monospace;
+            line-height:1.1; color:{value_color};">{value}</div>
+        <div style="font-size:9px; color:rgba(255,255,255,0.25); margin-top:5px;
+            font-family:'JetBrains Mono',monospace;">{sub}</div>
     </div>"""
 
 
 def sec_header(icon_svg, title, subtitle=""):
-    icon_part = (
-        f'<div style="display:flex;align-items:center;justify-content:center;'
-        f'width:36px;height:36px;flex-shrink:0;">{icon_svg}</div>'
-    ) if icon_svg else ""
-    sub_part = (
-        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:11px;'
-        f'color:rgba(255,255,255,0.45);letter-spacing:0.12em;text-transform:uppercase;'
-        f'margin-top:3px;">{subtitle}</div>'
-    ) if subtitle else ""
+    icon_part = f'<div style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;">{icon_svg}</div>' if icon_svg else ""
+    sub_part  = f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.15em;text-transform:uppercase;margin-top:3px;">{subtitle}</div>' if subtitle else ""
     st.markdown(f"""
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.6rem;margin-top:0.4rem;">
         {icon_part}
         <div>
-            <div style="font-size:18px;font-weight:700;color:#F0F4FF;font-family:'Space Grotesk',sans-serif;line-height:1.1;">{title}</div>
+            <div style="font-size:17px;font-weight:700;color:#F0F4FF;font-family:'Space Grotesk',sans-serif;line-height:1.1;">{title}</div>
             {sub_part}
         </div>
         <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);margin-left:6px;"></div>
     </div>""", unsafe_allow_html=True)
-
-
-def small_title(text):
-    st.markdown(
-        f'<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.6);'
-        f'text-transform:uppercase;letter-spacing:0.1em;margin:4px 0 8px;">{text}</div>',
-        unsafe_allow_html=True,
-    )
 
 
 def change_summary_box(total_change):
@@ -230,70 +215,13 @@ def change_summary_box(total_change):
     <div style="margin-top:14px; background:rgba(255,255,255,0.02); padding:16px 22px;
         border-radius:12px; border:1px solid rgba(255,255,255,0.06);
         display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-        <div style="font-family:'JetBrains Mono',monospace; font-size:11px;
-            color:rgba(255,255,255,0.5); letter-spacing:0.12em; text-transform:uppercase;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px;
+            color:rgba(255,255,255,0.4); letter-spacing:0.12em; text-transform:uppercase;">
             {icon} Total Daily Change Across All Funds
         </div>
         <div style="font-size:1.4rem; font-weight:700; font-family:'JetBrains Mono',monospace;
             color:{color};">{sign}₹{abs(total_change):,.2f}</div>
     </div>""", unsafe_allow_html=True)
-
-
-# =========================================================
-# CACHED DATA LOADERS
-# (XIRR for every fund is expensive; refresh every 15 minutes.
-#  Remove the decorators if you need every rerun to recompute.)
-# =========================================================
-@st.cache_data(ttl=900, show_spinner="Loading NAV data…")
-def get_nav():
-    return load_nav()
-
-
-@st.cache_data(ttl=900, show_spinner="Computing fund returns…")
-def build_summary():
-    """Returns (rows, messages). Each row:
-    [fund, code, units, invested, current, pnl, nav, nav_date, xirr_pct, held_years]"""
-    nav_df   = get_nav()
-    rows     = []
-    messages = []
-    today    = pd.Timestamp.today().normalize()
-
-    for fund_name, meta in mutual_funds.items():
-        try:
-            code    = meta["code"]
-            folder  = meta["folder"]
-            fund_df = load_fund(folder)
-            match   = nav_df[nav_df["SchemeCode"] == str(code)]
-            if match.empty:
-                messages.append(("warning", f"No NAV found for {fund_name} ({code})"))
-                continue
-
-            latest_row  = match.sort_values("Date", ascending=False).iloc[0]
-            latest_nav  = float(latest_row["NAV"])
-            latest_date = latest_row["Date"].date()
-            invested    = calculate_invested_amount(fund_df)
-            current     = calculate_current_value(fund_df, latest_nav)
-            total_units = fund_df["Units"].sum()
-            fund_xirr   = compute_fund_xirr(fund_df, latest_nav)
-
-            first_date = pd.to_datetime(fund_df["Date"], errors="coerce").min() \
-                if "Date" in fund_df.columns else pd.NaT
-            held_years = (today - first_date).days / 365.25 if pd.notna(first_date) else float("nan")
-
-            rows.append([
-                fund_name, code, total_units, invested, current,
-                current - invested, latest_nav, latest_date,
-                fund_xirr * 100,          # numeric, not a formatted string
-                held_years,
-            ])
-        except Exception as e:
-            messages.append(("error", f"{fund_name} error: {e}"))
-    return rows, messages
-
-
-@st.cache_data(ttl=900, show_spinner="Computing overall XIRR…")
-def get_overall_xirr_pct():
-    return compute_overall_xirr(load_all_funds()) * 100
 
 
 # =========================================================
@@ -307,13 +235,13 @@ st.markdown("""
             letter-spacing:-0.02em; font-family:'Space Grotesk',sans-serif;">
             Portfolio Dashboard
         </div>
-        <div style="font-family:'JetBrains Mono',monospace; font-size:11px;
-            color:rgba(255,255,255,0.45); margin-top:5px; letter-spacing:0.18em; text-transform:uppercase;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px;
+            color:rgba(255,255,255,0.3); margin-top:5px; letter-spacing:0.2em; text-transform:uppercase;">
             ◈ Taurus · Mutual Fund Tracker · Live NAV
         </div>
         <div style="display:inline-flex; align-items:center; gap:6px; margin-top:10px;
             background:rgba(29,158,117,0.1); border:1px solid rgba(29,158,117,0.25);
-            border-radius:20px; padding:5px 12px; font-size:12px; font-weight:500;
+            border-radius:20px; padding:5px 12px; font-size:11px; font-weight:500;
             color:#1D9E75; font-family:'JetBrains Mono',monospace;">
             <div style="width:6px; height:6px; border-radius:50%; background:#1D9E75;
                 animation:livepulse 2s ease-in-out infinite;"></div>
@@ -325,19 +253,48 @@ st.markdown("""
 
 
 # =========================================================
-# LOAD DATA + OVERALL METRICS
+# LOAD NAV + PROCESS FUNDS
 # =========================================================
-summary, load_messages = build_summary()
-for level, msg in load_messages:
-    (st.warning if level == "warning" else st.error)(msg)
+nav_df         = load_nav()
+summary        = []
+total_invested = 0
+total_current  = 0
 
-nav_df         = get_nav()
-total_invested = sum(r[3] for r in summary)
-total_current  = sum(r[4] for r in summary)
+for fund_name, meta in mutual_funds.items():
+    try:
+        code      = meta["code"]
+        folder    = meta["folder"]
+        fund_df   = load_fund(folder)
+        match     = nav_df[nav_df["SchemeCode"] == str(code)]
+        if match.empty:
+            st.warning(f"No NAV found for {fund_name} ({code})")
+            continue
+        latest_row  = match.sort_values("Date", ascending=False).iloc[0]
+        latest_nav  = float(latest_row["NAV"])
+        latest_date = latest_row["Date"].date()
+        invested    = calculate_invested_amount(fund_df)
+        current     = calculate_current_value(fund_df, latest_nav)
+        total_units = fund_df["Units"].sum()
+        fund_xirr   = compute_fund_xirr(fund_df, latest_nav)
+        total_invested += invested
+        total_current  += current
+        summary.append([
+            fund_name, code, total_units, invested, current,
+            current - invested, latest_nav, latest_date,
+            f"{fund_xirr * 100:.2f}%"
+        ])
+    except Exception as e:
+        st.error(f"{fund_name} error: {e}")
 
+
+# =========================================================
+# COMPUTE OVERALL METRICS
+# =========================================================
 total_pnl           = total_current - total_invested
 absolute_return_pct = ((total_pnl / total_invested) * 100) if total_invested > 0 else 0
-overall_xirr_pct    = get_overall_xirr_pct()
+all_funds_df        = load_all_funds()
+overall_xirr        = compute_overall_xirr(all_funds_df)
+overall_xirr_pct    = overall_xirr * 100
 
 pnl_color  = SUCCESS if total_pnl >= 0 else DANGER
 ret_color  = SUCCESS if absolute_return_pct >= 0 else DANGER
@@ -345,42 +302,51 @@ xirr_color = SUCCESS if overall_xirr_pct >= 0 else DANGER
 pnl_sign   = "+" if total_pnl >= 0 else ""
 ret_sign   = "+" if absolute_return_pct >= 0 else ""
 xirr_sign  = "+" if overall_xirr_pct >= 0 else ""
-
-# Today's change for the hero card
-try:
-    _d = pd.read_csv("data/portfolio_daily.csv")
-    _d["Date"] = pd.to_datetime(_d["Date"], format="%d-%m-%Y")
-    day_change = float(_d.sort_values("Date").iloc[-1]["OneDayChange"])
-except Exception:
-    day_change = None
-
-if day_change is None:
-    day_sub, day_col = "live NAV", "rgba(255,255,255,0.45)"
-else:
-    day_sub = f"{'▲' if day_change >= 0 else '▼'} ₹{abs(day_change):,.0f} today"
-    day_col = SUCCESS if day_change >= 0 else DANGER
+xirr_bar   = SUCCESS if overall_xirr_pct >= 0 else DANGER
 
 
 # =========================================================
-# KPI CARDS
+# KPI CARDS — each rendered in its own st.column
+# Using st.markdown per column — this is the CORRECT Streamlit approach
 # =========================================================
-c1, c2, c3, c4, c5 = st.columns([1.4, 1, 1, 1, 1])
+c1, c2, c3, c4, c5 = st.columns(5)
+
+with c2:
+    st.markdown(kpi_card(
+        "💰", "Total Invested",
+        f"₹{total_invested:,.0f}",
+        "#F1F5F9",
+        f"across {len(summary)} funds",
+        "#7C3AED"
+    ), unsafe_allow_html=True)
 
 with c1:
-    st.markdown(kpi_card("Current Value", f"₹{total_current:,.0f}", "#F1F5F9",
-                         day_sub, day_col, hero=True), unsafe_allow_html=True)
-with c2:
-    st.markdown(kpi_card("Total Invested", f"₹{total_invested:,.0f}", "#F1F5F9",
-                         f"across {len(summary)} funds"), unsafe_allow_html=True)
+    st.markdown(kpi_card(
+        "📈", "Current Value",
+        f"₹{total_current:,.0f}",
+        SUCCESS, "live NAV", SUCCESS
+    ), unsafe_allow_html=True)
+
 with c3:
-    st.markdown(kpi_card("Total P&L", f"{pnl_sign}₹{abs(total_pnl):,.0f}", pnl_color,
-                         "unrealised gain/loss"), unsafe_allow_html=True)
+    st.markdown(kpi_card(
+        "📊", "Total P&L",
+        f"{pnl_sign}₹{abs(total_pnl):,.0f}",
+        pnl_color, "unrealised gain/loss", "#06B6D4"
+    ), unsafe_allow_html=True)
+
 with c4:
-    st.markdown(kpi_card("Absolute Return", f"{ret_sign}{absolute_return_pct:.2f}%", ret_color,
-                         "since first investment"), unsafe_allow_html=True)
+    st.markdown(kpi_card(
+        "📉", "Absolute Return",
+        f"{ret_sign}{absolute_return_pct:.2f}%",
+        ret_color, "since first investment", "#EF9F27"
+    ), unsafe_allow_html=True)
+
 with c5:
-    st.markdown(kpi_card("Overall XIRR", f"{xirr_sign}{overall_xirr_pct:.2f}%", xirr_color,
-                         "annualised return"), unsafe_allow_html=True)
+    st.markdown(kpi_card(
+        "📌", "Overall XIRR",
+        f"{xirr_sign}{overall_xirr_pct:.2f}%",
+        xirr_color, "annualised return", xirr_bar
+    ), unsafe_allow_html=True)
 
 st.divider()
 
@@ -396,169 +362,190 @@ tab1, tab2, tab3, tab4 = st.tabs([
 
 
 # =========================================================
-# TAB 1 — ALLOCATION + FUND DETAILS
+# TAB 1 — FUND DETAILS + PORTFOLIO ALLOCATION
 # =========================================================
-def render_fund_tab(summary_rows):
-    df = pd.DataFrame(summary_rows, columns=[
-        "Fund", "Code", "Units", "Invested", "Current",
-        "P&L", "NAV", "NAV Date", "XIRR", "Held (yrs)"
+with tab1:
+    sec_header(ICON_FUND,         "Fund Details",          "live NAV · invested · P&L · XIRR")
+
+    df = pd.DataFrame(summary, columns=[
+        "Fund", "SchemeCode", "TotalUnits", "Invested", "Current",
+        "P&L", "Latest NAV", "NAV Date", "XIRR"
     ])
-    if df.empty:
-        st.warning("No fund data available.")
-        return
 
-    df["Category"] = df["Fund"].map(categorize)
-    df["Return %"] = df["P&L"] / df["Invested"] * 100
-    df["Share"]    = df["Current"] / df["Current"].sum() * 100
-    df = df.sort_values("Current", ascending=False).reset_index(drop=True)
+    col_tbl, col_donut = st.columns([7, 3])
 
-    # Funds held under MIN_HELD_YRS get a neutral colour: short-period XIRR is mostly noise
-    held_ok = df["Held (yrs)"].fillna(MIN_HELD_YRS) >= MIN_HELD_YRS
-    df["XIRR (colour)"] = df["XIRR"].where(held_ok, HURDLE)
-
-    # ── Where the money is ────────────────────────────────────────────
-    sec_header(
-        ICON_TREEMAP, "Where your money is",
-        f"size = current value · colour = XIRR vs {HURDLE:.0f}% hurdle · grey = held < {MIN_HELD_YRS:.0f} yr",
-    )
-    col_map, col_side = st.columns([3, 2], gap="large")
-
-    with col_map:
-        fig_tree = px.treemap(
-            df, path=["Fund"], values="Current", color="XIRR (colour)",
-            custom_data=["Share", "XIRR", "Invested", "Held (yrs)"],
-            color_continuous_scale=["#B91C1C", "#1F2937", "#15803D"],
-            color_continuous_midpoint=HURDLE,
+    with col_tbl:
+        display_df = df.copy()
+    
+        rows_html = ""
+        for i, (_, row) in enumerate(display_df.iterrows(), start=1):
+            pnl_val   = row["P&L"]
+            pnl_color = "#69F0AE" if pnl_val >= 0 else "#FF6B6B"
+            pnl_sign  = "+" if pnl_val >= 0 else ""
+            xirr_val  = float(str(row["XIRR"]).replace("%", ""))
+            xirr_col  = "#69F0AE" if xirr_val >= 0 else "#FF6B6B"
+    
+            rows_html += f"""
+            <tr>
+                <td style="padding:10px 14px; color:rgba(255,255,255,0.25); font-size:10px; text-align:center; width:36px;">{i}</td>
+                <td style="padding:10px 14px; color:#F0F4FF; font-weight:500; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{row['Fund']}">{row['Fund']}</td>
+                <td style="padding:10px 14px; color:rgba(255,255,255,0.4); font-size:10px;">{row['SchemeCode']}</td>
+                <td style="padding:10px 14px; color:rgba(255,255,255,0.6);">{row['TotalUnits']:.3f}</td>
+                <td style="padding:10px 14px; color:rgba(200,215,240,0.85);">&#8377;{row['Invested']:,.0f}</td>
+                <td style="padding:10px 14px; color:#4FC3F7;">&#8377;{row['Current']:,.0f}</td>
+                <td style="padding:10px 14px; color:{pnl_color}; font-weight:600;">{pnl_sign}&#8377;{abs(pnl_val):,.0f}</td>
+                <td style="padding:10px 14px; color:rgba(200,215,240,0.7);">{row['Latest NAV']:.2f}</td>
+                <td style="padding:10px 14px; color:rgba(200,215,240,0.5); font-size:10px;">{row['NAV Date']}</td>
+                <td style="padding:10px 14px; color:{xirr_col}; font-weight:600;">{row['XIRR']}</td>
+            </tr>"""
+    
+        headers = ["#", "Fund", "Code", "Units", "Invested", "Current", "P&amp;L", "NAV", "NAV Date", "XIRR"]
+        header_html = "".join(
+            f'<th style="padding:10px 14px; text-align:left; font-family:JetBrains Mono,monospace; font-size:9px; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.15em; font-weight:500; white-space:nowrap;">{h}</th>'
+            for h in headers
         )
-        fig_tree.update_traces(
-            texttemplate="<b>%{label}</b><br>%{customdata[0]:.1f}% · XIRR %{customdata[1]:.1f}%",
-            textfont=dict(size=13, family="Space Grotesk"),
-            marker=dict(line=dict(width=2, color="#060910")),
-            hovertemplate=(
-                "<b>%{label}</b><br>₹%{value:,.0f}<br>"
-                "Invested ₹%{customdata[2]:,.0f}<br>"
-                "XIRR %{customdata[1]:.2f}%<br>"
-                "Held %{customdata[3]:.1f} yrs<extra></extra>"
-            ),
+    
+        table_html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+        <style>
+            * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+            html, body {{ background: transparent; height: 100%; }}
+            .wrap {{
+                overflow-x: auto;
+                overflow-y: auto;
+                height: 100%;
+                border-radius: 12px;
+                border: 1px solid rgba(255,255,255,0.07);
+                background: rgba(255,255,255,0.02);
+            }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 12px;
+            }}
+            thead tr {{
+                background: #0d1424;
+            }}
+            thead th {{
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                background: #0d1424;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+            }}
+            tbody tr {{
+                border-bottom: 1px solid rgba(255,255,255,0.04);
+                transition: background 0.15s;
+            }}
+            tbody tr:last-child {{ border-bottom: none; }}
+            tbody tr:hover td {{ background: rgba(255,255,255,0.025); }}
+        </style>
+        </head>
+        <body>
+        <div class="wrap">
+            <table>
+                <thead><tr>{header_html}</tr></thead>
+                <tbody>{rows_html}</tbody>
+            </table>
+        </div>
+        </body>
+        </html>
+        """
+    
+        components.html(scale_component_html(table_html), height=min((len(display_df) + 1) * 52, 560), scrolling=True)
+
+                # ── Download buttons ─────────────────────────────────────────────
+        from datetime import datetime
+        import io
+
+        export_df = df.copy()
+        export_df["XIRR (%)"] = (
+            export_df["XIRR"].astype(str).str.rstrip("%").astype(float)
         )
-        fig_tree.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)", margin=dict(t=0, l=0, r=0, b=0), height=470,
-            font=dict(color="white", family="Space Grotesk"),
-            coloraxis_colorbar=dict(title="XIRR %", thickness=10, len=0.6),
-        )
-        st.plotly_chart(fig_tree, use_container_width=True)
+        export_df["NAV Date"] = pd.to_datetime(export_df["NAV Date"]).dt.strftime("%d-%m-%Y")
+        export_df = export_df.drop(columns=["XIRR"]).rename(columns={
+            "TotalUnits": "Units",
+            "Invested": "Invested (INR)",
+            "Current": "Current Value (INR)",
+            "P&L": "P&L (INR)",
+        })
 
-    with col_side:
-        small_title("Category split")
-        cat = (df.groupby("Category", as_index=False)["Current"].sum()
-                 .sort_values("Current", ascending=False))
-        cat["Share"] = cat["Current"] / cat["Current"].sum() * 100
-        cat["Label"] = cat["Share"].map("{:.0f}%".format)
-        cat["Row"]   = "Portfolio"
+        stamp = datetime.now().strftime("%Y%m%d")
+        d1, d2, _ = st.columns([1, 1, 3])
 
-        fig_cat = px.bar(
-            cat, x="Share", y="Row", color="Category", orientation="h",
-            text="Label", color_discrete_sequence=PALETTE,
-        )
-        fig_cat.update_traces(textposition="inside", marker_line_width=0)
-        fig_cat.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", height=170,
-            margin=dict(t=0, b=0, l=0, r=0),
-            xaxis=dict(visible=False, range=[0, 100]),
-            yaxis=dict(visible=False),
-            legend=dict(orientation="h", y=-0.15, title=None),
-            font=dict(color="white", family="Space Grotesk"),
-        )
-        st.plotly_chart(fig_cat, use_container_width=True)
-
-        # Rank only funds with a meaningful holding period (fallback: all)
-        ranked = df[held_ok] if held_ok.sum() >= 3 else df
-
-        def perf_rows(sub, color):
-            return "".join(
-                f'<div style="display:flex;justify-content:space-between;padding:6px 0;'
-                f'border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;">'
-                f'<span style="color:#E5E7EB;">{r.Fund}</span>'
-                f'<span style="color:{color};font-weight:600;">{r.XIRR:.1f}%</span></div>'
-                for r in sub.itertuples()
-            )
-
-        small_title(f"Best XIRR (held ≥ {MIN_HELD_YRS:.0f} yr)")
-        st.markdown(perf_rows(ranked.nlargest(3, "XIRR"), SUCCESS), unsafe_allow_html=True)
-        st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
-        small_title("Weakest XIRR")
-        st.markdown(perf_rows(ranked.nsmallest(3, "XIRR"), DANGER), unsafe_allow_html=True)
-
-    st.divider()
-
-    # ── Fund table ────────────────────────────────────────────────────
-    sec_header(ICON_FUND, "Fund Details", "live NAV · invested · P&L · XIRR")
-    st.dataframe(
-        df[["Fund", "Category", "Invested", "Current", "P&L", "Return %", "XIRR", "Held (yrs)"]],
-        hide_index=True, use_container_width=True,
-        height=min(40 * (len(df) + 1), 620),
-        column_config={
-            "Invested": st.column_config.NumberColumn(format="₹%d"),
-            "Current":  st.column_config.NumberColumn(format="₹%d"),
-            "P&L": st.column_config.ProgressColumn(
-                format="₹%d",
-                min_value=min(0.0, float(df["P&L"].min())),
-                max_value=float(df["P&L"].max()),
-            ),
-            "Return %":   st.column_config.NumberColumn(format="%.1f"),
-            "XIRR":       st.column_config.NumberColumn("XIRR %", format="%.2f"),
-            "Held (yrs)": st.column_config.NumberColumn(format="%.1f"),
-        },
-    )
-
-    with st.expander("More columns (code, units, NAV)"):
-        st.dataframe(
-            df[["Fund", "Code", "Units", "NAV", "NAV Date"]],
-            hide_index=True, use_container_width=True,
-        )
-
-    # ── Downloads ─────────────────────────────────────────────────────
-    export_df = df.drop(columns=["Share", "XIRR (colour)"]).copy()
-    export_df["NAV Date"] = pd.to_datetime(export_df["NAV Date"]).dt.strftime("%d-%m-%Y")
-    export_df = export_df.rename(columns={
-        "Units": "Units",
-        "Invested": "Invested (INR)",
-        "Current": "Current Value (INR)",
-        "P&L": "P&L (INR)",
-        "XIRR": "XIRR (%)",
-        "Return %": "Return (%)",
-    })
-
-    stamp = datetime.now().strftime("%Y%m%d")
-    d1, d2, _ = st.columns([1, 1, 4])
-
-    with d1:
-        st.download_button(
-            "⬇ CSV",
-            data=export_df.to_csv(index=False).encode("utf-8-sig"),  # utf-8-sig so Excel opens it cleanly
-            file_name=f"fund_details_{stamp}.csv",
-            mime="text/csv",
-            use_container_width=True,
-        )
-
-    with d2:
-        try:
-            buf = io.BytesIO()
-            with pd.ExcelWriter(buf, engine="openpyxl") as writer:
-                export_df.to_excel(writer, index=False, sheet_name="Fund Details")
+        with d1:
             st.download_button(
-                "⬇ Excel",
-                data=buf.getvalue(),
-                file_name=f"fund_details_{stamp}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "⬇ CSV",
+                data=export_df.to_csv(index=False).encode("utf-8-sig"),  # utf-8-sig so Excel opens it cleanly
+                file_name=f"fund_details_{stamp}.csv",
+                mime="text/csv",
                 use_container_width=True,
             )
-        except ModuleNotFoundError:
-            st.caption("Add `openpyxl` to requirements.txt for Excel export.")
+
+        with d2:
+            try:
+                buf = io.BytesIO()
+                with pd.ExcelWriter(buf, engine="openpyxl") as writer:
+                    export_df.to_excel(writer, index=False, sheet_name="Fund Details")
+                st.download_button(
+                    "⬇ Excel",
+                    data=buf.getvalue(),
+                    file_name=f"fund_details_{stamp}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                )
+            except ModuleNotFoundError:
+                st.caption("Add `openpyxl` to requirements.txt for Excel export.")
 
 
-with tab1:
-    render_fund_tab(summary)
+    
+    with col_donut:
+        fig_donut = go.Figure(go.Pie(
+            labels=df["Fund"], values=df["Current"], hole=0.65,
+            marker=dict(colors=PALETTE[:len(df)], line=dict(color="#060910", width=3)),
+            textinfo="percent",
+            textfont=dict(size=12, family="JetBrains Mono"),
+            hovertemplate="<b>%{label}</b><br>₹%{value:,.0f}<br>%{percent}<extra></extra>"
+        ))
+        fig_donut.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="white", family="Space Grotesk"), showlegend=False,
+            margin=dict(t=10, b=10, l=10, r=10),
+            height=320,
+            annotations=[dict(
+                text=f"<b>₹{total_current/1e5:.1f}L</b>",
+                x=0.5, y=0.5,
+                font=dict(size=18, color="white", family="JetBrains Mono"),
+                showarrow=False
+            )]
+        )
+        st.plotly_chart(fig_donut, use_container_width=True)
+
+    st.divider()
+    sec_header(ICON_TREEMAP, "Portfolio Allocation", "treemap by current value")
+
+    fig_tree = px.treemap(
+        df, path=["Fund"], values="Current",
+        color="Fund",
+        color_discrete_sequence=PALETTE[:len(df)],
+        hover_data={"Invested": True, "XIRR": True}
+    )
+    fig_tree.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="white", family="Space Grotesk"),
+        margin=dict(t=10, l=10, r=10, b=10), coloraxis_showscale=False
+    )
+    fig_tree.update_traces(
+        textinfo="label+percent entry",
+        textfont=dict(size=13, family="Space Grotesk"),
+        marker=dict(line=dict(width=2, color="#060910"))
+    )
+    st.plotly_chart(fig_tree, use_container_width=True)
 
 
 # =========================================================
@@ -590,11 +577,12 @@ with tab2:
         selected_period = st.radio(
             "Period",
             options=list(PERIODS.keys()),
-            index=list(PERIODS.keys()).index("All"),   # default → All
+            index=1,          # default → All
             horizontal=True,
             label_visibility="collapsed",
         )
 
+    # Custom date range (only shown when "Custom" is selected)
     min_date = chart_df_full["Date"].min().date()
     max_date = chart_df_full["Date"].max().date()
 
@@ -616,18 +604,18 @@ with tab2:
         chart_df = chart_df_full[
             (chart_df_full["Date"].dt.date >= start_date) &
             (chart_df_full["Date"].dt.date <= end_date)
-        ].copy()
+        ]
     else:
         days = PERIODS[selected_period]
         if days is None:
             chart_df = chart_df_full.copy()
         else:
             cutoff = chart_df_full["Date"].max() - pd.Timedelta(days=days)
-            chart_df = chart_df_full[chart_df_full["Date"] >= cutoff].copy()
+            chart_df = chart_df_full[chart_df_full["Date"] >= cutoff]
     # ────────────────────────────────────────────────────────────────────────
 
     chart_df["OneDayChangePct_val"] = (
-        chart_df["OneDayChangePct"].astype(str).str.replace("%", "", regex=False).astype(float)
+        chart_df["OneDayChangePct"].str.replace("%", "", regex=False).astype(float)
     )
     bar_colors = [SUCCESS if x >= 0 else DANGER for x in chart_df["OneDayChange"]]
 
@@ -655,6 +643,7 @@ with tab2:
         bargap=0.3,
         xaxis=dict(showgrid=False, zeroline=False),
     )
+
     fig_perf.update_yaxes(
         showgrid=True, gridcolor="rgba(255,255,255,0.05)",
         zeroline=False, tickprefix="₹", secondary_y=False
@@ -664,16 +653,15 @@ with tab2:
     )
     st.plotly_chart(fig_perf, use_container_width=True)
 
-
 # =========================================================
 # TAB 3 — MONTHLY INVESTMENT SUMMARY + BAR CHART
 # =========================================================
 with tab3:
-    sec_header(ICON_MONTHLY, "Monthly Investment Summary", "SIP breakdown by fund & month")
+    sec_header(ICON_MONTHLY,      "Monthly Investment Summary", "SIP breakdown by fund & month")
 
     monthly_data = []
-    month_map    = {1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
-                    7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"}
+    month_map    = {1:"Jan",2:"Feb",3:"Mar",4:"Apr",5:"May",6:"Jun",
+                    7:"Jul",8:"Aug",9:"Sep",10:"Oct",11:"Nov",12:"Dec"}
 
     for fund_name, meta in mutual_funds.items():
         try:
@@ -752,7 +740,7 @@ with tab3:
 # TAB 4 — DAILY CHANGE ACROSS FUNDS
 # =========================================================
 with tab4:
-    sec_header(ICON_DAILY_CHANGE, "Daily Change Across Funds", "NAV movement · single date")
+    sec_header(ICON_DAILY_CHANGE, "Daily Change Across Funds",  "NAV movement · single date")
 
     latest_nav_date  = nav_df["Date"].max().date()
     selected_date    = st.date_input("Select Date", value=latest_nav_date)
@@ -801,9 +789,11 @@ with tab4:
 
     total_change = df_daily_change["Change in Value"].sum() if not df_daily_change.empty else 0
     change_summary_box(total_change)
-
-    # ── Horizontal Bar Chart ──────────────────────────────────────────
+    
+        # ── Horizontal Bar Chart ──────────────────────────────────────────
     if not df_daily_change.empty:
+        import plotly.graph_objects as go
+
         df_chart = df_daily_change.copy().sort_values("Change in Value", ascending=True)
 
         colors = [
@@ -828,7 +818,7 @@ with tab4:
                 for v, pct in zip(df_chart["Change in Value"], df_chart["% Change in NAV"])
             ],
             textposition="outside",
-            cliponaxis=False,          # stops Plotly clipping outside-labels
+            cliponaxis=False,          # ← critical: stops Plotly clipping outside-labels
             textfont=dict(size=11),
             hovertemplate=(
                 "<b>%{customdata[0]}</b><br>"
@@ -843,10 +833,13 @@ with tab4:
             )),
         ))
 
-        chart_height = max(300, len(df_chart) * 52 + 120)   # 52px per fund, min 300
+        # Dynamic height: 52px per fund, min 300
+        chart_height = max(300, len(df_chart) * 52 + 120)
+        # Compute a padded x-axis range so labels have room
         max_abs = df_chart["Change in Value"].abs().max()
-        x_pad   = max_abs * 0.45                            # breathing room for labels
+        x_pad = max_abs * 0.45   # 45% breathing room on each side for labels
 
+        # Legend entries below chart (positive / negative indicator)
         fig.update_layout(
             title=dict(
                 text=f"Daily Change in Value — {selected_date.strftime('%d %b %Y')}",
@@ -855,7 +848,7 @@ with tab4:
             ),
             xaxis=dict(
                 title="Change in Value (₹)",
-                range=[-(max_abs + x_pad), max_abs + x_pad],
+                range=[-(max_abs + x_pad), max_abs + x_pad],   # ← symmetric padding
                 zeroline=True,
                 zerolinecolor="#555",
                 zerolinewidth=1.5,
@@ -866,20 +859,20 @@ with tab4:
                 tickfont=dict(size=12),
             ),
             height=chart_height,
-            margin=dict(l=20, r=180, t=50, b=120),
-            uniformtext=dict(mode="hide", minsize=9),
+            margin=dict(l=20, r=180, t=50, b=120),  # bump r from 140 → 180
+            uniformtext=dict(mode="hide", minsize=9), # hide labels only if truly tiny
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
             font=dict(color="#e0e0e0"),
             legend=dict(
                 orientation="h",
                 yanchor="top",
-                y=-0.18,
+                y=-0.18,              # sits below x-axis
                 xanchor="center",
                 x=0.5,
                 font=dict(size=12),
             ),
-            # Manual legend
+            # Manual legend via invisible scatter traces
             annotations=[
                 dict(
                     x=0.0, y=-0.13,
@@ -901,6 +894,7 @@ with tab4:
         )
 
         st.plotly_chart(fig, use_container_width=True)
+
 
 
 # =========================================================
