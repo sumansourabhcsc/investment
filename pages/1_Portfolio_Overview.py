@@ -1111,21 +1111,24 @@ def render_monthly_tab():
             mode="lines+markers", line=dict(color="#4FC3F7", width=2.5), marker=dict(size=6),
             hovertemplate="<b>Cumulative</b><br>%{x}: ₹%{y:,.0f}<extra></extra>",
         ), secondary_y=True)
+    legend_rows   = -(-(len(order) + (1 if show_cum else 0)) // 4)   # ≈ 4 legend entries per row
+    legend_bottom = 60 + 22 * legend_rows
     fig_month.update_layout(
         barmode="stack",
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15,22,41,0.6)",
         font=dict(color="rgba(255,255,255,0.6)", family="Space Grotesk"),
-        height=400, margin=dict(t=20, b=10, l=10, r=10),
-        legend=dict(font=dict(size=11, color="rgba(255,255,255,0.65)"),
+        height=380 + legend_bottom, margin=dict(t=20, b=legend_bottom, l=10, r=10),   # room for the legend
+        legend=dict(font=dict(size=11, color="rgba(255,255,255,0.7)"),
                     bgcolor="rgba(0,0,0,0)", orientation="h",
                     yanchor="top", y=-0.12, xanchor="left", x=0),
         bargap=0.25, hovermode="x unified",
-        xaxis=dict(showgrid=False, zeroline=False,
+        xaxis=dict(showgrid=False, zeroline=False, automargin=True,
                    categoryorder="array", categoryarray=MONTH_NAMES),
     )
     fig_month.update_yaxes(showgrid=True, gridcolor="rgba(255,255,255,0.05)",
                            zeroline=False, tickprefix="₹", secondary_y=False)
-    fig_month.update_yaxes(showgrid=False, zeroline=False, tickprefix="₹", secondary_y=True)
+    fig_month.update_yaxes(showgrid=False, zeroline=False, tickprefix="₹",
+                           rangemode="tozero", secondary_y=True)
     st.plotly_chart(fig_month, use_container_width=True)
 
     # ── Fund × month table (heat-shaded, numeric, no inner scroll) ───
