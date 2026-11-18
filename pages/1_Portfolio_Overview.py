@@ -327,6 +327,64 @@ def get_overall_xirr_pct():
     return compute_overall_xirr(load_all_funds()) * 100
 
 
+@st.cache_data(ttl=900, show_spinner=False)
+def load_daily_files():
+    """{fund_name: (code, DataFrame sorted by date)} for every fund that has a daily CSV."""
+    out = {}
+    for fund_name, meta in mutual_funds.items():
+        path = f"mutualfund/{meta['folder']}/daily_{meta['code']}.csv"
+        if not os.path.exists(path):
+            continue
+        d = pd.read_csv(path)
+        d.columns = d.columns.str.strip()
+        d["date"] = pd.to_datetime(d["date"], format="%d-%m-%Y", errors="coerce")
+        out[fund_name] = (meta["code"], d.dropna(subset=["date"]).sort_values("date"))
+    return out
+
+
+def fund_pnl_series(daily_files):
+    """Portfolio P&L per date = sum over funds of the day-on-day change in that fund's
+    absolute_gain_loss (current value − invested). A new SIP raises value and invested by the
+    same amount, so it cancels out and only market movement is left."""
+    parts = []
+    for _, (_code, d) in daily_files.items():
+        if "absolute_gain_loss" not in d.columns:
+            continue
+        s = d[["date", "absolute_gain_loss"]].copy()
+        s["absolute_gain_loss"] = pd.to_numeric(s["absolute_gain_loss"], errors="coerce")
+        s = s.dropna().drop_duplicates("date", keep="last").sort_values("date")
+        s["PnL"] = s["absolute_gain_loss"].diff()      # a fund's first row has no prior day → ignored
+        parts.append(s[["date", "PnL"]].dropna())
+    if not parts:
+        return None
+    return (pd.concat(parts).groupby("date", as_index=False)["PnL"].sum()
+              .rename(columns={"date": "Date"}))
+
+
+@st.cache_data(ttl=900, show_spinner=False)
+def load_portfolio_daily():
+    """Returns (DataFrame, basis).
+    basis == "gain":  OneDayChange / OneDayChangePct are rebuilt from the per-fund gain/loss, so new
+                      investments are excluded. The % is P&L divided by the previous day's total value.
+                      "NewMoney" = the CSV's old value-based change minus the P&L (implied SIP amount).
+    basis == "value": per-fund files missing → CSV columns used unchanged (they include new money)."""
+    base = pd.read_csv("data/portfolio_daily.csv")
+    base["Date"] = pd.to_datetime(base["Date"], format="%d-%m-%Y")
+    base = base.sort_values("Date").reset_index(drop=True)
+
+    pnl = fund_pnl_series(load_daily_files())
+    if pnl is None or pnl.empty:
+        return base, "value"
+
+    df = base.merge(pnl, on="Date", how="outer").sort_values("Date").reset_index(drop=True)
+    prev_value = df["TotalValue"].ffill().shift(1)
+    if "OneDayChange" in df.columns:
+        df["NewMoney"] = df["OneDayChange"] - df["PnL"]
+    df["OneDayChange"]    = df["PnL"]
+    df["OneDayChangePct"] = df["PnL"] / prev_value.where(prev_value > 0) * 100
+    return df.drop(columns=["PnL"]), "gain"
+
+
 # =========================================================
 # PAGE HERO
 # =========================================================
@@ -377,18 +435,19 @@ pnl_sign   = "+" if total_pnl >= 0 else ""
 ret_sign   = "+" if absolute_return_pct >= 0 else ""
 xirr_sign  = "+" if overall_xirr_pct >= 0 else ""
 
-# Today's change for the hero card
+# Today's change for the hero card (gain/loss based, excludes new investments)
+day_change, _basis = None, "gain"
 try:
-    _d = pd.read_csv("data/portfolio_daily.csv")
-    _d["Date"] = pd.to_datetime(_d["Date"], format="%d-%m-%Y")
-    day_change = float(_d.sort_values("Date").iloc[-1]["OneDayChange"])
+    _d, _basis = load_portfolio_daily()
+    day_change = float(_d["OneDayChange"].dropna().iloc[-1])
 except Exception:
     day_change = None
 
 if day_change is None:
     day_sub, day_col = "live NAV", "rgba(255,255,255,0.45)"
 else:
-    day_sub = f"{'▲' if day_change >= 0 else '▼'} ₹{abs(day_change):,.0f} today"
+    day_sub = (f"{'▲' if day_change >= 0 else '▼'} ₹{abs(day_change):,.0f} today"
+               + ("" if _basis == "gain" else " (incl. new money)"))
     day_col = SUCCESS if day_change >= 0 else DANGER
 
 
@@ -626,6 +685,10 @@ def _compact_inr(v):
     return f"{v:+.0f}"
 
 
+def _pfmt(x):
+    return "n/a" if pd.isna(x) else f"{x:+.2f}%"
+
+
 def _lakh(v):
     return f"₹{v / 1e5:.2f}L" if abs(v) >= 1e5 else f"₹{v:,.0f}"
 
@@ -654,19 +717,12 @@ def _styler_map(styler, func, subset):
 # =========================================================
 # TAB 2 — DAILY PORTFOLIO SUMMARY
 # =========================================================
-@st.cache_data(ttl=900, show_spinner=False)
-def load_portfolio_daily():
-    d = pd.read_csv("data/portfolio_daily.csv")
-    d["Date"] = pd.to_datetime(d["Date"], format="%d-%m-%Y")
-    return d.sort_values("Date").reset_index(drop=True)
-
-
 def render_daily_tab():
     sec_header(ICON_DAILY_SUMMARY, "Daily Portfolio Summary",
                "performance · drawdown · monthly P&L")
 
     try:
-        full = load_portfolio_daily()
+        full, basis = load_portfolio_daily()
     except Exception as e:
         st.error(f"Could not load data/portfolio_daily.csv: {e}")
         return
@@ -752,15 +808,22 @@ def render_daily_tab():
     with k4:
         st.markdown(kpi_card(
             "Best day", _inr(chg[best_i]), SUCCESS,
-            f"{chart_df.loc[best_i, 'Date']:%d %b %Y} · {pct[best_i]:+.2f}%"), unsafe_allow_html=True)
+            f"{chart_df.loc[best_i, 'Date']:%d %b %Y} · {_pfmt(pct[best_i])}"), unsafe_allow_html=True)
     with k5:
         st.markdown(kpi_card(
             "Worst day", _inr(chg[worst_i]), DANGER,
-            f"{chart_df.loc[worst_i, 'Date']:%d %b %Y} · {pct[worst_i]:+.2f}%"), unsafe_allow_html=True)
+            f"{chart_df.loc[worst_i, 'Date']:%d %b %Y} · {_pfmt(pct[worst_i])}"), unsafe_allow_html=True)
     with k6:
         st.markdown(kpi_card(
             "Max drawdown", f"{max_dd:.2f}%", DANGER if max_dd < 0 else "#F1F5F9",
             "peak to trough"), unsafe_allow_html=True)
+
+    if basis == "gain":
+        st.caption("Daily change = day-on-day change in gain/loss (value − invested), summed across funds. "
+                   "New SIP money is excluded; % is P&L ÷ previous day's total value.")
+    else:
+        st.warning("Per-fund daily files not found — daily change below is the change in total value "
+                   "and includes new investments.")
 
     # ── Main chart: daily change bars + total value ──────────────────
     st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
@@ -858,12 +921,16 @@ def render_daily_tab():
         fmt = {}
         for c in disp.columns:
             if c != "Date" and pd.api.types.is_numeric_dtype(disp[c]):
-                fmt[c] = "{:+,.2f}" if c == "OneDayChange" else "{:,.2f}"
+                fmt[c] = ("{:+,.2f}" if c in ("OneDayChange", "NewMoney")
+                          else "{:+.2f}%" if c == "OneDayChangePct" else "{:,.2f}")
         styler = disp.style.format(fmt)
         tint_cols = [c for c in ("OneDayChange", "OneDayChangePct") if c in disp.columns]
         if tint_cols:
             styler = _styler_map(styler, _tint_value, tint_cols)
 
+        if "NewMoney" in disp.columns:
+            st.caption("NewMoney = the CSV's old value-based change − the gain-based change. "
+                       "It should be ≈ your SIP amount on SIP dates and ≈ 0 on other days.")
         st.dataframe(styler, hide_index=True, use_container_width=True, height=420)
         st.download_button(
             "⬇ CSV (this view)",
@@ -1097,21 +1164,6 @@ with tab3:
 # =========================================================
 # TAB 4 — DAILY CHANGE ACROSS FUNDS
 # =========================================================
-@st.cache_data(ttl=900, show_spinner=False)
-def load_daily_files():
-    """{fund_name: (code, DataFrame sorted by date)} for every fund that has a daily CSV."""
-    out = {}
-    for fund_name, meta in mutual_funds.items():
-        path = f"mutualfund/{meta['folder']}/daily_{meta['code']}.csv"
-        if not os.path.exists(path):
-            continue
-        d = pd.read_csv(path)
-        d.columns = d.columns.str.strip()
-        d["date"] = pd.to_datetime(d["date"], format="%d-%m-%Y", errors="coerce")
-        out[fund_name] = (meta["code"], d.dropna(subset=["date"]).sort_values("date"))
-    return out
-
-
 def compute_daily_changes(daily_files, target_date):
     """One row per fund that has a NAV on target_date and an earlier NAV to compare with."""
     target = pd.Timestamp(target_date)
