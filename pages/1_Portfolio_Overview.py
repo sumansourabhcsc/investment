@@ -160,6 +160,37 @@ hr { border-color: rgba(255,255,255,0.06) !important; margin: 2rem 0 !important;
     animation: gridShift 25s linear infinite;
 }
 @keyframes gridShift { 0% { background-position: 0 0; } 100% { background-position: 60px 60px; } }
+
+/* ── Tabs: pill-style bar instead of the default underline ── */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px; padding: 6px; overflow-x: auto;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07); border-radius: 14px;
+}
+.stTabs [data-baseweb="tab"] {
+    height: 44px; padding: 0 20px; border-radius: 10px; white-space: nowrap;
+    background: transparent; color: rgba(255,255,255,0.55);
+    font-size: 15px; font-weight: 600; transition: all 0.2s;
+}
+.stTabs [data-baseweb="tab"]:hover { color: #FFFFFF; background: rgba(255,255,255,0.05); }
+.stTabs [aria-selected="true"] {
+    color: #F0F4FF !important;
+    background: linear-gradient(135deg, rgba(29,158,117,0.24), rgba(6,182,212,0.14)) !important;
+    box-shadow: inset 0 0 0 1px rgba(29,158,117,0.5), 0 0 18px rgba(29,158,117,0.12);
+}
+.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] { display: none; }
+.stTabs [data-baseweb="tab-panel"] { padding-top: 1.6rem; }
+
+/* ── Radio groups inside keyed containers → pills ── */
+div[class*="st-key-pillgroup_"] div[role="radiogroup"] { gap: 6px; flex-wrap: wrap; }
+div[class*="st-key-pillgroup_"] div[role="radiogroup"] > label {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 999px; padding: 4px 14px; margin: 0; transition: all 0.2s;
+}
+div[class*="st-key-pillgroup_"] div[role="radiogroup"] > label:hover { border-color: rgba(29,158,117,0.5); }
+div[class*="st-key-pillgroup_"] div[role="radiogroup"] > label:has(input:checked) {
+    background: rgba(29,158,117,0.2); border-color: rgba(29,158,117,0.65);
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -388,10 +419,10 @@ st.divider()
 # TABS
 # =========================================================
 tab1, tab2, tab3, tab4 = st.tabs([
-    "≡  Fund Details",
-    "▐  Daily Summary",
-    "⊞  Monthly Investment",
-    "∧  Daily Change",
+    "📊  Fund Details",
+    "📈  Daily Summary",
+    "🗓️  Monthly Investment",
+    "⚡  Daily Change",
 ])
 
 
@@ -562,78 +593,183 @@ with tab1:
 
 
 # =========================================================
-# TAB 2 — DAILY PORTFOLIO SUMMARY + PERFORMANCE CHART
+# SHARED HELPERS FOR TABS 2–4
 # =========================================================
-with tab2:
-    sec_header(ICON_DAILY_SUMMARY, "Daily Portfolio Summary", "sorted by date · all funds")
+MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+month_map   = {i + 1: n for i, n in enumerate(MONTH_NAMES)}
+DIVERGING   = [[0, "#B91C1C"], [0.5, "#1F2937"], [1, "#15803D"]]
 
-    daily_path = "data/portfolio_daily.csv"
-    daily_df   = pd.read_csv(daily_path)
-    daily_df["Date"] = pd.to_datetime(daily_df["Date"], format="%d-%m-%Y")
-    daily_df = daily_df.sort_values("Date", ascending=False)
 
-    display_daily = daily_df.copy()
-    display_daily["Date"] = display_daily["Date"].dt.strftime("%d-%m-%Y")
-    st.dataframe(display_daily, use_container_width=True)
+def keyed_container(key):
+    """st.container(key=...) needs Streamlit >= 1.39; fall back to a plain container."""
+    try:
+        return st.container(key=key)
+    except TypeError:
+        return st.container()
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    sec_header(ICON_DAILY_SUMMARY, "Portfolio Performance", "daily change · total value")
 
-    # ── Time-period filter ──────────────────────────────────────────────────
-    chart_df_full = daily_df.sort_values("Date")
+def _inr(v, decimals=0):
+    return f"{'+' if v >= 0 else '−'}₹{abs(v):,.{decimals}f}"
 
-    PERIODS = {"1M": 30, "3M": 90, "6M": 180, "1Y": 365, "All": None, "Custom": -1}
 
-    col_btns, col_custom = st.columns([3, 2])
+def _short(name, n=26):
+    return name if len(name) <= n else name[:n - 1] + "…"
 
+
+def _compact_inr(v):
+    a = abs(v)
+    if a >= 1e5:
+        return f"{v / 1e5:+.1f}L"
+    if a >= 1e3:
+        return f"{v / 1e3:+.1f}k"
+    return f"{v:+.0f}"
+
+
+def _lakh(v):
+    return f"₹{v / 1e5:.2f}L" if abs(v) >= 1e5 else f"₹{v:,.0f}"
+
+
+def _tint_value(v):
+    """Green for positive, red for negative; works on numbers and strings like '-1.2%'."""
+    try:
+        x = float(str(v).replace("%", "").replace(",", "").replace("₹", "").replace("+", ""))
+    except ValueError:
+        return ""
+    if x > 0:
+        return "color: #69F0AE; font-weight: 600"
+    if x < 0:
+        return "color: #FF6B6B; font-weight: 600"
+    return "color: #9CA3AF"
+
+
+def _fmt_dash(x):
+    return "–" if (pd.isna(x) or x == 0) else f"{x:,.0f}"
+
+
+def _styler_map(styler, func, subset):
+    return (styler.map if hasattr(styler, "map") else styler.applymap)(func, subset=subset)
+
+
+# =========================================================
+# TAB 2 — DAILY PORTFOLIO SUMMARY
+# =========================================================
+@st.cache_data(ttl=900, show_spinner=False)
+def load_portfolio_daily():
+    d = pd.read_csv("data/portfolio_daily.csv")
+    d["Date"] = pd.to_datetime(d["Date"], format="%d-%m-%Y")
+    return d.sort_values("Date").reset_index(drop=True)
+
+
+def render_daily_tab():
+    sec_header(ICON_DAILY_SUMMARY, "Daily Portfolio Summary",
+               "performance · drawdown · monthly P&L")
+
+    try:
+        full = load_portfolio_daily()
+    except Exception as e:
+        st.error(f"Could not load data/portfolio_daily.csv: {e}")
+        return
+    if full.empty:
+        st.warning("data/portfolio_daily.csv has no rows.")
+        return
+
+    PERIODS  = {"1M": 30, "3M": 90, "6M": 180, "1Y": 365, "All": None, "Custom": -1}
+    min_date = full["Date"].min().date()
+    max_date = full["Date"].max().date()
+
+    # Optional "invested" column — opt-in, because the column name is a guess
+    inv_col = next((c for c in full.columns
+                    if "invest" in c.lower() and pd.api.types.is_numeric_dtype(full[c])), None)
+
+    # ── Controls ─────────────────────────────────────────────────────
+    col_btns, col_custom, col_inv = st.columns([3, 2.5, 2])
     with col_btns:
-        selected_period = st.radio(
-            "Period",
-            options=list(PERIODS.keys()),
-            index=list(PERIODS.keys()).index("All"),   # default → All
-            horizontal=True,
-            label_visibility="collapsed",
-        )
-
-    min_date = chart_df_full["Date"].min().date()
-    max_date = chart_df_full["Date"].max().date()
+        with keyed_container("pillgroup_daily"):
+            selected_period = st.radio(
+                "Period", options=list(PERIODS.keys()),
+                index=list(PERIODS.keys()).index("All"),      # default → All
+                horizontal=True, label_visibility="collapsed",
+            )
+    with col_inv:
+        show_inv = st.toggle(f"Show “{inv_col}” line", value=False) if inv_col else False
 
     if selected_period == "Custom":
         with col_custom:
             custom_range = st.date_input(
-                "Date range",
-                value=(min_date, max_date),
-                min_value=min_date,
-                max_value=max_date,
-                label_visibility="collapsed",
+                "Date range", value=(min_date, max_date),
+                min_value=min_date, max_value=max_date, label_visibility="collapsed",
             )
         # date_input returns a tuple only when both ends are picked
         if isinstance(custom_range, (list, tuple)) and len(custom_range) == 2:
             start_date, end_date = custom_range
         else:
             start_date, end_date = min_date, max_date
-
-        chart_df = chart_df_full[
-            (chart_df_full["Date"].dt.date >= start_date) &
-            (chart_df_full["Date"].dt.date <= end_date)
-        ].copy()
+        chart_df = full[(full["Date"].dt.date >= start_date) &
+                        (full["Date"].dt.date <= end_date)].copy()
     else:
         days = PERIODS[selected_period]
         if days is None:
-            chart_df = chart_df_full.copy()
+            chart_df = full.copy()
         else:
-            cutoff = chart_df_full["Date"].max() - pd.Timedelta(days=days)
-            chart_df = chart_df_full[chart_df_full["Date"] >= cutoff].copy()
-    # ────────────────────────────────────────────────────────────────────────
+            cutoff   = full["Date"].max() - pd.Timedelta(days=days)
+            chart_df = full[full["Date"] >= cutoff].copy()
 
-    chart_df["OneDayChangePct_val"] = (
-        chart_df["OneDayChangePct"].astype(str).str.replace("%", "", regex=False).astype(float)
+    chart_df = chart_df.dropna(subset=["OneDayChange"])
+    if len(chart_df) < 2:
+        st.info("Not enough data in this range — pick a wider period.")
+        return
+
+    # ── Period statistics ────────────────────────────────────────────
+    chg = chart_df["OneDayChange"]
+    pct = pd.to_numeric(
+        chart_df["OneDayChangePct"].astype(str).str.replace("%", "", regex=False),
+        errors="coerce",
     )
-    bar_colors = [SUCCESS if x >= 0 else DANGER for x in chart_df["OneDayChange"]]
+    cum         = (1 + pct.fillna(0) / 100).cumprod()           # return index, ignores new contributions
+    drawdown    = (cum / cum.cummax() - 1) * 100
+    period_pnl  = float(chg.sum())
+    period_ret  = float((cum.iloc[-1] - 1) * 100)
+    max_dd      = float(drawdown.min())
+    n_up, n_down = int((chg > 0).sum()), int((chg < 0).sum())
+    best_i, worst_i = chg.idxmax(), chg.idxmin()
+
+    st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
+    k1, k2, k3, k4, k5, k6 = st.columns([1.3, 1, 1, 1, 1, 1])
+    with k1:
+        st.markdown(kpi_card(
+            "Period P&L", _inr(period_pnl), SUCCESS if period_pnl >= 0 else DANGER,
+            f"{chart_df['Date'].min():%d %b} → {chart_df['Date'].max():%d %b %Y}", hero=True),
+            unsafe_allow_html=True)
+    with k2:
+        st.markdown(kpi_card(
+            "Return", f"{period_ret:+.2f}%", SUCCESS if period_ret >= 0 else DANGER,
+            "compounded daily %"), unsafe_allow_html=True)
+    with k3:
+        st.markdown(kpi_card(
+            "Up days", f"{n_up / len(chart_df) * 100:.0f}%", "#F1F5F9",
+            f"{n_up} up · {n_down} down"), unsafe_allow_html=True)
+    with k4:
+        st.markdown(kpi_card(
+            "Best day", _inr(chg[best_i]), SUCCESS,
+            f"{chart_df.loc[best_i, 'Date']:%d %b %Y} · {pct[best_i]:+.2f}%"), unsafe_allow_html=True)
+    with k5:
+        st.markdown(kpi_card(
+            "Worst day", _inr(chg[worst_i]), DANGER,
+            f"{chart_df.loc[worst_i, 'Date']:%d %b %Y} · {pct[worst_i]:+.2f}%"), unsafe_allow_html=True)
+    with k6:
+        st.markdown(kpi_card(
+            "Max drawdown", f"{max_dd:.2f}%", DANGER if max_dd < 0 else "#F1F5F9",
+            "peak to trough"), unsafe_allow_html=True)
+
+    # ── Main chart: daily change bars + total value ──────────────────
+    st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
+    small_title("Portfolio performance · daily change & total value")
+    bar_colors = [SUCCESS if x >= 0 else DANGER for x in chg]
 
     fig_perf = make_subplots(specs=[[{"secondary_y": True}]])
     fig_perf.add_trace(go.Bar(
-        x=chart_df["Date"], y=chart_df["OneDayChange"],
+        x=chart_df["Date"], y=chg,
         name="Daily Change (₹)", marker_color=bar_colors, marker_line_width=0, opacity=0.75,
         hovertemplate="<b>%{x|%d %b %Y}</b><br>Daily Change: ₹%{y:,.2f}<extra></extra>"
     ), secondary_y=False)
@@ -644,6 +780,13 @@ with tab2:
         fill="tozeroy", fillcolor="rgba(79,139,249,0.06)",
         hovertemplate="<b>%{x|%d %b %Y}</b><br>Value: ₹%{y:,.0f}<extra></extra>"
     ), secondary_y=True)
+    if show_inv and inv_col:
+        fig_perf.add_trace(go.Scatter(
+            x=chart_df["Date"], y=chart_df[inv_col],
+            name=f"{inv_col} (₹)", mode="lines",
+            line=dict(color="#EF9F27", width=2, dash="dot"),
+            hovertemplate="<b>%{x|%d %b %Y}</b><br>" + inv_col + ": ₹%{y:,.0f}<extra></extra>"
+        ), secondary_y=True)
     fig_perf.update_layout(
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15,22,41,0.6)",
         font=dict(color="rgba(255,255,255,0.6)", family="Space Grotesk"),
@@ -655,97 +798,300 @@ with tab2:
         bargap=0.3,
         xaxis=dict(showgrid=False, zeroline=False),
     )
-    fig_perf.update_yaxes(
-        showgrid=True, gridcolor="rgba(255,255,255,0.05)",
-        zeroline=False, tickprefix="₹", secondary_y=False
-    )
-    fig_perf.update_yaxes(
-        showgrid=False, zeroline=False, tickprefix="₹", secondary_y=True
-    )
+    fig_perf.update_yaxes(showgrid=True, gridcolor="rgba(255,255,255,0.05)",
+                          zeroline=False, tickprefix="₹", secondary_y=False)
+    fig_perf.update_yaxes(showgrid=False, zeroline=False, tickprefix="₹", secondary_y=True)
     st.plotly_chart(fig_perf, use_container_width=True)
 
+    # ── Drawdown + monthly P&L heatmap ───────────────────────────────
+    col_dd, col_heat = st.columns(2, gap="large")
 
-# =========================================================
-# TAB 3 — MONTHLY INVESTMENT SUMMARY + BAR CHART
-# =========================================================
-with tab3:
-    sec_header(ICON_MONTHLY, "Monthly Investment Summary", "SIP breakdown by fund & month")
-
-    monthly_data = []
-    month_map    = {1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
-                    7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"}
-
-    for fund_name, meta in mutual_funds.items():
-        try:
-            folder   = meta["folder"]
-            code     = meta["code"]
-            df_month = load_fund(folder)
-            df_month["Date"]  = pd.to_datetime(df_month["Date"], errors="coerce")
-            df_month          = df_month.dropna(subset=["Date"])
-            df_month["Year"]  = df_month["Date"].dt.year
-            df_month["Month"] = df_month["Date"].dt.month
-            grouped = df_month.groupby(["Year", "Month"])["Amount"].sum().reset_index()
-            for _, row in grouped.iterrows():
-                monthly_data.append([code, fund_name, row["Year"], row["Month"], row["Amount"]])
-        except Exception as e:
-            st.warning(f"{fund_name} skipped: {e}")
-
-    if monthly_data:
-        monthly_df    = pd.DataFrame(monthly_data, columns=["Code", "Fund", "Year", "Month", "Amount"])
-        years         = sorted(monthly_df["Year"].dropna().astype(int).unique())
-        selected_year = st.selectbox("Select Year", years, index=len(years) - 1)
-
-        year_df  = monthly_df[monthly_df["Year"] == selected_year]
-        pivot_df = year_df.pivot_table(
-            index=["Code", "Fund"], columns="Month",
-            values="Amount", aggfunc="sum", fill_value=0
-        ).reset_index()
-        pivot_df = pivot_df.rename(columns=month_map)
-        for m in month_map.values():
-            if m not in pivot_df.columns:
-                pivot_df[m] = 0
-
-        month_cols        = list(month_map.values())
-        pivot_df          = pivot_df[["Code", "Fund"] + month_cols]
-        pivot_df["Total"] = pivot_df[month_cols].sum(axis=1)
-        total_row = ["", "TOTAL"] + [pivot_df[m].sum() for m in month_cols] + [pivot_df["Total"].sum()]
-        final_df  = pd.concat(
-            [pivot_df, pd.DataFrame([total_row], columns=pivot_df.columns)],
-            ignore_index=True
-        )
-        for col in final_df.select_dtypes(include="number").columns:
-            final_df[col] = final_df[col].map(lambda x: f"{x:,.0f}")
-        st.dataframe(final_df, use_container_width=True)
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        bar_data = year_df.copy()
-        bar_data["Month_Name"] = bar_data["Month"].map(month_map)
-        fig_month = px.bar(
-            bar_data, x="Month_Name", y="Amount", color="Fund",
-            barmode="stack", color_discrete_sequence=PALETTE,
-            labels={"Month_Name": "Month", "Amount": "Amount (₹)"}
-        )
-        fig_month.update_layout(
+    with col_dd:
+        small_title("Drawdown from peak (return-based, ignores new money)")
+        fig_dd = go.Figure(go.Scatter(
+            x=chart_df["Date"], y=drawdown, mode="lines",
+            line=dict(color=DANGER, width=1.8),
+            fill="tozeroy", fillcolor="rgba(226,75,74,0.18)",
+            hovertemplate="<b>%{x|%d %b %Y}</b><br>Drawdown: %{y:.2f}%<extra></extra>",
+        ))
+        fig_dd.update_layout(
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15,22,41,0.6)",
             font=dict(color="rgba(255,255,255,0.6)", family="Space Grotesk"),
-            height=340, margin=dict(t=20, b=10, l=10, r=10),
-            legend=dict(
-                font=dict(size=11, color="rgba(255,255,255,0.55)"),
-                bgcolor="rgba(0,0,0,0)", orientation="h",
-                yanchor="top", y=-0.2, xanchor="left", x=0
-            ),
-            bargap=0.25,
-            xaxis=dict(
-                showgrid=False, zeroline=False,
-                categoryorder="array", categoryarray=list(month_map.values())
-            ),
-            yaxis=dict(
-                showgrid=True, gridcolor="rgba(255,255,255,0.05)",
-                zeroline=False, tickprefix="₹"
-            ),
+            height=300, margin=dict(t=10, b=30, l=10, r=10), showlegend=False,
+            xaxis=dict(showgrid=False, zeroline=False),
+            yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.05)",
+                       zeroline=False, ticksuffix="%"),
         )
-        st.plotly_chart(fig_month, use_container_width=True)
+        st.plotly_chart(fig_dd, use_container_width=True)
+
+    with col_heat:
+        small_title("Monthly P&L (₹, all history)")
+        monthly_pnl = (
+            full.assign(Year=full["Date"].dt.year, Month=full["Date"].dt.month)
+                .groupby(["Year", "Month"])["OneDayChange"].sum()
+                .unstack("Month").reindex(columns=range(1, 13))
+        )
+        z    = monthly_pnl.to_numpy(dtype=float)
+        text = [["" if pd.isna(v) else _compact_inr(v) for v in row] for row in z]
+        fig_heat = go.Figure(go.Heatmap(
+            z=z, x=MONTH_NAMES, y=[str(y) for y in monthly_pnl.index],
+            text=text, texttemplate="%{text}", textfont=dict(size=11),
+            colorscale=DIVERGING, zmid=0, showscale=False, xgap=3, ygap=3,
+            hoverongaps=False,
+            hovertemplate="<b>%{y} %{x}</b><br>P&L: ₹%{z:+,.0f}<extra></extra>",
+        ))
+        fig_heat.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="rgba(255,255,255,0.7)", family="Space Grotesk"),
+            height=max(200, len(monthly_pnl) * 48 + 70), margin=dict(t=10, b=10, l=10, r=10),
+            yaxis=dict(type="category", autorange="reversed"),
+            xaxis=dict(side="top"),
+        )
+        st.plotly_chart(fig_heat, use_container_width=True)
+
+    # ── Data table + download ────────────────────────────────────────
+    st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
+    with st.expander(f"Daily data table · {len(chart_df)} days in view", expanded=False):
+        disp = chart_df.sort_values("Date", ascending=False).copy()
+        disp["Date"] = disp["Date"].dt.strftime("%d-%m-%Y")
+
+        fmt = {}
+        for c in disp.columns:
+            if c != "Date" and pd.api.types.is_numeric_dtype(disp[c]):
+                fmt[c] = "{:+,.2f}" if c == "OneDayChange" else "{:,.2f}"
+        styler = disp.style.format(fmt)
+        tint_cols = [c for c in ("OneDayChange", "OneDayChangePct") if c in disp.columns]
+        if tint_cols:
+            styler = _styler_map(styler, _tint_value, tint_cols)
+
+        st.dataframe(styler, hide_index=True, use_container_width=True, height=420)
+        st.download_button(
+            "⬇ CSV (this view)",
+            data=disp.to_csv(index=False).encode("utf-8-sig"),
+            file_name=f"portfolio_daily_{datetime.now():%Y%m%d}.csv",
+            mime="text/csv",
+        )
+
+
+with tab2:
+    render_daily_tab()
+
+
+# =========================================================
+# TAB 3 — MONTHLY INVESTMENT SUMMARY
+# =========================================================
+@st.cache_data(ttl=900, show_spinner=False)
+def load_monthly_investments():
+    """Returns (DataFrame[Code, Fund, Year, Month, Amount], warning messages)."""
+    rows, msgs = [], []
+    for fund_name, meta in mutual_funds.items():
+        try:
+            d = load_fund(meta["folder"]).copy()
+            d["Date"] = pd.to_datetime(d["Date"], errors="coerce")
+            d = d.dropna(subset=["Date"])
+            g = (d.groupby([d["Date"].dt.year.rename("Year"),
+                            d["Date"].dt.month.rename("Month")])["Amount"]
+                   .sum().reset_index())
+            for _, r in g.iterrows():
+                rows.append([meta["code"], fund_name, int(r["Year"]), int(r["Month"]), float(r["Amount"])])
+        except Exception as e:
+            msgs.append(f"{fund_name} skipped: {e}")
+    return pd.DataFrame(rows, columns=["Code", "Fund", "Year", "Month", "Amount"]), msgs
+
+
+def render_monthly_tab():
+    sec_header(ICON_MONTHLY, "Monthly Investment Summary", "SIP breakdown by fund & month")
+
+    monthly_df, msgs = load_monthly_investments()
+    for m in msgs:
+        st.warning(m)
+    if monthly_df.empty:
+        st.info("No investment data found.")
+        return
+
+    monthly_df = monthly_df.copy()
+    monthly_df["Category"] = monthly_df["Fund"].map(categorize)
+    years = sorted(monthly_df["Year"].unique())
+
+    # ── Controls ─────────────────────────────────────────────────────
+    c_year, c_group, c_cum, _ = st.columns([1.4, 2.4, 1.8, 3.4])
+    with c_year:
+        selected_year = int(st.selectbox("Select Year", years, index=len(years) - 1))
+    with c_group:
+        with keyed_container("pillgroup_monthly"):
+            group_by = st.radio("Chart groups", ["Fund", "Category"], horizontal=True)
+    with c_cum:
+        show_cum = st.toggle("Cumulative line", value=True)
+
+    year_df = monthly_df[monthly_df["Year"] == selected_year]
+    now     = datetime.now()
+    elapsed = 12 if selected_year < now.year else (now.month if selected_year == now.year else 12)
+
+    by_month   = year_df.groupby("Month")["Amount"].sum().reindex(range(1, 13), fill_value=0.0)
+    total_year = float(by_month.sum())
+    prev_total = float(monthly_df.loc[monthly_df["Year"] == selected_year - 1, "Amount"].sum())
+    avg_month  = total_year / elapsed if elapsed else 0.0
+    peak_month = int(by_month.idxmax())
+    invested_m = int((by_month.iloc[:elapsed] > 0).sum())
+    active     = int(year_df.loc[year_df["Amount"] > 0, "Fund"].nunique())
+    lifetime   = float(monthly_df["Amount"].sum())
+
+    if prev_total > 0:
+        yoy = (total_year / prev_total - 1) * 100
+        yoy_text, yoy_color = f"{yoy:+.1f}% vs {selected_year - 1}", (SUCCESS if yoy >= 0 else DANGER)
+    else:
+        yoy_text, yoy_color = f"no {selected_year - 1} data to compare", "rgba(255,255,255,0.45)"
+
+    # ── Summary strip ────────────────────────────────────────────────
+    st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
+    k1, k2, k3, k4, k5 = st.columns([1.3, 1, 1, 1, 1])
+    with k1:
+        st.markdown(kpi_card(f"Invested in {selected_year}", f"₹{total_year:,.0f}", "#F1F5F9",
+                             yoy_text, yoy_color, hero=True), unsafe_allow_html=True)
+    with k2:
+        st.markdown(kpi_card("Monthly average", f"₹{avg_month:,.0f}", "#F1F5F9",
+                             f"over {elapsed} months"), unsafe_allow_html=True)
+    with k3:
+        st.markdown(kpi_card("Peak month", f"{month_map[peak_month]}", "#F1F5F9",
+                             f"₹{by_month[peak_month]:,.0f}"), unsafe_allow_html=True)
+    with k4:
+        st.markdown(kpi_card("Consistency", f"{invested_m} / {elapsed}",
+                             SUCCESS if invested_m == elapsed else "#F1F5F9",
+                             "months with an investment"), unsafe_allow_html=True)
+    with k5:
+        st.markdown(kpi_card("Active funds", f"{active}", "#F1F5F9",
+                             f"lifetime ₹{lifetime:,.0f}"), unsafe_allow_html=True)
+
+    # ── Stacked bars + cumulative line ───────────────────────────────
+    st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
+    small_title(f"Monthly investment by {group_by.lower()}")
+    grp   = year_df.groupby([group_by, "Month"])["Amount"].sum().reset_index()
+    order = grp.groupby(group_by)["Amount"].sum().sort_values(ascending=False).index
+
+    fig_month = make_subplots(specs=[[{"secondary_y": True}]])
+    for i, name in enumerate(order):
+        s = (grp[grp[group_by] == name].set_index("Month")["Amount"]
+                .reindex(range(1, 13), fill_value=0.0))
+        fig_month.add_trace(go.Bar(
+            x=MONTH_NAMES, y=s.values, name=str(name),
+            marker_color=PALETTE[i % len(PALETTE)],
+            hovertemplate="<b>" + str(name) + "</b><br>%{x}: ₹%{y:,.0f}<extra></extra>",
+        ), secondary_y=False)
+    if show_cum:
+        cum = by_month.cumsum().iloc[:elapsed]
+        fig_month.add_trace(go.Scatter(
+            x=MONTH_NAMES[:elapsed], y=cum.values, name="Cumulative (₹)",
+            mode="lines+markers", line=dict(color="#4FC3F7", width=2.5), marker=dict(size=6),
+            hovertemplate="<b>Cumulative</b><br>%{x}: ₹%{y:,.0f}<extra></extra>",
+        ), secondary_y=True)
+    fig_month.update_layout(
+        barmode="stack",
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15,22,41,0.6)",
+        font=dict(color="rgba(255,255,255,0.6)", family="Space Grotesk"),
+        height=400, margin=dict(t=20, b=10, l=10, r=10),
+        legend=dict(font=dict(size=11, color="rgba(255,255,255,0.65)"),
+                    bgcolor="rgba(0,0,0,0)", orientation="h",
+                    yanchor="top", y=-0.12, xanchor="left", x=0),
+        bargap=0.25, hovermode="x unified",
+        xaxis=dict(showgrid=False, zeroline=False,
+                   categoryorder="array", categoryarray=MONTH_NAMES),
+    )
+    fig_month.update_yaxes(showgrid=True, gridcolor="rgba(255,255,255,0.05)",
+                           zeroline=False, tickprefix="₹", secondary_y=False)
+    fig_month.update_yaxes(showgrid=False, zeroline=False, tickprefix="₹", secondary_y=True)
+    st.plotly_chart(fig_month, use_container_width=True)
+
+    # ── Fund × month table (heat-shaded, numeric, no inner scroll) ───
+    small_title("Fund × month")
+    pivot = (year_df.pivot_table(index=["Code", "Fund"], columns="Month",
+                                 values="Amount", aggfunc="sum", fill_value=0)
+                    .reindex(columns=range(1, 13), fill_value=0))
+    pivot.columns = MONTH_NAMES
+    pivot["Total"] = pivot.sum(axis=1)
+    pivot = pivot.sort_values("Total", ascending=False).reset_index()
+    pivot["Code"] = pivot["Code"].astype(str)
+
+    total_row = {"Code": "", "Fund": "TOTAL",
+                 **{m: float(pivot[m].sum()) for m in MONTH_NAMES + ["Total"]}}
+    final_df = pd.concat([pivot, pd.DataFrame([total_row])], ignore_index=True)
+
+    vmax = float(pivot[MONTH_NAMES].to_numpy().max()) or 1.0
+
+    def _shade(v):
+        if not isinstance(v, (int, float)) or pd.isna(v) or v <= 0:
+            return "color: rgba(255,255,255,0.25)"
+        a = min(0.6, 0.12 + 0.48 * v / vmax)
+        return f"background-color: rgba(29,158,117,{a:.2f}); color: #F0F4FF"
+
+    def _bold_total(row):
+        return ["font-weight: 700; border-top: 1px solid rgba(255,255,255,0.25)"
+                if row["Fund"] == "TOTAL" else "" for _ in row]
+
+    styler = final_df.style.format({c: _fmt_dash for c in MONTH_NAMES + ["Total"]})
+    styler = _styler_map(styler, _shade, pd.IndexSlice[final_df.index[:-1], MONTH_NAMES])
+    styler = styler.apply(_bold_total, axis=1)
+
+    st.dataframe(
+        styler, hide_index=True, use_container_width=True,
+        height=min((len(final_df) + 1) * 35 + 3, 760),
+        column_config={"Fund": st.column_config.TextColumn(width="large")},
+    )
+    st.download_button(
+        f"⬇ CSV ({selected_year})",
+        data=final_df.to_csv(index=False).encode("utf-8-sig"),
+        file_name=f"monthly_investment_{selected_year}.csv",
+        mime="text/csv",
+    )
+
+    # ── Year-over-year + fund share ──────────────────────────────────
+    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+    col_y, col_s = st.columns(2, gap="large")
+
+    with col_y:
+        small_title("Invested per year")
+        by_year = monthly_df.groupby("Year")["Amount"].sum().reset_index()
+        fig_y = go.Figure(go.Bar(
+            x=by_year["Year"].astype(str), y=by_year["Amount"],
+            marker_color=[SUCCESS if y == selected_year else "#3D5A80" for y in by_year["Year"]],
+            text=[_lakh(v) for v in by_year["Amount"]], textposition="outside", cliponaxis=False,
+            hovertemplate="<b>%{x}</b><br>₹%{y:,.0f}<extra></extra>",
+        ))
+        fig_y.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="rgba(255,255,255,0.7)", family="Space Grotesk"),
+            height=320, margin=dict(t=20, b=10, l=10, r=10),
+            xaxis=dict(type="category", showgrid=False),
+            yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.05)", tickprefix="₹"),
+        )
+        st.plotly_chart(fig_y, use_container_width=True)
+
+    with col_s:
+        small_title(f"Share of {selected_year} investment by fund")
+        fund_tot = year_df.groupby("Fund")["Amount"].sum()
+        fund_tot = fund_tot[fund_tot > 0].sort_values()
+        if fund_tot.empty or total_year <= 0:
+            st.info("No investments in this year.")
+        else:
+            fig_s = go.Figure(go.Bar(
+                x=fund_tot.values, y=[_short(n, 30) for n in fund_tot.index], orientation="h",
+                marker_color=SUCCESS,
+                text=[f"{v / total_year * 100:.0f}%" for v in fund_tot.values],
+                textposition="outside", cliponaxis=False,
+                customdata=list(fund_tot.index),
+                hovertemplate="<b>%{customdata}</b><br>₹%{x:,.0f}<extra></extra>",
+            ))
+            fig_s.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(color="rgba(255,255,255,0.7)", family="Space Grotesk"),
+                height=max(320, len(fund_tot) * 28 + 60), margin=dict(t=10, b=10, l=10, r=40),
+                xaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.05)", tickprefix="₹"),
+                yaxis=dict(automargin=True),
+            )
+            st.plotly_chart(fig_s, use_container_width=True)
+
+
+with tab3:
+    render_monthly_tab()
 
 
 # =========================================================
@@ -797,14 +1143,6 @@ def _shift_daily_date(direction, dates):
         later = [d for d in dates if d > cur]
         if later:
             st.session_state["daily_date"] = later[0]
-
-
-def _inr(v, decimals=0):
-    return f"{'+' if v >= 0 else '−'}₹{abs(v):,.{decimals}f}"
-
-
-def _short(name, n=26):
-    return name if len(name) <= n else name[:n - 1] + "…"
 
 
 with tab4:
