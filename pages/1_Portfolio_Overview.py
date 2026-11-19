@@ -1375,7 +1375,7 @@ with tab4:
             st.plotly_chart(fig, use_container_width=True)
 
         with col_tbl:
-	        with st.expander(f"All {len(df_day)} funds", expanded=False):
+            small_title(f"All {len(df_day)} funds")
             table = df_day[["Fund", "Change (₹)", "NAV %"]]
 
             def _tint(v):
