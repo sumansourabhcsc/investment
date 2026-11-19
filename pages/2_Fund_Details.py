@@ -422,12 +422,13 @@ avg_buy_nav     = invested / total_units if total_units > 0 else 0
 absolute_return = ((current_value - invested) / invested * 100) if invested > 0 else 0
 xirr_pct        = get_fund_xirr_pct(folder, latest_nav)
 
-# Today's change = change in gain/loss between the last two daily rows (excludes new SIP money)
-day_chg = None
+# Change in gain/loss between the last two daily rows (excludes new SIP money)
+day_chg, day_date = None, None
 if not daily_df.empty and "absolute_gain_loss" in daily_df.columns and len(daily_df) >= 2:
     g = pd.to_numeric(daily_df["absolute_gain_loss"], errors="coerce")
     if pd.notna(g.iloc[0]) and pd.notna(g.iloc[1]):
-        day_chg = float(g.iloc[0] - g.iloc[1])
+        day_chg  = float(g.iloc[0] - g.iloc[1])
+        day_date = daily_df["Date"].iloc[0]      # date of the latest daily row (daily_df is newest first)
 
 
 # =========================================================
@@ -465,9 +466,9 @@ ret_color  = SUCCESS if absolute_return >= 0 else DANGER
 xirr_color = "#F1F5F9" if pd.isna(xirr_pct) else (SUCCESS if xirr_pct >= 0 else DANGER)
 
 if day_chg is None:
-    day_sub, day_col = f"NAV {latest_date.strftime('%d %b')}", "rgba(255,255,255,0.45)"
+    day_sub, day_col = f"NAV {latest_date.strftime('%d %b %Y')}", "rgba(255,255,255,0.45)"
 else:
-    day_sub = f"{'▲' if day_chg >= 0 else '▼'} {inr(abs(day_chg), 0)} today"
+    day_sub = f"{'▲' if day_chg >= 0 else '▼'} {inr(abs(day_chg), 0)} on {day_date.strftime('%d %b %Y')}"
     day_col = SUCCESS if day_chg >= 0 else DANGER
 
 c1, c2, c3, c4, c5, c6, c7 = st.columns([1.4, 1, 1, 1, 1, 1, 1])
