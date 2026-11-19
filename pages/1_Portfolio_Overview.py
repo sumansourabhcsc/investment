@@ -253,26 +253,6 @@ def small_title(text):
     )
 
 
-def more_columns(df, extra_cols, keep=("Fund",), label=None, fmt=None,
-                 tint_cols=None, tint_fn=None, height_cap=620):
-    """Collapsed "More columns (...)" panel under a table: the key column(s) + the extra columns.
-    Columns that don't exist in df are ignored; nothing is drawn if there are no extras."""
-    extras = [c for c in extra_cols if c in df.columns]
-    if not extras:
-        return
-    cols  = [c for c in keep if c in df.columns and c not in extras] + extras
-    view  = df[cols]
-    label = label or "More columns (" + ", ".join(extras) + ")"
-    with st.expander(label):
-        fmt_use = {k: v for k, v in (fmt or {}).items() if k in view.columns} or None
-        styler  = view.style.format(fmt_use, na_rep="–")
-        t_cols  = [c for c in (tint_cols or []) if c in view.columns]
-        if t_cols and tint_fn is not None:
-            styler = (styler.map if hasattr(styler, "map") else styler.applymap)(tint_fn, subset=t_cols)
-        st.dataframe(styler, hide_index=True, use_container_width=True,
-                     height=min((len(view) + 1) * 35 + 3, height_cap))
-
-
 def change_summary_box(total_change):
     sign  = "+" if total_change >= 0 else ""
     color = "#69F0AE" if total_change >= 0 else "#FF6B6B"
@@ -433,18 +413,38 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+
+
 # =========================================================
 # PORTFOLIO REFRESH CONTROL
 # =========================================================
+
 refresh_col, info_col = st.columns([1, 5])
 
 with refresh_col:
-    if st.button("↻ Refresh Portfolio", key="refresh_portfolio", use_container_width=True):
-        st.cache_data.clear()      # NAV, fund returns, XIRR, daily files, monthly investments — everything
+    if st.button(
+        "↻ Refresh Portfolio",
+        key="refresh_portfolio",
+        use_container_width=True
+    ):
+        # Clear cached NAV
+        get_nav.clear()
+
+        # Clear cached fund calculations
+        build_summary.clear()
+
+        # Clear cached overall XIRR
+        get_overall_xirr_pct.clear()
+
+        # Recalculate everything
         st.rerun()
 
 with info_col:
-    st.caption("Refresh after adding transactions, updating SIPs or downloading new NAV data.")
+    st.caption(
+        "Refresh after adding transactions, updating SIPs "
+        "or downloading new NAV data."
+    )
+
 
 
 # =========================================================
@@ -469,22 +469,46 @@ pnl_sign   = "+" if total_pnl >= 0 else ""
 ret_sign   = "+" if absolute_return_pct >= 0 else ""
 xirr_sign  = "+" if overall_xirr_pct >= 0 else ""
 
-# Latest daily change for the hero card (gain/loss based, excludes new investments) + its date
-day_change, day_date, _basis = None, None, "gain"
+# # Today's change for the hero card (gain/loss based, excludes new investments)
+# day_change, _basis = None, "gain"
+# try:
+#     _d, _basis = load_portfolio_daily()
+#     day_change = float(_d["OneDayChange"].dropna().iloc[-1])
+# except Exception:
+#     day_change = None
+
+# if day_change is None:
+#     day_sub, day_col = "live NAV", "rgba(255,255,255,0.45)"
+# else:
+#     day_sub = (f"{'▲' if day_change >= 0 else '▼'} ₹{abs(day_change):,.0f} today"
+#                + ("" if _basis == "gain" else " (incl. new money)"))
+#     day_col = SUCCESS if day_change >= 0 else DANGER
+
+
+# Today's change for the hero card
 try:
-    _d, _basis = load_portfolio_daily()
-    _last      = _d.dropna(subset=["OneDayChange"]).iloc[-1]
-    day_change = float(_last["OneDayChange"])
-    day_date   = _last["Date"].strftime("%d %b %Y")
+    _d = pd.read_csv("data/portfolio_daily.csv")
+    _d["Date"] = pd.to_datetime(_d["Date"], format="%d-%m-%Y")
+
+    latest_record = _d.sort_values("Date").iloc[-1]
+
+    day_change = float(latest_record["OneDayChange"])
+    day_date = latest_record["Date"].strftime("%d %b %Y")
+
 except Exception:
     day_change = None
+    day_date = None
 
 if day_change is None:
-    day_sub, day_col = "Live NAV", "rgba(255,255,255,0.45)"
+    day_sub = "Live NAV"
+    day_col = "rgba(255,255,255,0.45)"
 else:
-    day_sub = (f"{'▲' if day_change >= 0 else '▼'} ₹{abs(day_change):,.0f} on {day_date}"
-               + ("" if _basis == "gain" else " (incl. new money)"))
+    day_sub = (
+        f"{'▲' if day_change >= 0 else '▼'} "
+        f"₹{abs(day_change):,.0f} on {day_date}"
+    )
     day_col = SUCCESS if day_change >= 0 else DANGER
+
 
 
 # =========================================================
@@ -637,9 +661,11 @@ def render_fund_tab(summary_rows):
         },
     )
 
-    more_columns(df, ["Code", "Units", "NAV", "NAV Date"],
-                 label="More columns (code, units, NAV)",
-                 fmt={"Units": "{:,.3f}", "NAV": "{:,.4f}"})
+    with st.expander("More columns (code, units, NAV)"):
+        st.dataframe(
+            df[["Fund", "Code", "Units", "NAV", "NAV Date"]],
+            hide_index=True, use_container_width=True,
+        )
 
     # ── Downloads ─────────────────────────────────────────────────────
     export_df = df.drop(columns=["Share", "XIRR (colour)"]).copy()
@@ -946,40 +972,32 @@ def render_daily_tab():
         )
         st.plotly_chart(fig_heat, use_container_width=True)
 
-    # ── Data table (key columns) + "More columns" + download ─────────
+    # ── Data table + download ────────────────────────────────────────
     st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
-    small_title(f"Daily data · {len(chart_df)} days in view")
+    with st.expander(f"Daily data table · {len(chart_df)} days in view", expanded=False):
+        disp = chart_df.sort_values("Date", ascending=False).copy()
+        disp["Date"] = disp["Date"].dt.strftime("%d-%m-%Y")
 
-    disp = chart_df.sort_values("Date", ascending=False).copy()
-    disp["Date"] = disp["Date"].dt.strftime("%d-%m-%Y")
+        fmt = {}
+        for c in disp.columns:
+            if c != "Date" and pd.api.types.is_numeric_dtype(disp[c]):
+                fmt[c] = ("{:+,.2f}" if c in ("OneDayChange", "NewMoney")
+                          else "{:+.2f}%" if c == "OneDayChangePct" else "{:,.2f}")
+        styler = disp.style.format(fmt)
+        tint_cols = [c for c in ("OneDayChange", "OneDayChangePct") if c in disp.columns]
+        if tint_cols:
+            styler = _styler_map(styler, _tint_value, tint_cols)
 
-    fmt = {}
-    for c in disp.columns:
-        if c != "Date" and pd.api.types.is_numeric_dtype(disp[c]):
-            fmt[c] = ("{:+,.2f}" if c in ("OneDayChange", "NewMoney")
-                      else "{:+.2f}%" if c == "OneDayChangePct" else "{:,.2f}")
-
-    main_cols  = [c for c in ("Date", "TotalValue", "OneDayChange", "OneDayChangePct") if c in disp.columns]
-    extra_cols = [c for c in disp.columns if c not in main_cols]
-
-    styler = disp[main_cols].style.format({k: v for k, v in fmt.items() if k in main_cols} or None)
-    tint_cols = [c for c in ("OneDayChange", "OneDayChangePct") if c in main_cols]
-    if tint_cols:
-        styler = _styler_map(styler, _tint_value, tint_cols)
-    st.dataframe(styler, hide_index=True, use_container_width=True,
-                 height=min((len(disp) + 1) * 35 + 3, 420))
-
-    if "NewMoney" in disp.columns:
-        st.caption("NewMoney (in More columns) = the CSV's old value-based change − the gain-based change. "
-                   "It should be ≈ your SIP amount on SIP dates and ≈ 0 on other days.")
-    more_columns(disp, extra_cols, keep=("Date",), fmt=fmt)
-
-    st.download_button(
-        "⬇ CSV (this view, all columns)",
-        data=disp.to_csv(index=False).encode("utf-8-sig"),
-        file_name=f"portfolio_daily_{datetime.now():%Y%m%d}.csv",
-        mime="text/csv",
-    )
+        if "NewMoney" in disp.columns:
+            st.caption("NewMoney = the CSV's old value-based change − the gain-based change. "
+                       "It should be ≈ your SIP amount on SIP dates and ≈ 0 on other days.")
+        st.dataframe(styler, hide_index=True, use_container_width=True, height=420)
+        st.download_button(
+            "⬇ CSV (this view)",
+            data=disp.to_csv(index=False).encode("utf-8-sig"),
+            file_name=f"portfolio_daily_{datetime.now():%Y%m%d}.csv",
+            mime="text/csv",
+        )
 
 
 with tab2:
@@ -1139,24 +1157,15 @@ def render_monthly_tab():
         return ["font-weight: 700; border-top: 1px solid rgba(255,255,255,0.25)"
                 if row["Fund"] == "TOTAL" else "" for _ in row]
 
-    shown_df = final_df.drop(columns=["Code"])          # Code is available under "More columns"
-    styler = shown_df.style.format({c: _fmt_dash for c in MONTH_NAMES + ["Total"]})
-    styler = _styler_map(styler, _shade, pd.IndexSlice[shown_df.index[:-1], MONTH_NAMES])
+    styler = final_df.style.format({c: _fmt_dash for c in MONTH_NAMES + ["Total"]})
+    styler = _styler_map(styler, _shade, pd.IndexSlice[final_df.index[:-1], MONTH_NAMES])
     styler = styler.apply(_bold_total, axis=1)
 
     st.dataframe(
         styler, hide_index=True, use_container_width=True,
-        height=min((len(shown_df) + 1) * 35 + 3, 760),
+        height=min((len(final_df) + 1) * 35 + 3, 760),
         column_config={"Fund": st.column_config.TextColumn(width="large")},
     )
-
-    extra = pivot[["Fund", "Code"]].copy()
-    extra["Category"]           = extra["Fund"].map(categorize)
-    extra["Months invested"]    = (pivot[MONTH_NAMES] > 0).sum(axis=1)
-    extra["Avg / active month"] = pivot["Total"] / extra["Months invested"].where(extra["Months invested"] > 0)
-    extra["Share of year"]      = pivot["Total"] / total_year * 100 if total_year > 0 else float("nan")
-    more_columns(extra, ["Code", "Category", "Months invested", "Avg / active month", "Share of year"],
-                 fmt={"Avg / active month": "₹{:,.0f}", "Share of year": "{:.1f}%"}, height_cap=760)
     st.download_button(
         f"⬇ CSV ({selected_year})",
         data=final_df.to_csv(index=False).encode("utf-8-sig"),
@@ -1232,15 +1241,10 @@ def compute_daily_changes(daily_files, target_date):
         rows.append({
             "Fund": fund_name,
             "Code": code,
-            "Category": categorize(fund_name),
             "Change (₹)": round(float(rt["absolute_gain_loss"]) - float(rp["absolute_gain_loss"]), 2),
             "NAV %": ((nav_t - nav_p) / nav_p * 100) if nav_p != 0 else 0.0,
-            "NAV": nav_t,
-            "Prev NAV": nav_p,
-            "Prev date": rp["date"].date(),
         })
-    return pd.DataFrame(rows, columns=["Fund", "Code", "Category", "Change (₹)", "NAV %",
-                                       "NAV", "Prev NAV", "Prev date"])
+    return pd.DataFrame(rows, columns=["Fund", "Code", "Change (₹)", "NAV %"])
 
 
 def _shift_daily_date(direction, dates):
@@ -1387,8 +1391,6 @@ with tab4:
                 height=(len(table) + 1) * 35 + 3,      # every row visible, no inner scrollbar
                 column_config={"Fund": st.column_config.TextColumn(width="large")},
             )
-            more_columns(df_day, ["Code", "Category", "NAV", "Prev NAV", "Prev date"],
-                         fmt={"NAV": "₹{:,.4f}", "Prev NAV": "₹{:,.4f}"})
 
 
 # =========================================================
