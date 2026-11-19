@@ -418,15 +418,32 @@ st.markdown("""
 # =========================================================
 # PORTFOLIO REFRESH CONTROL
 # =========================================================
+
 refresh_col, info_col = st.columns([1, 5])
 
 with refresh_col:
-    if st.button("↻ Refresh Portfolio", key="refresh_portfolio", use_container_width=True):
-        st.cache_data.clear()      # NAV, fund returns, XIRR, daily files, monthly investments — everything
+    if st.button(
+        "↻ Refresh Portfolio",
+        key="refresh_portfolio",
+        use_container_width=True
+    ):
+        # Clear cached NAV
+        get_nav.clear()
+
+        # Clear cached fund calculations
+        build_summary.clear()
+
+        # Clear cached overall XIRR
+        get_overall_xirr_pct.clear()
+
+        # Recalculate everything
         st.rerun()
 
 with info_col:
-    st.caption("Refresh after adding transactions, updating SIPs or downloading new NAV data.")
+    st.caption(
+        "Refresh after adding transactions, updating SIPs "
+        "or downloading new NAV data."
+    )
 
 
 
