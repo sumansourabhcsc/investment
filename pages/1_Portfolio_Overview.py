@@ -1359,7 +1359,10 @@ with tab4:
 
         with col_tbl:
             small_title(f"All {len(df_day)} funds")
-            table = df_day[["Fund", "Change (₹)", "NAV %"]]
+
+            table = df_day[["Fund", "Change (₹)", "NAV %"]].copy()
+
+            table["Fund"] = table["Fund"].str.split().str[:3].str.join(" ")
 
             def _tint(v):
                 c = "#69F0AE" if v > 0 else "#FF6B6B" if v < 0 else "#9CA3AF"
