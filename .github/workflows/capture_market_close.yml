@@ -1,33 +1,37 @@
 name: Capture Market Close
 on:
   schedule:
-    # 10:30 UTC = 16:00 IST, backup 12:00 UTC = 17:30 IST (Mon-Fri)
-    - cron: "30 10 * * 1-5"
+    # 3:30 PM IST = 10:00 UTC, Mon–Fri
     - cron: "0 12 * * 1-5"
   workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: market-data-writes
-  cancel-in-progress: false
+  contents: write          # ← THIS fixes the 403
 
 jobs:
   capture:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install yfinance
-      - run: python utils/capture_market_close.py
+
+      - name: Install dependencies
+        run: pip install yfinance
+
+      - name: Run capture script
+        run: python utils/capture_market_close.py
+
       - name: Commit & push updated data
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/market_index_history.json
+          git add data/market_index_history.json   # ← matches fixed script path
           git diff --cached --quiet || git commit -m "chore: market close snapshot $(date -u +'%Y-%m-%d')"
-          git pull --rebase origin main
           git push
