@@ -1147,7 +1147,7 @@ def render_monthly_tab():
     st.dataframe(
         styler, hide_index=True, use_container_width=True,
         height=min((len(final_df) + 1) * 35 + 3, 760),
-        column_config={"Fund": st.column_config.TextColumn(width="small")},
+        column_config={"Fund": st.column_config.TextColumn(width="large")},
     )
     st.download_button(
         f"⬇ CSV ({selected_year})",
