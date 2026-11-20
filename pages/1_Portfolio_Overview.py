@@ -1375,7 +1375,7 @@ with tab4:
             st.dataframe(
                 styler, hide_index=True, use_container_width=True,
                 height=(len(table) + 1) * 35 + 3,      # every row visible, no inner scrollbar
-                column_config={"Fund": st.column_config.TextColumn(width="large")},
+                column_config={"Fund": st.column_config.TextColumn(width="small")},
             )
 
 
