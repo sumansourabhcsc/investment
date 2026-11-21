@@ -18,7 +18,7 @@ MAX_STALE_DAYS = 4               # fail the run if history is older than this
 SYMBOLS = {"nifty": "^NSEI", "sensex": "^BSESN"}
 
 # Higher rank wins when two sources give the same date
-RANK = {"yf_5m": 1, "nse": 2, "yf_1d": 3}
+RANK = {"yf_5m": 2, "nse": 3, "yf_1d": 1}
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
