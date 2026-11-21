@@ -547,36 +547,61 @@
   {
     "date": "2026-11-06",
     "nifty": 25030.35,
-    "sensex": 81028.02
+    "sensex": 81028.02,
+    "source": "yf_1d"
   },
   {
     "date": "2026-11-09",
     "nifty": 25044.65,
-    "sensex": 81106.65
+    "sensex": 81106.65,
+    "source": "yf_1d"
   },
   {
     "date": "2026-11-11",
     "nifty": 25255.05,
-    "sensex": 81879.4
+    "sensex": 81879.4,
+    "source": "yf_1d"
   },
   {
     "date": "2026-11-12",
     "nifty": 25299.35,
-    "sensex": 81911.01
+    "sensex": 81911.01,
+    "source": "yf_1d"
   },
   {
     "date": "2026-11-13",
     "nifty": 25144.3,
-    "sensex": 81592.45
+    "sensex": 81592.45,
+    "source": "yf_1d"
   },
   {
     "date": "2026-11-16",
     "nifty": 25291.1,
-    "sensex": 82104.79
+    "sensex": 82104.79,
+    "source": "yf_1d"
   },
   {
     "date": "2026-11-17",
     "nifty": 25387.4,
-    "sensex": 82532.19
+    "sensex": 82532.19,
+    "source": "yf_1d"
+  },
+  {
+    "date": "2026-11-18",
+    "nifty": 25227.95,
+    "sensex": 82031.81,
+    "source": "yf_1d"
+  },
+  {
+    "date": "2026-11-19",
+    "nifty": 25514.3,
+    "sensex": 83021.75,
+    "source": "yf_1d"
+  },
+  {
+    "date": "2026-11-20",
+    "nifty": 25800.6,
+    "sensex": 83919.71,
+    "source": "yf_1d"
   }
 ]
