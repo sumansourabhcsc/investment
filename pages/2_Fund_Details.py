@@ -512,12 +512,19 @@ with tab_overview:
 
     first_date  = fund_df["Date"].min()
     held_years  = (pd.Timestamp.today().normalize() - first_date).days / 365.25
+    
+    held_months = round(held_years * 12)
+    held_y, held_m = divmod(held_months, 12)
+
+    
+    
+    
     n_inst      = len(fund_df)
     chips([
         ("First investment", first_date.strftime("%d %b %Y")),
         ("Installments",     f"{n_inst}"),
         ("Avg installment",  inr(invested / n_inst if n_inst else 0, 0)),
-        ("Held for",         f"{held_years:.1f} yrs"),
+        ("Held for", f"{held_y}Y {held_m}M"),
     ])
 
     col_sip, col_daily = st.columns(2, gap="large")
