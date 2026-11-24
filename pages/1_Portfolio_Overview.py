@@ -626,6 +626,13 @@ def render_fund_tab(summary_rows):
 
     # ── Fund table ────────────────────────────────────────────────────
     sec_header(ICON_FUND, "Fund Details", "live NAV · invested · P&L · XIRR")
+    
+    df["Held (yrs)"] = df["Held (yrs)"].apply(
+      lambda x: (
+        f"{int(x)}Y {round((x - int(x)) * 12)}M"
+        if pd.notna(x) else "-"
+      )
+    )
     st.dataframe(
         df[["Fund", "Category", "Invested", "Current", "P&L", "Return %", "XIRR", "Held (yrs)"]],
         hide_index=True, use_container_width=True,
@@ -640,7 +647,8 @@ def render_fund_tab(summary_rows):
             ),
             "Return %":   st.column_config.NumberColumn(format="%.1f"),
             "XIRR":       st.column_config.NumberColumn("XIRR %", format="%.2f"),
-            "Held (yrs)": st.column_config.NumberColumn(format="%.1f"),
+            #"Held (yrs)": st.column_config.NumberColumn(format="%.1f"),
+            "Held (yrs)": st.column_config.TextColumn("Holding Period"),
         },
     )
 
