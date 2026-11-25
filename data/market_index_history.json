@@ -1114,5 +1114,11 @@
     "nifty": 25349.65,
     "sensex": 82435.99,
     "source": "nse/yf_5m"
+  },
+  {
+    "date": "2026-11-25",
+    "nifty": 25819.25,
+    "sensex": 83938.28,
+    "source": "nse/yf_5m"
   }
 ]
