@@ -1323,59 +1323,48 @@ with tab4:
         # ── Chart (left) + full table (right, no scrolling) ──────────
         col_chart, col_tbl = st.columns([3, 2], gap="large")
 
-    def _compact(v):
-    a = abs(v)
-    s = f"{a/1000:.1f}k" if a >= 1000 else f"{a:.0f}"
-    return f"{'-' if v < 0 else '+'}₹{s}"
+        with col_chart:
+            small_title("Change by fund")
+            df_chart = df_day.sort_values("Change (₹)", ascending=True)
+            vals = df_chart["Change (₹)"]
+            lo, hi = min(float(vals.min()), 0.0), max(float(vals.max()), 0.0)
+            span = (hi - lo) or 1.0
 
-    with col_chart:
-        small_title("Change by fund")
-        df_chart = df_day.sort_values("Change (₹)", ascending=True)
-        vals = df_chart["Change (₹)"]
-        lo, hi = min(float(vals.min()), 0.0), max(float(vals.max()), 0.0)
-        span = (hi - lo) or 1.0
-        big = max(abs(lo), abs(hi))
-    
-        # long bars: label inside (white); short bars: label outside
-        pos = ["inside" if abs(v) > 0.55 * big else "outside" for v in vals]
-    
-        fig = go.Figure(go.Bar(
-            x=vals,
-            y=[_short(n, 20) for n in df_chart["Fund"]],
-            orientation="h",
-            marker=dict(color=["#2ecc71" if v >= 0 else "#e74c3c" for v in vals]),
-            text=[f"{_compact(v)} ({p:+.1f}%)" for v, p in zip(vals, df_chart["NAV %"])],
-            textposition=pos,
-            insidetextanchor="start",
-            insidetextfont=dict(color="white", size=10),
-            outsidetextfont=dict(size=10),
-            cliponaxis=False,
-            customdata=list(zip(df_chart["Fund"], df_chart["Code"], df_chart["NAV %"])),
-            hovertemplate=(
-                "<b>%{customdata[0]}</b><br>"
-                "Code: %{customdata[1]}<br>"
-                "Change: ₹%{x:+,.2f}<br>"
-                "NAV change: %{customdata[2]:+.2f}%<extra></extra>"
-            ),
-        ))
-        fig.update_layout(
-            height=max(320, len(df_chart) * 34 + 60),
-            margin=dict(l=0, r=0, t=0, b=30),
-            xaxis=dict(
-                range=[lo - span * (0.05 if lo < 0 else 0.02),
-                       hi + span * (0.40 if hi > 0 else 0.30)],
-                zeroline=True, zerolinecolor="#555", zerolinewidth=1.5,
-                tickformat="~s", nticks=4, fixedrange=True,
-                showgrid=True, gridcolor="rgba(255,255,255,0.05)",
-            ),
-            yaxis=dict(automargin=True, tickfont=dict(size=10), fixedrange=True),
-            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#e0e0e0", family="Space Grotesk"),
-            showlegend=False,
-        )
-        st.plotly_chart(fig, use_container_width=True,
-                        config={"displayModeBar": False})
-    
+            fig = go.Figure(go.Bar(
+                x=vals,
+                y=[_short(n, 30) for n in df_chart["Fund"]],
+                orientation="h",
+                marker=dict(color=["#2ecc71" if v >= 0 else "#e74c3c" for v in vals]),
+                text=[f"{_inr(v)} ({p:+.2f}%)" for v, p in zip(vals, df_chart["NAV %"])],
+                textposition="outside",
+                cliponaxis=False,
+                textfont=dict(size=11),
+                customdata=list(zip(df_chart["Fund"], df_chart["Code"], df_chart["NAV %"])),
+                hovertemplate=(
+                    "<b>%{customdata[0]}</b><br>"
+                    "Code: %{customdata[1]}<br>"
+                    "Change: ₹%{x:+,.2f}<br>"
+                    "NAV change: %{customdata[2]:+.2f}%<extra></extra>"
+                ),
+            ))
+            fig.update_layout(
+                height=max(320, len(df_chart) * 34 + 90),
+                margin=dict(l=10, r=10, t=10, b=40),
+                xaxis=dict(
+                    title="Change in value (₹)",
+                    range=[lo - span * (0.45 if lo < 0 else 0.02),
+                           hi + span * (0.45 if hi > 0 else 0.02)],
+                    zeroline=True, zerolinecolor="#555", zerolinewidth=1.5,
+                    tickformat=",.0f", showgrid=True, gridcolor="rgba(255,255,255,0.05)",
+                ),
+                yaxis=dict(automargin=True, tickfont=dict(size=12)),
+                uniformtext=dict(mode="hide", minsize=9),
+                plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(color="#e0e0e0", family="Space Grotesk"),
+                showlegend=False,
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
         with col_tbl:
             small_title(f"All {len(df_day)} funds")
 
