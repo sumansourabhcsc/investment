@@ -199,7 +199,7 @@ def render_sidebar(current_page: str):
         #st.markdown('</div>', unsafe_allow_html=True)
         # Fund News pinned at bottom with gold wrapper
         #st.markdown('<div class="news-page">', unsafe_allow_html=True)
-        st.page_link("pages/5_Fund_News.py", label="News", icon="📰")
+        #st.page_link("pages/5_Fund_News.py", label="News", icon="📰")
         #st.markdown('</div>', unsafe_allow_html=True)
         
 
