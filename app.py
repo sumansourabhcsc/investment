@@ -222,6 +222,7 @@ WORKFLOWS = [
     {"name": "Fetch NAV Daily",     "file": "fetch_nav_daily.yml",         "num": "01"},
     {"name": "Portfolio Overview",  "file": "update_fund_snapshots.yml",   "num": "02"},
     {"name": "Individual Funds",    "file": "update_portfolio_daily.yml",  "num": "03"},
+    {"name": "capture_market_close",    "file": "capture_market_close.yml",    "num": "04"},
 ]
 
 PAGES = [
